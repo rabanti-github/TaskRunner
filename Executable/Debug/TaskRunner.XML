@@ -1,0 +1,433 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TaskRunner</name>
+    </assembly>
+    <members>
+        <member name="T:TaskRunner.ArgsTuple">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Class represents a tuple to execute the program. It contains all possible flags and values
+            </summary>
+        </member>
+        <member name="M:TaskRunner.ArgsTuple.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="P:TaskRunner.ArgsTuple.Output">
+            <summary>
+            In true, the output of the executed tasks is passed to the command shell. The program runs in silent mode otherwise
+            </summary>
+        </member>
+        <member name="P:TaskRunner.ArgsTuple.HaltOnError">
+            <summary>
+            If true, the program halts on a error while execution of the tasks
+            </summary>
+        </member>
+        <member name="P:TaskRunner.ArgsTuple.Run">
+            <summary>
+            If true, a run flag was passed to the program. This starts the execution process
+            </summary>
+        </member>
+        <member name="P:TaskRunner.ArgsTuple.Log">
+            <summary>
+            In true, the result of the executed tasks are logged to a program logfile
+            </summary>
+        </member>
+        <member name="P:TaskRunner.ArgsTuple.Demo">
+            <summary>
+            If true, a demo flag was passed to the program. This will generate the example configurations in the program folder
+            </summary>
+        </member>
+        <member name="P:TaskRunner.ArgsTuple.LogFilePath">
+            <summary>
+            Path to the program logfile
+            </summary>
+        </member>
+        <member name="P:TaskRunner.ArgsTuple.ConfigFilePath">
+            <summary>
+            Path to the configuration file
+            </summary>
+        </member>
+        <member name="T:TaskRunner.ArgsTuple.ArgType">
+            <summary>
+            Enum to define the type of the passed argument
+            </summary>
+        </member>
+        <member name="F:TaskRunner.ArgsTuple.ArgType.flag">
+            <summary>
+            The argument is a flag like -r or --demo
+            </summary>
+        </member>
+        <member name="F:TaskRunner.ArgsTuple.ArgType.configFile">
+            <summary>
+            The argument is the path to the configuration file (XML file)
+            </summary>
+        </member>
+        <member name="F:TaskRunner.ArgsTuple.ArgType.logFile">
+            <summary>
+            The argument it the path to the program logfile
+            </summary>
+        </member>
+        <member name="F:TaskRunner.ArgsTuple.ArgType.undefined">
+            <summary>
+            The argument is not defined
+            </summary>
+        </member>
+        <member name="T:TaskRunner.LogEntry">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Class represents an entry for a logfile
+            </summary>
+        </member>
+        <member name="M:TaskRunner.LogEntry.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.LogEntry.getLogString">
+            <summary>
+            Returns a formated log entry as string (line). The first value is the current date
+            </summary>
+            <returns>Formated log entry as string</returns>
+        </member>
+        <member name="T:TaskRunner.Program">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Main class
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Program.Main(System.String[])">
+            <summary>
+            Main method
+            </summary>
+            <param name="args">Arguments like -r, -d, -o, h or -l</param>
+        </member>
+        <member name="M:TaskRunner.Program.Usage(System.Boolean)">
+            <summary>
+            Method returns the header and usage of the program as text
+            </summary>
+            <param name="headerOnly">If true, only the header is returned, otherwise the usage is added after the header</param>
+            <returns>Header and/or usage of the program as text</returns>
+        </member>
+        <member name="M:TaskRunner.Program.CheckArgs(TaskRunner.ArgsTuple@,System.String,TaskRunner.ArgsTuple.ArgType)">
+            <summary>
+            Method to check the passed arguments
+            </summary>
+            <param name="tuple">Argument tuple as reference</param>
+            <param name="argValue">Passed argument value</param>
+            <param name="argType">The expected type of the argument</param>
+            <returns>The expected type of the next argument. In case of -r|--run and -l|--log, this is configFile or logFile</returns>
+        </member>
+        <member name="T:TaskRunner.SubTasks.DeleteFileTask">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Derived Sub-Task Class for deleting files
+            </summary>
+        </member>
+        <member name="T:TaskRunner.SubTasks.SubTask">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Abstract class as template for Sub-Tasks to execute
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.Run">
+            <summary>
+            Abstract method to run the Sub-Task
+            </summary>
+            <returns>True if the task was executed successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetDemoFile(System.Int32)">
+            <summary>
+            Abstract method to generate a demo configuration of the implemented class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Sub-Task object of the implemented class</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.Name">
+            <summary>
+            Name of the Sub-Task. Will be displayed in -o mode
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.MainValue">
+            <summary>
+            The main value / command to execute. The meaning of this value varies depending on the actual implementation of the derived class
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.Description">
+            <summary>
+            Optional description of the Sub-Task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.Arguments">
+            <summary>
+            Optional arguments as strings to execute the Sub-Task. The meaning of these values varies depending on the actual implementation of the derived class
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.Message">
+            <summary>
+            Message after execution of the Sub-Task. This Message is not serialized
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.Prolog">
+            <summary>
+            Optional Message before execution of the Sub-Task. This Message is not serialized
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteFileTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteFileTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>True if the task was executed successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteFileTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="T:TaskRunner.SubTasks.DeleteRegKeyTask">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Derived Sub-Task Class for deleting registry entries
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteRegKeyTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteRegKeyTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>True if the task was executed successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteRegKeyTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="T:TaskRunner.SubTasks.StartProgramTask">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Derived Sub-Task Class for staring programs synchronous or asynchronous
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.StartProgramTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.StartProgramTask.RunAsyncronous(System.String,System.String)">
+            <summary>
+            Helper method to maintain the status of a running process if the task is executed asynchronous
+            </summary>
+            <param name="name">Name of the program to execute</param>
+            <param name="args">Optional arguments to execute the program (separated by spaces)</param>
+            <returns>Task object which contains the current status of the process</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.StartProgramTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>True if the task was executed successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.StartProgramTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="T:TaskRunner.SubTasks.WriteLogTask">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Derived Sub-Task Class for writing log entries
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.WriteLogTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.WriteLogTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>True if the task was executed successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.WriteLogTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="T:TaskRunner.Task">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Class for orchestration and execution of the Sub-Tasks
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.DATEFORMAT">
+            <summary>
+            Globally used format string for dates / times
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Task.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Task.Run(System.Boolean,System.Boolean)">
+            <summary>
+            Method to run all SUb-Tasks of the current configuration
+            </summary>
+            <param name="stopOnError">If true, the method stops if an error occurs during execution of the Sub-Tasks</param>
+            <param name="displayOutput">In true, information about the executed Sub-Tasks is passed to the command shell</param>
+            <returns>True if no errors occurred, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.Task.Deserialize(System.String)">
+            <summary>
+            Method to deserialize a configuration
+            </summary>
+            <param name="filename">File name of the configuration</param>
+            <returns>The deserialized configuration. In case of an error, an empty object with the parameter Valid=false is returned</returns>
+        </member>
+        <member name="M:TaskRunner.Task.Serialize(System.String)">
+            <summary>
+            Method to serialize the current configuration
+            </summary>
+            <param name="filename">File name of the configuration</param>
+        </member>
+        <member name="M:TaskRunner.Task.CreateDemoFile(System.String,TaskRunner.Task.TaskType)">
+            <summary>
+            Static method to generate an example configuration
+            </summary>
+            <param name="file">File name of the demo configuration</param>
+            <param name="type">Task type of the demo configuration</param>
+        </member>
+        <member name="M:TaskRunner.Task.Log(System.String)">
+            <summary>
+            Method to write all log entries of the executed Tasks
+            </summary>
+            <param name="logFile">File name of the logfile</param>
+        </member>
+        <member name="P:TaskRunner.Task.Type">
+            <summary>
+            Type of this Task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.Items">
+            <summary>
+            List of Sub-Tasks to execute in this Task
+            </summary>
+            <remarks>Each class of a Sub-Task needs a distinct XML annotation (XmlArrayItem) for proper serialization / deserialization</remarks>
+        </member>
+        <member name="P:TaskRunner.Task.TaskName">
+            <summary>
+            Optional Task name
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.Description">
+            <summary>
+            Optional Task description
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.Valid">
+            <summary>
+            If proper deserialized, this value is set to true. It indicates that the configuration is valid (valid XML)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.ExecutedTasks">
+            <summary>
+            The number of executed Sub-Tasks
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.OccurredErrors">
+            <summary>
+            The number of occurred errors during execution
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.LogEntries">
+            <summary>
+            List of log entries. Each executed Sub-Task has one entry
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Task.TaskType">
+            <summary>
+            Type of the Task and its Sub-Tasks
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.TaskType.DeleteFile">
+            <summary>
+            Task deletes files
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.TaskType.DeleteRegKey">
+            <summary>
+            Task delete registry entries
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.TaskType.WriteLog">
+            <summary>
+            Task writes log entries
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.TaskType.StartProgram">
+            <summary>
+            Task start programs
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Utils">
+            <summary>
+            Task Runner - (c)2016 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Static Utils class
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Utils.Log(System.String,System.String,System.String)">
+            <summary>
+            Writes a logfile entry
+            </summary>
+            <param name="logFile">Path to the logfile</param>
+            <param name="headerValue">Header as string. The values are separated by tab</param>
+            <param name="value">Value or values to write. Use tab in case of several values to separate them</param>
+            <returns>True if the entry could be written, otherwise false</returns>
+        </member>
+    </members>
+</doc>

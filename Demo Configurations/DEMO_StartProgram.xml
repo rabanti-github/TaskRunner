@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="StartProgram" name="Demo-Task">
+  <items>
+    <startProgramItem name="Start-Program-Task_1" runAsynchronous="true">
+      <mainValue>C:\temp\apps\app1.exe</mainValue>
+      <description>This is sub-task 1</description>
+      <arguments>
+        <argument>ARG1</argument>
+        <argument>ARG2</argument>
+      </arguments>
+    </startProgramItem>
+    <startProgramItem name="Start-Program-Task_2" runAsynchronous="true">
+      <mainValue>C:\temp\apps\app2.exe</mainValue>
+      <description>This is sub-task 2</description>
+      <arguments>
+        <argument>ARG1</argument>
+        <argument>ARG2</argument>
+      </arguments>
+    </startProgramItem>
+    <startProgramItem name="Start-Program-Task_3" runAsynchronous="true">
+      <mainValue>C:\temp\apps\app3.exe</mainValue>
+      <description>This is sub-task 3</description>
+      <arguments>
+        <argument>ARG1</argument>
+        <argument>ARG2</argument>
+      </arguments>
+    </startProgramItem>
+  </items>
+  <description>This is a demo Task with several sub-tasks of the type StartProgram</description>
+</task>

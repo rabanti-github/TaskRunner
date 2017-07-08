@@ -18,6 +18,19 @@ All Sub-Tasks are now defined in the file <i>C:/tasks/config.xml</i>. Furthermor
 
 The utility can be used of course as standalone application e.g. in combination with a BAT file to run repeating tasks just by double-clicking on the BAT file.
 
+**Prerequisites**
+----------------------
+TaskRunner was written in C# and relies on Windows functionalities. The only prerequisites are:
+
+* A Windows System (7 / 8.x / 10)
+* An installed .NET Framework (at least .NET 4.5) 
+
+Furthermore, you need the following knowledge when using TaskRunner:
+
+* Basic knowledge of XML (tags, attributes, escaping etc.)
+* Basic knowledge how to run a command line application
+* Basic knowledge about the Windows task scheduler if you want to use TaskRunner as proxy app
+
 
 **Usage**
 ---------------

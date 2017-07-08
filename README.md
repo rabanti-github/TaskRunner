@@ -1,6 +1,8 @@
 # TaskRunner
 Task Runner is a simple Windows command line tool to execute several tasks controlled by XML config files, such as deleting files, deleting registry entries, write logfile entries or execute programs.
 
+<b>Please have a look into the <a href="../../wiki">Wiki</a> for more information.</b>
+
 **Purpose**
 ----------------------
 <b>Preamble</b>

@@ -22,6 +22,7 @@ namespace TaskRunner
             if (args.Length < 1)
             {
                 Console.WriteLine(Usage(false));
+                return;
             }
             // DEBUG
             /*
@@ -41,6 +42,11 @@ namespace TaskRunner
             {
                 type = CheckArgs(ref a, args[i], type);
             }
+            if (a.Help == true)
+            {
+                Console.WriteLine(Usage(false));
+                return;
+            }
 
             if (a.Demo == true)
             {
@@ -50,6 +56,7 @@ namespace TaskRunner
                 Task.CreateDemoFile("DEMO_DeleteRegKeys.xml", Task.TaskType.DeleteRegKey);
                 Task.CreateDemoFile("DEMO_WriteLog.xml", Task.TaskType.WriteLog);
                 Task.CreateDemoFile("DEMO_StartProgram.xml", Task.TaskType.StartProgram);
+                return;
             }
 
             if (a.ConfigFilePath == "" && a.Run == true)
@@ -107,10 +114,11 @@ Flags / Options
                configurations in the program folder
 -o | --output: Enables the output mode. The results of the task
                will be displayed in the command shell
--h | --halt:   The task runner stops after an error, othewise all
+-s | --halt:   The task runner stops after an error, otherwise all
                sub-tasks are executed until the end of the configuration
 -l | --log:    Enables logging. After the flag a valid path
-               (absolute or relative) to a logfile must be defined 
+               (absolute or relative) to a logfile must be defined
+-h | --help:   Shows the program help (this text) 
 
 Possible Tasks
 --------------
@@ -166,12 +174,17 @@ is not terminated (process still running).
                     tuple.Run = true;
                     nextArgIs = ArgsTuple.ArgType.configFile;
                 }
+                else if (arg == "--help" || arg == "-h")
+                {
+                    tuple.Help = true;
+                    nextArgIs = ArgsTuple.ArgType.flag;
+                }
                 else if (arg == "--output" || arg == "-o")
                 {
                     tuple.Output = true;
                     nextArgIs = ArgsTuple.ArgType.flag;
                 }
-                else if (arg == "--halt" || arg == "-h")
+                else if (arg == "--halt" || arg == "-s")
                 {
                     tuple.HaltOnError = true;
                     nextArgIs = ArgsTuple.ArgType.flag;

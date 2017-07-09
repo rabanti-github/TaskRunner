@@ -17,6 +17,11 @@
             Default constructor
             </summary>
         </member>
+        <member name="P:TaskRunner.ArgsTuple.Help">
+            <summary>
+            If true, the usage will be displayed
+            </summary>
+        </member>
         <member name="P:TaskRunner.ArgsTuple.Output">
             <summary>
             In true, the output of the executed tasks is passed to the command shell. The program runs in silent mode otherwise

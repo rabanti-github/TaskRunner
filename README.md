@@ -54,9 +54,11 @@ Path to the configuration: A relative or absolute path to the configuration as X
 
 <code>-o | --output</code>: Enables the output mode. The results of the task will be displayed in the command shell
 
-<code>-h | --halt</code>:   The task runner stops after an error, othewise all sub-tasks are executed until the end of the configuration
+<code>-s | --halt</code>:   The task runner stops after an error, otherwise all sub-tasks are executed until the end of the configuration
 
 <code>-l | --log</code>:    Enables logging. After the flag a valid path (absolute or relative) to a logfile must be defined 
+
+<code>-h | --help</code:    Shows the program help
 
 
 **Possible Tasks**

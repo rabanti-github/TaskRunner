@@ -34,6 +34,11 @@ namespace TaskRunner
             /// </summary>
             undefined
         }
+
+        /// <summary>
+        /// If true, the usage will be displayed
+        /// </summary>
+        public bool Help { get; set; }
         /// <summary>
         /// In true, the output of the executed tasks is passed to the command shell. The program runs in silent mode otherwise
         /// </summary>
@@ -68,6 +73,7 @@ namespace TaskRunner
         /// </summary>
         public ArgsTuple()
         {
+            this.Help = false;
             this.HaltOnError = false;
             this.Output = false;
             this.Run = false;

@@ -61,7 +61,7 @@ Path to the configuration: A relative or absolute path to the configuration as X
 
 **Possible Tasks**
 --------------
-Please look at the demo files and into the <a href="../../wiki/Possible-Tasks">Wiki</a> for all parameters and a detailed description of the configuration.
+Please look at the demo files and into the <a href="../../wiki/Possible-Tasks-&-Configuration">Wiki</a> for all parameters and a detailed description of the configuration.
 
 <b>DeleteFileTask:</b>
 

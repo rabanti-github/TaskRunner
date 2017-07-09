@@ -31,7 +31,7 @@ Furthermore, you need the following knowledge when using TaskRunner:
 
 * Basic knowledge of XML (tags, attributes, escaping etc.)
 * Basic knowledge how to run a command line application
-* Basic knowledge about the Windows task scheduler if you want to use TaskRunner as proxy app
+* Basic knowledge about the Windows task scheduler or the local group policy editor (gpedit.msc) if you want to use TaskRunner as proxy app
 
 
 **Usage**

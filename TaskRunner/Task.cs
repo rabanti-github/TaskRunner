@@ -262,7 +262,6 @@ namespace TaskRunner
             foreach (LogEntry entry in this.LogEntries)
             {
                 sb.Append(entry.getLogString());
-                sb.Append("\r\n");
             }
             Utils.Log(logFile, headerValue, sb.ToString());
         }

@@ -6,7 +6,7 @@
     <members>
         <member name="T:TaskRunner.ArgsTuple">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Class represents a tuple to execute the program. It contains all possible flags and values
@@ -79,7 +79,7 @@
         </member>
         <member name="T:TaskRunner.LogEntry">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Class represents an entry for a logfile
@@ -98,7 +98,7 @@
         </member>
         <member name="T:TaskRunner.Program">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Main class
@@ -128,7 +128,7 @@
         </member>
         <member name="T:TaskRunner.SubTasks.DeleteFileTask">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Derived Sub-Task Class for deleting files
@@ -136,7 +136,7 @@
         </member>
         <member name="T:TaskRunner.SubTasks.SubTask">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Abstract class as template for Sub-Tasks to execute
@@ -210,7 +210,7 @@
         </member>
         <member name="T:TaskRunner.SubTasks.DeleteRegKeyTask">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Derived Sub-Task Class for deleting registry entries
@@ -236,7 +236,7 @@
         </member>
         <member name="T:TaskRunner.SubTasks.StartProgramTask">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Derived Sub-Task Class for staring programs synchronous or asynchronous
@@ -270,7 +270,7 @@
         </member>
         <member name="T:TaskRunner.SubTasks.WriteLogTask">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Derived Sub-Task Class for writing log entries
@@ -296,7 +296,7 @@
         </member>
         <member name="T:TaskRunner.Task">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Class for orchestration and execution of the Sub-Tasks
@@ -414,7 +414,7 @@
         </member>
         <member name="T:TaskRunner.Utils">
             <summary>
-            Task Runner - (c)2016 - Raphael Stoeckli
+            Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Static Utils class

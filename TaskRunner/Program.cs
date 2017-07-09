@@ -88,6 +88,7 @@ namespace TaskRunner
             string header = @"
 Task Runner - Run tasks controlled by config files
 (c) 2017 - Raphael Stoeckli
+https://github.com/rabanti-github/TaskRunner
 --------------------------------------------------
 ";
             string usage =
@@ -132,8 +133,8 @@ as argument (see demo files).
 StartProgramTask:
 Starts one or several programs with optional arguments. It is possible
 to define whether the sub tasks are executed synchronous or asynchronous.
-The later can cause freezing of the task runner if a executed application
-is not ended.
+The later can cause freezing of the task runner if an executed application
+is not terminated (process still running).
             ";
             if (headerOnly == true)
             {

@@ -5,7 +5,7 @@ using System.Text;
 namespace TaskRunner
 {
     /// <summary>
-    /// Task Runner - (c)2016 - Raphael Stoeckli
+    /// Task Runner - (c) 2017 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Class represents a tuple to execute the program. It contains all possible flags and values

@@ -9,7 +9,7 @@ using System.Text;
 namespace TaskRunner
 {
     /// <summary>
-    /// Task Runner - (c)2016 - Raphael Stoeckli
+    /// Task Runner - (c) 2017 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Class for orchestration and execution of the Sub-Tasks

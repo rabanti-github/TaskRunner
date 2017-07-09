@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace TaskRunner.SubTasks
 {
     /// <summary>
-    /// Task Runner - (c)2016 - Raphael Stoeckli
+    /// Task Runner - (c) 2017 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Abstract class as template for Sub-Tasks to execute

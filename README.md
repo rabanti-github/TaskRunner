@@ -77,4 +77,4 @@ Writes a defined text with the time stamp of the execution time into the defined
 
 <b>StartProgramTask:</b>
 
-Starts one or several programs with optional arguments. It is possible to define whether the sub tasks are executed synchronous or asynchronous. The later can cause freezing of the task runner if a executed application is not ended.
+Starts one or several programs with optional arguments. It is possible to define whether the sub tasks are executed synchronous or asynchronous. The later can cause freezing of the task runner if a executed application is not terminated (process is still running).

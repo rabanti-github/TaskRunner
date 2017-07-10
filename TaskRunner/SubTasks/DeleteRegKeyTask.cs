@@ -37,11 +37,13 @@ namespace TaskRunner.SubTasks
                 if (this.Arguments.Count < 1)
                 {
                     this.Message = "The Hive of the key " + this.MainValue + " was not defined";
+                    this.ExecutionCode = 1001;
                     return false;
                 }
                 if (this.Arguments.Count < 2)
                 {
                     this.Message = "The value in the key " + this.MainValue + " was not defined";
+                    this.ExecutionCode = 1002;
                     return false;
                 }
                 hive = this.Arguments[0].ToUpper();
@@ -79,18 +81,21 @@ namespace TaskRunner.SubTasks
                 else
                 {
                     this.Message = "The hive " + hive + " is undefined";
+                    this.ExecutionCode = 1003;
                     return false;
                 }
 
                 if (status == false)
                 {
-                    this.Message = "The key " + this.MainValue + " is not present in " + hive + ". Nothing to do.";
+                    this.Message = "The key " + this.MainValue + " is not present in " + hive + ". Nothing to do";
+                    this.ExecutionCode = 1;
                     return true;
                 }
                 else
                 {
                     key.DeleteValue(regValue, false);
                     this.Message = "The value " + regValue + " in the key " + this.MainValue + " in " + hive + " was deleted";
+                    this.ExecutionCode = 2;
                     return true;
                 }
 
@@ -99,6 +104,7 @@ namespace TaskRunner.SubTasks
             catch (Exception e)
             {
                 this.Message = "The value " + regValue + " in  " + this.MainValue + " in " + this.Arguments[0] + " could not be deleted" + e.Message;
+                this.ExecutionCode = 1000;
                 return false;
             }
 

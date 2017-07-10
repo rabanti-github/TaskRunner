@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="WriteLog" name="Demo-Task">
   <items>
-    <writeLogItem name="Write-Log-Task_1">
+    <writeLogItem name="Write-Log-Task_1" createFolders="true">
       <mainValue>C:\temp\logs\logfile.log</mainValue>
       <description>This is sub-task 1</description>
       <arguments>
@@ -10,7 +10,7 @@
 *********************************************</argument>
       </arguments>
     </writeLogItem>
-    <writeLogItem name="Write-Log-Task_2">
+    <writeLogItem name="Write-Log-Task_2" createFolders="true">
       <mainValue>C:\temp\logs\logfile.log</mainValue>
       <description>This is sub-task 2</description>
       <arguments>
@@ -19,7 +19,7 @@
 *********************************************</argument>
       </arguments>
     </writeLogItem>
-    <writeLogItem name="Write-Log-Task_3">
+    <writeLogItem name="Write-Log-Task_3" createFolders="true">
       <mainValue>C:\temp\logs\logfile.log</mainValue>
       <description>This is sub-task 3</description>
       <arguments>

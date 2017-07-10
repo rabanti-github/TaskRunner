@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace TaskRunner.SubTasks
@@ -29,13 +30,25 @@ namespace TaskRunner.SubTasks
         {
             try
             {
-                System.IO.File.Delete(this.MainValue);
-                this.Message = this.MainValue + " was deleted";
+                if (File.Exists(this.MainValue) == false)
+                {
+                    this.Message = this.MainValue + " does not exist. Nothing to do";
+                    this.ExecutionCode = 1;
+                }
+                else
+                {
+                    System.IO.File.Delete(this.MainValue);
+                    this.Message = this.MainValue + " was deleted";
+                    this.ExecutionCode = 2;
+                }
+
+
                 return true;
             }
             catch (Exception e)
             {
                 this.Message = this.MainValue + " could not be deleted:\n" + e.Message;
+                this.ExecutionCode = 1000;
                 return false;
             }
         }

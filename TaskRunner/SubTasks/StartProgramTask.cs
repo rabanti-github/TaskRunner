@@ -81,6 +81,7 @@ namespace TaskRunner.SubTasks
                 {
                     System.Diagnostics.Process.Start(this.MainValue, argString);
                     this.Message = "The process " + this.MainValue + " was executed";
+                    this.ExecutionCode = 1;
                     return true;
                 }
                 else
@@ -103,18 +104,21 @@ namespace TaskRunner.SubTasks
                     if (executed == false)
                     {
                         this.Message = "The process " + this.MainValue + " could not be executed";
+                        this.ExecutionCode = 1001;
                         return false;
                     }
                     else
                     {
                         this.Message = "The process " + this.MainValue + " was executed";
+                        this.ExecutionCode = 1;
                         return true;
                     }
                 }
             }
             catch (Exception e)
             {
-                this.Message = "The process " + this.MainValue + " was executed\n" + e.Message;
+                this.Message = "The process " + this.MainValue + " could not be executed\n" + e.Message;
+                this.ExecutionCode = 1000;
                 return false;
             }
         }

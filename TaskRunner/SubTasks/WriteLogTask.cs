@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace TaskRunner.SubTasks
 {
@@ -12,6 +14,9 @@ namespace TaskRunner.SubTasks
     /// </summary>
     public class WriteLogTask : SubTask
     {
+
+        [XmlAttribute("createFolders")]
+        public Boolean CreateFolders { get; set; }
 
         /// <summary>
         /// Default constructor
@@ -28,6 +33,24 @@ namespace TaskRunner.SubTasks
         /// <returns>True if the task was executed successfully, otherwise false</returns>
         public override bool Run()
         {
+
+                if (this.CreateFolders == true)
+                {
+                    try
+                    {
+                        FileInfo f = new FileInfo(this.MainValue);
+                        if (Directory.Exists(f.DirectoryName) == false)
+                        {
+                            DirectoryInfo di = Directory.CreateDirectory(f.DirectoryName);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        this.Message = "The directory of the logfile could not be created\n" + e.Message;
+                        this.ExecutionCode = 1001;
+                        return false;
+                    }
+                }
             try
             {
                 string text = DateTime.Now.ToString(Task.DATEFORMAT);
@@ -35,12 +58,24 @@ namespace TaskRunner.SubTasks
                 string header = Arguments[1];
                 if (string.IsNullOrEmpty(header)) { header = "Date\tValue\r\n*********************************************"; }
                 bool check = Utils.Log(this.MainValue, header, text);
-                this.Message = "Logfile entry was written";
-                return true;
+                if (check == true)
+                {
+                    this.Message = "Logfile entry was written";
+                    this.ExecutionCode = 1;
+                    return true;
+                }
+                else
+                {
+                    this.Message = "Logfile could not be created or opened";
+                    this.ExecutionCode = 1001;
+                    return false;
+                }
+                
             }
             catch (Exception e)
             {
-                this.Message = "The logfile entry could not be written" + e.Message;
+                this.Message = "The logfile entry could not be written\n" + e.Message;
+                this.ExecutionCode = 1000;
                 return false;
             }
         }
@@ -54,6 +89,7 @@ namespace TaskRunner.SubTasks
         {
             WriteLogTask t = new WriteLogTask();
             t.Name = "Write-Log-Task_" + number.ToString();
+            t.CreateFolders = true;
             t.Description = "This is sub-task " + number.ToString();
             t.MainValue = @"C:\temp\logs\logfile.log";
             t.Arguments.Add("Text to write (separate fields using tab) no. " + number.ToString());

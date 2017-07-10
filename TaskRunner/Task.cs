@@ -119,10 +119,11 @@ namespace TaskRunner
                 System.Console.WriteLine("STARTING SUB-TASKS AT\t" + date + "\n");
             }
             bool status;
-            foreach(SubTask task in this.Items)
+            foreach(SubTask subTask in this.Items)
             {
                 entry = new LogEntry();
-                entry.TaskName = task.Name;
+                entry.TaskName = this.TaskName;
+                entry.SubTaskName = subTask.Name;
                 entry.ExecutionDate = DateTime.Now;
                 this.ExecutedTasks++;
                 if (displayOutput == true)
@@ -130,17 +131,17 @@ namespace TaskRunner
                     date = DateTime.Now.ToString(DATEFORMAT);
                     System.Console.WriteLine("**********************\n");
                     System.Console.WriteLine("Date:\t\t" + date);
-                    System.Console.WriteLine("Sub-Task:\t" + task.Name);
-                    if (string.IsNullOrEmpty(task.Prolog) == false)
+                    System.Console.WriteLine("Sub-Task:\t" + subTask.Name);
+                    if (string.IsNullOrEmpty(subTask.Prolog) == false)
                     {
-                        System.Console.WriteLine("Prolog:\t\t" + task.Prolog);
+                        System.Console.WriteLine("Prolog:\t\t" + subTask.Prolog);
                     }
                 }
-                status = task.Run();
+                status = subTask.Run();
                 if (displayOutput == true)
                 {
                     System.Console.WriteLine("Status:\t\t" + status.ToString());
-                    System.Console.WriteLine("Message:\t" + task.Message + "\n");
+                    System.Console.WriteLine("Message:\t" + subTask.Message + "\n");
                 }
                 if (status == false)
                 {
@@ -156,6 +157,7 @@ namespace TaskRunner
                 {
                     entry.Status = true;
                 }
+                entry.ExecutionCode = subTask.ExecutionCode;
                 this.LogEntries.Add(entry);
             }
             if (displayOutput == true)
@@ -257,13 +259,15 @@ namespace TaskRunner
         /// <param name="logFile">File name of the logfile</param>
         public void Log(string logFile)
         {
-            string headerValue = "Date\tStatus\tTask\r\n---------------------------------------------------------------------------------------------";
+            string headerValue = "Date\tStatus\tStatus-Code\tTask\tSub-Task\r\n---------------------------------------------------------------------------------------------";
             StringBuilder sb = new StringBuilder();
             foreach (LogEntry entry in this.LogEntries)
             {
                 sb.Append(entry.getLogString());
+                sb.Append("\r\n");
             }
-            Utils.Log(logFile, headerValue, sb.ToString());
+            char[] trim = new char[]{'\r', '\n'};
+            Utils.Log(logFile, headerValue, sb.ToString().TrimEnd(trim));
         }
 
 

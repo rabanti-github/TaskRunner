@@ -44,6 +44,13 @@ namespace TaskRunner.SubTasks
         /// </summary>
         [XmlIgnore]
         public string Prolog { get; set; }
+
+        /// <summary>
+        /// Returned Code after execution. Please see documentation about the various codes
+        /// </summary>
+        [XmlIgnore]
+        public int ExecutionCode { get; set; }
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -52,6 +59,7 @@ namespace TaskRunner.SubTasks
             this.Arguments = new List<string>();
             this.Message = string.Empty;
             this.Prolog = string.Empty;
+            this.ExecutionCode = -1; // Not started
         }
         /// <summary>
         /// Abstract method to run the Sub-Task

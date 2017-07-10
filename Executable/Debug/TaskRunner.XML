@@ -101,6 +101,31 @@
             </summary>
             <returns>Formated log entry as string</returns>
         </member>
+        <member name="P:TaskRunner.LogEntry.TaskName">
+            <summary>
+            The name of the main Task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.LogEntry.SubTaskName">
+            <summary>
+            The name of the Sub-Task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.LogEntry.Status">
+            <summary>
+            The execution status
+            </summary>
+        </member>
+        <member name="P:TaskRunner.LogEntry.ExecutionDate">
+            <summary>
+            The execution date
+            </summary>
+        </member>
+        <member name="P:TaskRunner.LogEntry.ExecutionCode">
+            <summary>
+            The execution code of the Sub-Task
+            </summary>
+        </member>
         <member name="T:TaskRunner.Program">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -193,6 +218,11 @@
         <member name="P:TaskRunner.SubTasks.SubTask.Prolog">
             <summary>
             Optional Message before execution of the Sub-Task. This Message is not serialized
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.ExecutionCode">
+            <summary>
+            Returned Code after execution. Please see documentation about the various codes
             </summary>
         </member>
         <member name="M:TaskRunner.SubTasks.DeleteFileTask.#ctor">

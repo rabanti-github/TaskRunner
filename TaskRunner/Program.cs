@@ -19,20 +19,22 @@ namespace TaskRunner
         /// <param name="args">Arguments like -r, -d, -o, h or -l</param>
         static void Main(string[] args)
         {
-            if (args.Length < 1)
-            {
-                Console.WriteLine(Usage(false));
-                return;
-            }
             // DEBUG
+            
             /*
              args = new string[5];
              args[0] = "--run";
-             args[1] = "startProgram_test.xml";
+             args[1] = @"..\..\..\..\DemoFiles\DEMO_WriteLog.xml";
              args[2] = "-o";
              args[3] = "-l";
-             args[4] = "test.txt";
-             */
+             args[4] = "log2.txt";
+             * */
+
+             if (args.Length < 1)
+             {
+                 Console.WriteLine(Usage(false));
+                 return;
+             }
 
             ArgsTuple a = new ArgsTuple();
             Task t = null;

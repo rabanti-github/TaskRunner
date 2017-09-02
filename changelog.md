@@ -1,5 +1,9 @@
 ﻿# Change Log
 
+## v1.1.1 (02.09.2017)
+
+* Improved markdown output
+
 ## v1.1.0 (02.09.2017)
 
 * Added ControlServiceTask

@@ -268,11 +268,56 @@ namespace TaskRunner
         }
 
         /// <summary>
+        /// Method to serialize the current configuration as memory stream 
+        /// </summary>
+        /// <returns>Memory stream</returns>
+        private MemoryStream SerializeAsStream()
+        {
+            MemoryStream ms = null;
+            try
+            {
+                ms = new MemoryStream();
+                StreamWriter sw = new StreamWriter(ms);
+                XmlSerializer ser = new XmlSerializer(typeof(Task));
+                ser.Serialize(sw, this);
+                ms.Flush();
+                ms.Position = 0;
+            }
+            catch (Exception e)
+            {
+                System.Console.WriteLine("Error while serializing file into the memory stream\n" + e.Message);
+            }
+            return ms;
+        }
+
+        /// <summary>
+        /// Creates a demo file as string
+        /// </summary>
+        /// <param name="type">Task type of the demo configuration</param>
+        /// <returns>Sting of the demo file</returns>
+        public static string CreateDemoFile(TaskType type)
+        {
+            return CreateDemoFile(null, type, false);
+        }
+
+        /// <summary>
         /// Static method to generate an example configuration
         /// </summary>
         /// <param name="file">File name of the demo configuration</param>
         /// <param name="type">Task type of the demo configuration</param>
         public static void CreateDemoFile(string file, TaskType type)
+        {
+            CreateDemoFile(file, type, true);
+        }
+
+
+        /// <summary>
+        /// Static method to generate an example configuration as file or string
+        /// </summary>
+        /// <param name="file">File name of the demo configuration</param>
+        /// <param name="type">Task type of the demo configuration</param>
+        /// <param name="asFile">If true a file will be generated, otherwise a string returned</param>
+        private static string CreateDemoFile(string file, TaskType type, bool asFile)
         {
             Task t = new Task();
             t.TaskName = "Demo-Task";
@@ -306,7 +351,28 @@ namespace TaskRunner
             t.Items.Add(t1);
             t.Items.Add(t2);
             t.Items.Add(t3);
-            t.Serialize(file);
+            if (asFile == true)
+            {
+                t.Serialize(file);
+                return "";
+            }
+            else
+            {
+                try
+                {
+                    MemoryStream ms = t.SerializeAsStream();
+                    StreamReader sr = new StreamReader(ms);
+                    string output = sr.ReadToEnd();
+                    ms.Close();
+                    ms.Dispose();
+                    return output;
+                }
+                catch (Exception e)
+                {
+                    System.Console.WriteLine("Error while loading demo file as string\n" + e.Message);
+                    return "";
+                }
+            }
         }
 
 

@@ -186,6 +186,17 @@ namespace TaskRunner.SubTasks
             sb.Append(part2);
             sb.Append(Documentation.NL);
             sb.Append(part3);
+            sb.Append(Documentation.NL);
+            sb.Append(Documentation.NL);
+            sb.Append("## Example configuration");
+            sb.Append(Documentation.NL);
+            sb.Append(Documentation.NL);
+            sb.Append("```xml");
+            sb.Append(Documentation.NL);
+            string demo = Task.CreateDemoFile(this.Type);
+            sb.Append(demo);
+            sb.Append(Documentation.NL);
+            sb.Append("```");
             try
             {
                 FileStream fs = new FileStream(fileName, FileMode.Create);

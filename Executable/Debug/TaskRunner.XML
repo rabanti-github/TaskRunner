@@ -980,12 +980,33 @@
             </summary>
             <param name="filename">File name of the configuration</param>
         </member>
+        <member name="M:TaskRunner.Task.SerializeAsStream">
+            <summary>
+            Method to serialize the current configuration as memory stream 
+            </summary>
+            <returns>Memory stream</returns>
+        </member>
+        <member name="M:TaskRunner.Task.CreateDemoFile(TaskRunner.Task.TaskType)">
+            <summary>
+            Creates a demo file as string
+            </summary>
+            <param name="type">Task type of the demo configuration</param>
+            <returns>Sting of the demo file</returns>
+        </member>
         <member name="M:TaskRunner.Task.CreateDemoFile(System.String,TaskRunner.Task.TaskType)">
             <summary>
             Static method to generate an example configuration
             </summary>
             <param name="file">File name of the demo configuration</param>
             <param name="type">Task type of the demo configuration</param>
+        </member>
+        <member name="M:TaskRunner.Task.CreateDemoFile(System.String,TaskRunner.Task.TaskType,System.Boolean)">
+            <summary>
+            Static method to generate an example configuration as file or string
+            </summary>
+            <param name="file">File name of the demo configuration</param>
+            <param name="type">Task type of the demo configuration</param>
+            <param name="asFile">If true a file will be generated, otherwise a string returned</param>
         </member>
         <member name="M:TaskRunner.Task.Log(System.String)">
             <summary>

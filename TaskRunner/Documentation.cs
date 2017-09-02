@@ -225,6 +225,7 @@ namespace TaskRunner
             {
                 if (asMarkdown == true)
                 {
+                    sb.Append(NL);
                     sb.Append(GetMarkdownTable(asTagDoc, "Value", "Description"));
                 }
                 else
@@ -269,10 +270,14 @@ namespace TaskRunner
             foreach (T tuple in Tuples)
             {
                 val = tuple.Value.Replace("|", "&#124;");
+                val = val.Replace("<", "&lt;");
+                val = val.Replace(">", "&gt;");
                 desc = tuple.Description.Replace("|", "&#124;");
+                desc = desc.Replace("<", "&lt;");
+                desc = desc.Replace(">", "&gt;");
                 if (asTag == true && tuple.OverrideTagFormatting == false)
                 {
-                    sb.Append("<" + val + ">");
+                    sb.Append("&lt;" + val + "&gt;");
                 }
                 else
                 {

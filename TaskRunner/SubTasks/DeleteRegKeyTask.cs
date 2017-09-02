@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 using Microsoft.Win32;
 
 namespace TaskRunner.SubTasks
@@ -13,6 +14,51 @@ namespace TaskRunner.SubTasks
     /// </summary>
     public class DeleteRegKeyTask : SubTask
     {
+
+        /// <summary>
+        /// Implemented code of the task type (02)
+        /// </summary>
+        [XmlIgnore]
+        public override byte TaskTypeCode
+        {
+            get { return 0x02; }
+        }
+
+        /// <summary>
+        /// Type of the Task / Sub-task
+        /// </summary>
+        [XmlIgnore]
+        //public override Task.TaskType Type => Task.TaskType.DeleteRegKey;
+         public override Task.TaskType Type
+        {
+            get { return Task.TaskType.DeleteRegKey; }
+        }
+
+        /// <summary>
+        /// Name of the demo file
+        /// </summary>
+        [XmlIgnore]
+       // public override string DemoFileName => "DEMO_DeleteregKey.xml";
+        public override string DemoFileName
+        {
+            get { return "DEMO_DeleteRegKey.xml"; }
+        }
+
+        /// <summary>
+        /// Name of the markdown file
+        /// </summary>
+        [XmlIgnore]
+        public override string MarkdownFileName
+        {
+            get { return "DeleteRegKey.md"; }
+        }
+
+        /// <summary>
+        /// The hive of the registry key (e.g. HKLM or HKCU)
+        /// </summary>
+        [XmlAttribute("hive")]
+        public string Hive { get; set; }
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -28,83 +74,108 @@ namespace TaskRunner.SubTasks
         /// <returns>True if the task was executed successfully, otherwise false</returns>
         public override bool Run()
         {
-            string hive = "";
-            string regValue = "";
+            //string hive = "";
+            //string regValue = "";
             bool status = true;
             RegistryKey key = null;
             try
             {
-                if (this.Arguments.Count < 1)
+                if (string.IsNullOrEmpty(this.MainValue))
+                {
+                    this.Message = "No key was defined";
+                    this.StatusCode = 0x05;
+                    return false;
+                }
+                if (string.IsNullOrEmpty(this.Hive))
                 {
                     this.Message = "The Hive of the key " + this.MainValue + " was not defined";
-                    this.ExecutionCode = 1001;
+                    this.StatusCode = 0x02;
                     return false;
                 }
-                if (this.Arguments.Count < 2)
+                if (this.Arguments.Count < 1)
                 {
-                    this.Message = "The value in the key " + this.MainValue + " was not defined";
-                    this.ExecutionCode = 1002;
+                    this.Message = "No value in the key " + this.MainValue + " to delete was defined";
+                    this.StatusCode = 0x03;
                     return false;
                 }
-                hive = this.Arguments[0].ToUpper();
-                regValue = this.Arguments[1];
-                if (hive == "HKLM")
+                this.Hive = this.Hive.ToUpper();
+                //regValue = this.Arguments[1];
+                if (this.Hive == "HKLM")
                 {
                     key = Registry.LocalMachine.OpenSubKey(this.MainValue, true);
                     if (key == null) { status = false; }
                 }
-                else if (hive == "HKCU")
+                else if (this.Hive == "HKCU")
                 {
                     key = Registry.CurrentUser.OpenSubKey(this.MainValue, true);
                     if (key == null) { status = false; }
                 }
-                else if (hive == "HKCR")
+                else if (this.Hive == "HKCR")
                 {
                     key = Registry.ClassesRoot.OpenSubKey(this.MainValue, true);
                     if (key == null) { status = false; }
                 }
-                else if (hive == "HKCC")
+                else if (this.Hive == "HKCC")
                 {
                     key = Registry.CurrentConfig.OpenSubKey(this.MainValue, true);
                     if (key == null) { status = false; }
                 }
-                else if (hive == "HKU")
+                else if (this.Hive == "HKU")
                 {
                     key = Registry.Users.OpenSubKey(this.MainValue, true);
                     if (key == null) { status = false; }
                 }
-                else if (hive == "HKPD")
+                else if (this.Hive == "HKPD")
                 {
                     key = Registry.PerformanceData.OpenSubKey(this.MainValue, true);
                     if (key == null) { status = false; }
                 }
                 else
                 {
-                    this.Message = "The hive " + hive + " is undefined";
-                    this.ExecutionCode = 1003;
+                    this.Message = "The hive " + this.Hive + " is undefined";
+                    this.StatusCode = 0x04;
                     return false;
                 }
 
                 if (status == false)
                 {
-                    this.Message = "The key " + this.MainValue + " is not present in " + hive + ". Nothing to do";
-                    this.ExecutionCode = 1;
+                    this.Message = "The key " + this.MainValue + " is not present in " + this.Hive + ". Nothing to do";
+                    this.StatusCode = 0x02;
                     return true;
                 }
                 else
                 {
-                    key.DeleteValue(regValue, false);
-                    this.Message = "The value " + regValue + " in the key " + this.MainValue + " in " + hive + " was deleted";
-                    this.ExecutionCode = 2;
-                    return true;
+                    int counter = 0;
+                    object o;
+                    foreach(string value in this.Arguments)
+                    {
+                        o = key.GetValue(value);
+                        if (o != null)
+                        {
+                            key.DeleteValue(value, false);
+                            counter++;
+                        }
+                    }
+                    if (counter == 0)
+                    {
+                        this.Message = "No value to delete was found in the key " + this.MainValue + ". Nothing to do";
+                        this.StatusCode = 0x03;
+                        return true;
+                    }
+                    else
+                    {
+                        this.Message = counter + " values were deleted in the key " + this.MainValue + " in " + this.Hive;
+                        this.StatusCode = 0x01;
+                        return true;
+                    }
                 }
 
 
             }
             catch (Exception e)
             {
-                this.Message = "The value " + regValue + " in  " + this.MainValue + " in " + this.Arguments[0] + " could not be deleted" + e.Message;
-                this.ExecutionCode = 1000;
+                this.Message = "The value(s) in the key " + this.MainValue + " in " + this.Hive + " could not be deleted" + e.Message;
+                this.StatusCode = 0x01;
                 return false;
             }
 
@@ -120,10 +191,65 @@ namespace TaskRunner.SubTasks
             DeleteRegKeyTask t = new DeleteRegKeyTask();
             t.Name = "Delete-Registry-Task_" + number.ToString();
             t.Description = "This is sub-task " + number.ToString();
-            t.MainValue = @"Software\Microsoft\Windows\CurrentVersion\Run\base_key";
-            t.Arguments.Add("HKLM");
-            t.Arguments.Add("value_to_delete_" + number.ToString());
+            t.Hive = "HKLM";
+            t.MainValue = @"Software\Microsoft\Windows\CurrentVersion\Run\base_key" + number.ToString();
+            t.Arguments.Add("value_to_delete_1");
+            t.Arguments.Add("value_to_delete_2");
+            t.Arguments.Add("value_to_delete_3");
             return t;
+        }
+
+        /// <summary>
+        /// Returns the documentation of the status codes for the specific Sub-Task
+        /// </summary>
+        /// <returns>Documentation object</returns>
+        public override Documentation GetDocumentationStatusCodes()
+        {
+            Documentation codes = new Documentation("Delete Registry-Key (Value) Task", "Status Codes");
+            codes.AddTuple(this.PrintStatusCode(true, 0x01), "The value was deleted successfully");
+            codes.AddTuple(this.PrintStatusCode(true, 0x02), "The key is not existing. Nothing to do");
+            codes.AddTuple(this.PrintStatusCode(true, 0x03), "The value was not found in the key. Nothing to do");
+            codes.AddTuple(this.PrintStatusCode(false, 0x01), "The value could not be deleted due to an unknown reason");
+            codes.AddTuple(this.PrintStatusCode(false, 0x02), "The hive was not defined");
+            codes.AddTuple(this.PrintStatusCode(false, 0x03), "No value to delete was defined");
+            codes.AddTuple(this.PrintStatusCode(false, 0x04), "The hive is not defined / unknown");
+            codes.AddTuple(this.PrintStatusCode(false, 0x05), "No key to check was defined");
+            return codes;
+        }
+
+        /// <summary>
+        /// Returns the documentation of the XML tags for the specific Sub-Task
+        /// </summary>
+        /// <returns>Documentation object</returns>
+        public override Documentation GetTagDocumentationParameters()
+        {
+            Documentation tags = new Documentation("Delete Registry-Key (Value) Task", "Tags", "The following specific tags are defined (see also demo files)");
+            this.AppendCommonTags(ref tags, "<deleteRegKeyItem>");
+            tags.AddTuple("deleteRegKeyItem", "Main tag of a Sub-Task within the <items> tag");
+            tags.AddTuple("mainValue", "Defines the path to the registry key without the hive");
+            tags.AddTuple("argument", "Each <argument> tag within the <arguments> tag contains one value to delete within the key");
+            return tags;
+        }
+
+        /// <summary>
+        /// Returns the documentation of the XML attributes for the specific Sub-Task
+        /// </summary>
+        /// <returns>Documentation object</returns>
+        public override Documentation GetAttributesDocumentationParameters()
+        {
+            Documentation attributes = new Documentation("Delete Registry-Key (Value) Task", "Attributes", "The following attributes are defined");
+            this.AppendCommonAttributes(ref attributes, "<deleteRegKeyItem>", "DeleteRegKey");
+            attributes.AddTuple("hive", "Indicates which registry hive is accessed. Valid values are 'HKLM', 'HKCU', 'HKCR', 'HKCC', 'HKU' and 'HKPD'. The attribute is part of the <deleteRegKeyItem> tag.");
+            return attributes;
+        }
+
+        /// <summary>
+        /// Returns the description as documentation for the specific Sub-Task
+        /// </summary>
+        /// <returns>Documentation object</returns>
+        public override Documentation GetDocumentationDescription()
+        {
+            return new Documentation("Delete Registry-Key (Value) Task", "Description", "The task deletes a value of a registry key in the Windows registry. Several hives like HKLM or HKCU can be defined. Note that write permission to the registry must be granted to execute such a task.");
         }
     }
 }

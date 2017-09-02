@@ -42,23 +42,31 @@ Furthermore, you need the following knowledge when using TaskRunner:
 
 <b>Generation of example files of the configuration:</b>
 
-<code>TaskRunner.exe -d</code>
+<code>TaskRunner.exe -e</code>
+
+<b>Generation of markdown files of the documentation:</b>
+
+<code>TaskRunner.exe -m</code>
 
 Path to the configuration: A relative or absolute path to the configuration as XML file
 
 **Flags / Options**
 ---------------
-<code>-r | --run</code>:    Runs a task defined in the subsequent config file (path)
+<code>-r | --run</code>:      Runs a task defined in the subsequent config file (path)
 
-<code>-d | --demo</code>:   Runs the demo command and generates example configurations in the program folder
+<code>-e | --example</code>:  Runs the demo command and generates example configurations in the program folder
 
-<code>-o | --output</code>: Enables the output mode. The results of the task will be displayed in the command shell
+<code>-o | --output</code>:   Enables the output mode. The results of the task will be displayed in the command shell
 
-<code>-s | --halt</code>:   The task runner stops after an error, otherwise all sub-tasks are executed until the end of the configuration
+<code>-s | --stop</code>:     The task runner stops after an error, otherwise all sub-tasks are executed until the end of the configuration
 
-<code>-l | --log</code>:    Enables logging. After the flag a valid path (absolute or relative) to a logfile must be defined 
+<code>-l | --log</code>:      Enables logging. After the flag a valid path (absolute or relative) to a logfile must be defined 
 
-<code>-h | --help</code>:    Shows the program help
+<code>-h | --help</code>:     Shows the program help
+
+<code>-d | --docs</code>:     Shows the menu with the documentation
+
+<code>-m | --markdown</code>: Saves the documentation as markdown files 
 
 
 **Possible Tasks**
@@ -80,3 +88,7 @@ Writes a defined text with the time stamp of the execution time into the defined
 <b>StartProgramTask:</b>
 
 Starts one or several programs with optional arguments. It is possible to define whether the sub tasks are executed synchronous or asynchronous. The later can cause freezing of the task runner if a executed application is not terminated (process is still running).
+
+<b>ControlServiceTask:</b>
+
+Starts, restarts, pauses, resumes or stops a Windows Servcie by its name. It is possible to define a remote machine name. Furthermore a specific tmeout period can be defined.

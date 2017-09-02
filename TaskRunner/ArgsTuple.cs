@@ -60,6 +60,14 @@ namespace TaskRunner
         /// </summary>
         public bool Demo { get; set; }
         /// <summary>
+        /// If true, the documentation of tasks will be called
+        /// </summary>
+        public bool Docs { get; set; }
+        /// <summary>
+        /// If true, the documentation of tasks will be saved as markdown files
+        /// </summary>
+        public bool Markdown { get; set; }
+        /// <summary>
         /// Path to the program logfile
         /// </summary>
         public string LogFilePath { get; set; }
@@ -79,6 +87,8 @@ namespace TaskRunner
             this.Run = false;
             this.Log = false;
             this.Demo = false;
+            this.Docs = false;
+            this.Markdown = false;
             this.LogFilePath = string.Empty;
             this.ConfigFilePath = string.Empty;
         }

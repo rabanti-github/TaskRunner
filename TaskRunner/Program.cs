@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using TaskRunner.SubTasks;
 
 namespace TaskRunner
 {
@@ -19,17 +20,6 @@ namespace TaskRunner
         /// <param name="args">Arguments like -r, -d, -o, h or -l</param>
         static void Main(string[] args)
         {
-            // DEBUG
-            
-            /*
-             args = new string[5];
-             args[0] = "--run";
-             args[1] = @"..\..\..\..\DemoFiles\DEMO_WriteLog.xml";
-             args[2] = "-o";
-             args[3] = "-l";
-             args[4] = "log2.txt";
-             * */
-
              if (args.Length < 1)
              {
                  Console.WriteLine(Usage(false));
@@ -43,24 +33,45 @@ namespace TaskRunner
             for (int i = 0; i < args.Length; i++)
             {
                 type = CheckArgs(ref a, args[i], type);
+                if (type == ArgsTuple.ArgType.undefined)
+                {
+                    Console.WriteLine("Unknown flag '" + args[i] + "'");
+                    Console.WriteLine(Usage(false));
+                    return;
+                }
             }
             if (a.Help == true)
             {
                 Console.WriteLine(Usage(false));
                 return;
             }
-
+            if (a.Docs == true)
+            {
+                Documentation();
+                return;
+            }
+            if (a.Markdown == true)
+            {
+                Console.WriteLine(Usage(true));
+                Console.WriteLine("Generating markdown files in current folder...");
+                List<SubTask> types = Task.EnumerateTaskTypes();
+                foreach (SubTask subtask in types)
+                {
+                    subtask.SaveMarkdown(subtask.MarkdownFileName);
+                }
+                return;
+            }
             if (a.Demo == true)
             {
                 Console.WriteLine(Usage(true));
-                Console.WriteLine("Generating demo files in program folder...");
-                Task.CreateDemoFile("DEMO_DeleteFiles.xml", Task.TaskType.DeleteFile);
-                Task.CreateDemoFile("DEMO_DeleteRegKeys.xml", Task.TaskType.DeleteRegKey);
-                Task.CreateDemoFile("DEMO_WriteLog.xml", Task.TaskType.WriteLog);
-                Task.CreateDemoFile("DEMO_StartProgram.xml", Task.TaskType.StartProgram);
+                Console.WriteLine("Generating demo files in current folder...");
+                List<SubTask> types = Task.EnumerateTaskTypes();
+                foreach(SubTask subtask in types)
+                {
+                    Task.CreateDemoFile(subtask.DemoFileName, subtask.Type);
+                }
                 return;
             }
-
             if (a.ConfigFilePath == "" && a.Run == true)
             {
                 Console.WriteLine("Error: No config file was defined");
@@ -79,7 +90,7 @@ namespace TaskRunner
                 }
                 t = Task.Deserialize(a.ConfigFilePath);
                 if (t.Valid == false) { return; }
-                t.Run(a.HaltOnError, a.Output);
+                t.Run(a.HaltOnError, a.Output, a.Log);
                 if (a.Log == true)
                 {
                     t.Log(a.LogFilePath);
@@ -105,46 +116,39 @@ https://github.com/rabanti-github/TaskRunner
 TaskRunner.exe -r [path to configuration] <options>
 Generation of example files of the configuration:
 TaskRunner.exe -d
+Generation of markdown files of the documentation:
+TaskRunner.exe -m
 
 Path to the configuration: A relative or absolute path to the
 configuration as XML file
 
 Flags / Options
 ---------------
--r | --run:    Runs a task defined in the subsequent config file (path)
--d | --demo:   Runs the demo command and generates example
-               configurations in the program folder
--o | --output: Enables the output mode. The results of the task
-               will be displayed in the command shell
--s | --halt:   The task runner stops after an error, otherwise all
-               sub-tasks are executed until the end of the configuration
--l | --log:    Enables logging. After the flag a valid path
-               (absolute or relative) to a logfile must be defined
--h | --help:   Shows the program help (this text) 
+-r | --run:     Runs a task defined in the subsequent config file (path)
+-e | --example: Runs the demo command and generates example
+                configurations in the current selected folder
+-o | --output:  Enables the output mode. The results of the task
+                will be displayed in the command shell
+-s | --stop:    The task runner stops after an error, otherwise all
+                sub-tasks are executed until the end of the configuration
+-l | --log:     Enables logging. After the flag a valid path
+                (absolute or relative) to a logfile must be defined
+-h | --help:    Shows the program help (this text) 
+-d | --docs     Shows the menu with the task documentation
+-m | --markdown Saves the documentation of all task types to markdown
+                files in the current folder
 
-Possible Tasks
---------------
-Please look at the demo files for all parameters.
-
-DeleteFileTask:
-The tasks deletes one or several files. There are no additional options.
-At the moment, no wildcards are allowed.
-
-DeleteRegKeyTask:
-The task deletes a value of a reg key in the Windows registry. Several
-hives like HKLM or HKCU can be defined. Note that write permission to
-the registry mus be granted to execute such a task.
-
-WriteLogTask:
-Writes a defined text with the time stamp of the execution time into
-the defined log file. The logfile header is optional and can be passed
-as argument (see demo files).
-
-StartProgramTask:
-Starts one or several programs with optional arguments. It is possible
-to define whether the sub tasks are executed synchronous or asynchronous.
-The later can cause freezing of the task runner if an executed application
-is not terminated (process still running).
+Task Documentation
+------------------
+Please look at the demo files for a practical implementation of parameters.
+Use the flag -e / --example to generate the demo files.
+Use the flag -d / --docs for the documentation.
+Use the flag -m / --markdown to save the documentation as markdown files
+Available documentation:
+- Description
+- Documentation of Tags
+- Documentation of Tag-Attributes
+- Status codes
             ";
             if (headerOnly == true)
             {
@@ -154,6 +158,84 @@ is not terminated (process still running).
             {
                 return header + "\n" + usage;
             }
+        }
+
+        /// <summary>
+        /// Method to handle he output of the documentation
+        /// </summary>
+        private static void Documentation()
+        {
+            List<SubTask> types = Task.EnumerateTaskTypes();
+            int len = types.Count;
+            string input, text;
+            int number, number2;
+            bool exit;
+            while (true)
+            {
+                exit = false;
+                Console.WriteLine("\n #############");
+                Console.WriteLine(" # T A S K S #");
+                Console.WriteLine(" #############");
+                for (int i = 0; i < len; i++)
+                {
+                    Console.WriteLine("[" + (i + 1).ToString() + "] " + types[i].GetDocumentationDescription().Title);
+                }
+                Console.WriteLine("[x] Exit");
+                Console.WriteLine("\nPlease select a number between 1 and " + len.ToString() + " or X to exit...");
+                input = Console.ReadLine();
+                if (input.ToLower() == "x") { break; }
+                if (int.TryParse(input, out number) == false)
+                {
+                    Console.WriteLine("Invalid input. Please retry...");
+                    continue;
+                }
+                if (number < 1 || number > len)
+                {
+                    Console.WriteLine("Invalid input. Please retry...");
+                    continue;
+                }
+                while (true)
+                {
+                    Console.WriteLine("\nDocumentation Menu:\n-------------------\n[1] All documentation\n[2] Description\n[3] Tag documentation\n[4] Tag-Attribute documentation\n[5] Status codes\n[m] Main menu\n[x] Exit\n\nPlease select a number between 1 and 5, M for main menu or X to exit...");
+                    input = Console.ReadLine();
+                    if (input.ToLower() == "x") { exit = true;  break; }
+                    if (input.ToLower() == "m") { exit = false; break; }
+                    if (int.TryParse(input, out number2) == false)
+                    {
+                        Console.WriteLine("Invalid input. Please retry...");
+                        continue;
+                    }
+                    if (number2 < 1 || number2 > 5)
+                    {
+                        Console.WriteLine("Invalid input. Please retry...");
+                        continue;
+                    }
+                    if (number2 == 2 || number2 == 1)
+                    {
+                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Description, Console.WindowWidth);
+                        Console.WriteLine(text + "\n");
+                    }
+                    if (number2 == 3 || number2 == 1)
+                    {
+                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Tags, Console.WindowWidth);
+                        Console.WriteLine(text + "\n");
+                    }
+                    if (number2 == 4 || number2 == 1)
+                    {
+                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Attributes, Console.WindowWidth);
+                        Console.WriteLine(text + "\n");
+                    }
+                    if (number2 == 5 || number2 == 1)
+                    {
+                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.StatusCodes, Console.WindowWidth);
+                        Console.WriteLine(text + "\n");
+                    }
+                    Console.WriteLine("\nPress any key to continue...");
+                    input = Console.ReadLine();
+                }
+                if (exit == true) { break; }
+            }
+
         }
 
         /// <summary>
@@ -186,7 +268,7 @@ is not terminated (process still running).
                     tuple.Output = true;
                     nextArgIs = ArgsTuple.ArgType.flag;
                 }
-                else if (arg == "--halt" || arg == "-s")
+                else if (arg == "--stop" || arg == "-s")
                 {
                     tuple.HaltOnError = true;
                     nextArgIs = ArgsTuple.ArgType.flag;
@@ -196,10 +278,24 @@ is not terminated (process still running).
                     tuple.Log = true;
                     nextArgIs = ArgsTuple.ArgType.logFile;
                 }
-                else if (arg == "--demo" || arg == "-d")
+                else if (arg == "--example" || arg == "-e")
                 {
                     tuple.Demo = true;
                     nextArgIs = ArgsTuple.ArgType.flag;
+                }
+                else if (arg == "--docs" || arg == "-d")
+                {
+                    tuple.Docs = true;
+                    nextArgIs = ArgsTuple.ArgType.flag;
+                }
+                else if (arg == "--markdown" || arg == "-m")
+                {
+                    tuple.Markdown = true;
+                    nextArgIs = ArgsTuple.ArgType.flag;
+                }
+                else
+                {
+                    nextArgIs = ArgsTuple.ArgType.undefined;
                 }
             }
             else if (argType == ArgsTuple.ArgType.configFile)

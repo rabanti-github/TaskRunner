@@ -43,5 +43,27 @@ namespace TaskRunner
                 return false;
             }
         }
+
+        /// <summary>
+        /// Converts a byte array into a hex string
+        /// </summary>
+        /// <param name="input">Byte array to convert</param>
+        /// <returns>Hex string (e.g. '0AF3')</returns>
+        public static string ConvertBytesToString(byte[] input)
+        {
+            string code = BitConverter.ToString(input);
+            return code.Replace("-", "");
+        }
+
+        /// <summary>
+        /// Converts a single byte into a hex string
+        /// </summary>
+        /// <param name="input">Byte to convert</param>
+        /// <returns>Hex string (e.g. '00', '51' or 'BC')</returns>
+        public static string ConvertBytesToString(byte input)
+        {
+            byte[] b = new byte[] { input };
+            return ConvertBytesToString(b);
+        }
     }
 }

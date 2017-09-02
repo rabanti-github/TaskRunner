@@ -1,32 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="WriteLog" name="Demo-Task">
+<task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" enabled="true" type="WriteLog" name="Demo-Task">
   <items>
-    <writeLogItem name="Write-Log-Task_1" createFolders="true">
+    <writeLogItem enabled="true" name="Write-Log-Task_1" createFolders="true">
       <mainValue>C:\temp\logs\logfile.log</mainValue>
       <description>This is sub-task 1</description>
       <arguments>
-        <argument>Text to write (separate fields using tab) no. 1</argument>
-        <argument>Date	HeaderValue1	HeaderValue2
-*********************************************</argument>
+        <argument>Text token to write 1</argument>
+        <argument>Text token to write 2</argument>
+        <argument>Text token to write 3</argument>
       </arguments>
+      <header>Date	HeaderValue1	HeaderValue2
+*********************************************</header>
     </writeLogItem>
-    <writeLogItem name="Write-Log-Task_2" createFolders="true">
+    <writeLogItem enabled="true" name="Write-Log-Task_2" createFolders="true">
       <mainValue>C:\temp\logs\logfile.log</mainValue>
       <description>This is sub-task 2</description>
       <arguments>
-        <argument>Text to write (separate fields using tab) no. 2</argument>
-        <argument>Date	HeaderValue1	HeaderValue2
-*********************************************</argument>
+        <argument>Text token to write 1</argument>
+        <argument>Text token to write 2</argument>
+        <argument>Text token to write 3</argument>
       </arguments>
+      <header>Date	HeaderValue1	HeaderValue2
+*********************************************</header>
     </writeLogItem>
-    <writeLogItem name="Write-Log-Task_3" createFolders="true">
+    <writeLogItem enabled="true" name="Write-Log-Task_3" createFolders="true">
       <mainValue>C:\temp\logs\logfile.log</mainValue>
       <description>This is sub-task 3</description>
       <arguments>
-        <argument>Text to write (separate fields using tab) no. 3</argument>
-        <argument>Date	HeaderValue1	HeaderValue2
-*********************************************</argument>
+        <argument>Text token to write 1</argument>
+        <argument>Text token to write 2</argument>
+        <argument>Text token to write 3</argument>
       </arguments>
+      <header>Date	HeaderValue1	HeaderValue2
+*********************************************</header>
     </writeLogItem>
   </items>
   <description>This is a demo Task with several sub-tasks of the type WriteLog</description>

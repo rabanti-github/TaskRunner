@@ -43,8 +43,33 @@ namespace TaskRunner
             /// Task start programs
             /// </summary>
             StartProgram,
+            /// <summary>
+            /// Starts, stops, restarts, pauses or resumes a Windows service
+            /// </summary>
+            ControlService,
         }
-        
+
+        /// <summary>
+        /// Gets a List of all task types as instances of Sub-Tasks
+        /// </summary>
+        /// <returns>List of types (SubTask)</returns>
+        public static List<SubTask> EnumerateTaskTypes()
+        {
+            List<SubTask> output = new List<SubTask>();
+            output.Add(new DeleteFileTask());
+            output.Add(new DeleteRegKeyTask());
+            output.Add(new WriteLogTask());
+            output.Add(new StartProgramTask());
+            output.Add(new ControlServiceTask());
+            return output;
+        }
+
+        /// <summary>
+        /// Indicates whether the whole task is executed (enabled) or not
+        /// </summary>
+        [XmlAttribute("enabled")]
+        public bool Enabled { get; set; }
+
         /// <summary>
         /// Type of this Task
         /// </summary>
@@ -60,6 +85,7 @@ namespace TaskRunner
         [XmlArrayItem(Type = typeof(DeleteRegKeyTask), ElementName = "deleteRegKeyItem")]
         [XmlArrayItem(Type = typeof(WriteLogTask), ElementName = "writeLogItem")]
         [XmlArrayItem(Type = typeof(StartProgramTask), ElementName = "startProgramItem")]
+        [XmlArrayItem(Type = typeof(ControlServiceTask), ElementName = "controlServiceItem")]
         public List<SubTask> Items { get; set; }
         /// <summary>
         /// Optional Task name
@@ -93,22 +119,32 @@ namespace TaskRunner
         public List<LogEntry> LogEntries { get; set; }
 
         /// <summary>
+        /// The mode how the Task is executed by the program (1 byte)
+        /// </summary>
+        [XmlIgnore]
+        public byte TaskMode { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public Task()
         {
             this.Items = new List<SubTask>();
             this.LogEntries = new List<LogEntry>();
+            this.TaskMode = 0x0;
+            this.Enabled = true;
         }
 
         /// <summary>
         /// Method to run all SUb-Tasks of the current configuration
         /// </summary>
         /// <param name="stopOnError">If true, the method stops if an error occurs during execution of the Sub-Tasks</param>
-        /// <param name="displayOutput">In true, information about the executed Sub-Tasks is passed to the command shell</param>
+        /// <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
+        /// <param name="log">If true, the execution of the Task and its Sub-Tasks will be logged</param>
         /// <returns>True if no errors occurred, otherwise false</returns>
-        public bool Run(bool stopOnError, bool displayOutput)
+        public bool Run(bool stopOnError, bool displayOutput, bool log)
         {
+            ResolveTaskMode(stopOnError, displayOutput, log);
             LogEntry entry;
             this.LogEntries.Clear();
             this.OccurredErrors = 0;
@@ -125,6 +161,8 @@ namespace TaskRunner
                 entry.TaskName = this.TaskName;
                 entry.SubTaskName = subTask.Name;
                 entry.ExecutionDate = DateTime.Now;
+                entry.InsertCodeByte(this.TaskMode, 0);
+                entry.InsertCodeByte(subTask.TaskTypeCode, 1);
                 this.ExecutedTasks++;
                 if (displayOutput == true)
                 {
@@ -138,14 +176,16 @@ namespace TaskRunner
                     }
                 }
                 status = subTask.Run();
+                entry.Status = status;
+                entry.InsertCodeByte(subTask.StatusCode, 3);
                 if (displayOutput == true)
                 {
                     System.Console.WriteLine("Status:\t\t" + status.ToString());
+                    System.Console.WriteLine("Execution Code:\t" +  PrintExecutionCode(entry)); //subTask.ExecutionCode.ToString());
                     System.Console.WriteLine("Message:\t" + subTask.Message + "\n");
                 }
                 if (status == false)
                 {
-                    entry.Status = false;
                     this.OccurredErrors++;
                     if (displayOutput == true)
                     {
@@ -153,22 +193,35 @@ namespace TaskRunner
                     }
                     if (stopOnError == true) { break; }
                 }
-                else
-                {
-                    entry.Status = true;
-                }
-                entry.ExecutionCode = subTask.ExecutionCode;
                 this.LogEntries.Add(entry);
             }
             if (displayOutput == true)
             {
                 date = DateTime.Now.ToString(DATEFORMAT);
-                System.Console.WriteLine("\n\n******************************************\nTasks finished at " + date);
-                System.Console.WriteLine(this.ExecutedTasks.ToString() + " Tasks executed");
+                System.Console.WriteLine("\n\n******************************************\nSUB-TASKS FINISHED AT\t" + date);
+                System.Console.WriteLine(this.ExecutedTasks.ToString() + " Sub-Tasks executed");
                 System.Console.WriteLine(this.OccurredErrors.ToString() + " Errors occurred\n");
             }
             if (this.OccurredErrors == 0) { return true; }
             else { return false; }
+        }
+
+        /// <summary>
+        /// Resolves the mode how the Task is executed by the program (2 byte)
+        /// </summary>
+        /// <param name="stopOnError">If true, the task stops if an error occurs during execution of the Sub-Tasks</param>
+        /// <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
+        /// <param name="log">If true, the execution of the Task and its Sub-Tasks will be logged</param>
+        private void ResolveTaskMode(bool stopOnError, bool displayOutput, bool log)
+        {
+            if      (displayOutput == false && log == false && stopOnError == false) { this.TaskMode = 0x01; }
+            else if (displayOutput == false && log == false && stopOnError == true) { this.TaskMode = 0x02; }
+            else if (displayOutput == false && log == true && stopOnError == false) { this.TaskMode = 0x03; }
+            else if (displayOutput == false && log == true && stopOnError == true) { this.TaskMode = 0x04; }
+            else if (displayOutput == true && log == false && stopOnError == false) { this.TaskMode =  0x05; }
+            else if (displayOutput == true && log == false && stopOnError == true) { this.TaskMode = 0x06; }
+            else if (displayOutput == true && log == true && stopOnError == false) { this.TaskMode =  0x07; }
+            else if (displayOutput == true && log == true && stopOnError == true) { this.TaskMode = 0x08; }
         }
 
         /// <summary>
@@ -243,6 +296,10 @@ namespace TaskRunner
             {
                 tb = new WriteLogTask();
             }
+            else if (type == TaskType.ControlService)
+            {
+                tb = new ControlServiceTask();
+            }
             t1 = tb.GetDemoFile(1);
             t2 = tb.GetDemoFile(2);
             t3 = tb.GetDemoFile(3);
@@ -268,6 +325,16 @@ namespace TaskRunner
             }
             char[] trim = new char[]{'\r', '\n'};
             Utils.Log(logFile, headerValue, sb.ToString().TrimEnd(trim));
+        }
+
+        /// <summary>
+        /// Prints the execution code of the task
+        /// </summary>
+        /// <param name="logEntry">Log entry to print the code from</param>
+        /// <returns>Execution code as string</returns>
+        public string PrintExecutionCode(LogEntry logEntry)
+        {
+            return logEntry.PrintExecutionCode();
         }
 
 

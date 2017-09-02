@@ -15,6 +15,43 @@ namespace TaskRunner.SubTasks
     public class StartProgramTask : SubTask
     {
 
+        /// <summary>
+        /// Implemented code of the task type (03)
+        /// </summary>
+        [XmlIgnore]
+        public override byte TaskTypeCode
+        {
+            get { return 0x3; }
+        }
+
+        /// <summary>
+        /// Type of the Task / Sub-task
+        /// </summary>
+        [XmlIgnore]
+        //public override Task.TaskType Type => Task.TaskType.StartProgram;
+        public override Task.TaskType Type
+        {
+	        get { return Task.TaskType.StartProgram; }
+        }
+
+        /// <summary>
+        /// Name of the demo file
+        /// </summary>
+        [XmlIgnore]
+        //public override string DemoFileName => "DEMO_StartProgram.xml";
+        public override string DemoFileName
+        {
+            get { return "DEMO_StartProgram.xml"; }
+        }
+
+        /// <summary>
+        /// Name of the markdown file
+        /// </summary>
+        [XmlIgnore]
+        public override string MarkdownFileName
+        {
+            get { return "StartProgram.md"; }
+        }
 
         private bool asynchronous;
         [XmlAttribute("runAsynchronous")]
@@ -69,6 +106,13 @@ namespace TaskRunner.SubTasks
         {
             try
             {
+                if (string.IsNullOrEmpty(this.MainValue))
+                {
+                    this.Message = "No program to execute was defined";
+                    this.StatusCode = 0x03;
+                    return false;
+                }
+
                 StringBuilder sb = new StringBuilder();
                 bool executed = true;
                 foreach (string arg in Arguments)
@@ -81,7 +125,7 @@ namespace TaskRunner.SubTasks
                 {
                     System.Diagnostics.Process.Start(this.MainValue, argString);
                     this.Message = "The process " + this.MainValue + " was executed";
-                    this.ExecutionCode = 1;
+                    this.StatusCode = 0x02;
                     return true;
                 }
                 else
@@ -104,13 +148,13 @@ namespace TaskRunner.SubTasks
                     if (executed == false)
                     {
                         this.Message = "The process " + this.MainValue + " could not be executed";
-                        this.ExecutionCode = 1001;
+                        this.StatusCode = 0x02;
                         return false;
                     }
                     else
                     {
                         this.Message = "The process " + this.MainValue + " was executed";
-                        this.ExecutionCode = 1;
+                        this.StatusCode = 0x01;
                         return true;
                     }
                 }
@@ -118,7 +162,7 @@ namespace TaskRunner.SubTasks
             catch (Exception e)
             {
                 this.Message = "The process " + this.MainValue + " could not be executed\n" + e.Message;
-                this.ExecutionCode = 1000;
+                this.StatusCode = 0x01;
                 return false;
             }
         }
@@ -138,6 +182,57 @@ namespace TaskRunner.SubTasks
             t.Arguments.Add("ARG2");
             t.Asynchronous = true;
             return t;
+        }
+
+
+        /// <summary>
+        /// Returns the documentation of the status codes for the specific Sub-Task
+        /// </summary>
+        /// <returns>Documentation object</returns>
+        public override Documentation GetDocumentationStatusCodes()
+        {
+            Documentation codes = new Documentation("Start Program Task", "Status Codes");
+            codes.AddTuple(this.PrintStatusCode(true, 0x01), "Program was started successfully asynchronous");
+            codes.AddTuple(this.PrintStatusCode(true, 0x02), "Program was started successfully synchronous");
+            codes.AddTuple(this.PrintStatusCode(false, 0x01), "The program could not be executed due to an unknown reason");
+            codes.AddTuple(this.PrintStatusCode(false, 0x02), "An error occurred during the asynchronous execution");
+            codes.AddTuple(this.PrintStatusCode(false, 0x03), "No program to execute was defined");
+            return codes;
+        }
+
+        /// <summary>
+        /// Returns the documentation of the XML tags for the specific Sub-Task
+        /// </summary>
+        /// <returns>Documentation object</returns>
+        public override Documentation GetTagDocumentationParameters()
+        {
+            Documentation tags = new Documentation("Start Program Task", "Tags", "The following specific tags are defined (see also demo files)");
+            this.AppendCommonTags(ref tags, "<startProgramItem>");
+            tags.AddTuple("startProgramItem", "Main tag of a Sub-Task within the <items> tag.");
+            tags.AddTuple("mainValue", "Defines full path to the program to start.");
+            tags.AddTuple("argument", "Each <argument> tag within the <arguments> tag contains one (optional) program argument");
+            return tags;
+        }
+
+        /// <summary>
+        /// Returns the documentation of the XML attributes for the specific Sub-Task
+        /// </summary>
+        /// <returns>Documentation object</returns>
+        public override Documentation GetAttributesDocumentationParameters()
+        {
+            Documentation attributes = new Documentation("Start Program Task", "Attributes", "The following attributes are defined");
+            this.AppendCommonAttributes(ref attributes, "<startProgramItem>", "StartProgram");
+            attributes.AddTuple("runAsynchronous", "Indicates whether the Sub-Tasks are executed synchronous (all programs are started at the same time) or asynchronous (programs are started sequentially). Valid values are 'true' and 'false'. The attribute is part of the <startProgramItem> tag.");
+            return attributes;
+        }
+
+        /// <summary>
+        /// Returns the description as documentation for the specific Sub-Task
+        /// </summary>
+        /// <returns>Documentation object</returns>
+        public override Documentation GetDocumentationDescription()
+        {
+            return new Documentation("Start Program Task", "Description", "Starts one or several programs with optional arguments. It is possible to define whether the sub tasks are executed synchronous or asynchronous. The later can cause freezing of the task runner if an executed application is not terminated (process still running).");
         }
     }
 }

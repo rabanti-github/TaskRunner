@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" enabled="true" type="ControlService" name="Demo-Task">
+  <items>
+    <controlServiceItem enabled="true" name="Control-Service-Task_1" action="stop" waitForStatus="true" timeout="10">
+      <mainValue>WindowsService_1</mainValue>
+      <description>This is sub-task 1</description>
+      <arguments />
+    </controlServiceItem>
+    <controlServiceItem enabled="true" name="Control-Service-Task_2" action="stop" waitForStatus="false" timeout="10">
+      <mainValue>WindowsService_2</mainValue>
+      <description>This is sub-task 2</description>
+      <arguments>
+        <argument>remote_machine_name</argument>
+      </arguments>
+    </controlServiceItem>
+    <controlServiceItem enabled="true" name="Control-Service-Task_3" action="stop" waitForStatus="false" timeout="10">
+      <mainValue>WindowsService_3</mainValue>
+      <description>This is sub-task 3</description>
+      <arguments>
+        <argument>remote_machine_name</argument>
+      </arguments>
+    </controlServiceItem>
+  </items>
+  <description>This is a demo Task with several sub-tasks of the type ControlService</description>
+</task>

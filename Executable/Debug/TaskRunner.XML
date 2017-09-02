@@ -47,6 +47,16 @@
             If true, a demo flag was passed to the program. This will generate the example configurations in the program folder
             </summary>
         </member>
+        <member name="P:TaskRunner.ArgsTuple.Docs">
+            <summary>
+            If true, the documentation of tasks will be called
+            </summary>
+        </member>
+        <member name="P:TaskRunner.ArgsTuple.Markdown">
+            <summary>
+            If true, the documentation of tasks will be saved as markdown files
+            </summary>
+        </member>
         <member name="P:TaskRunner.ArgsTuple.LogFilePath">
             <summary>
             Path to the program logfile
@@ -82,6 +92,188 @@
             The argument is not defined
             </summary>
         </member>
+        <member name="T:TaskRunner.Documentation">
+            <summary>
+            Task Runner - (c) 2017 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Class for handling of the console documentation
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Documentation.NL">
+            <summary>
+            Globally used new line sequence
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Documentation.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Documentation.#ctor(System.String,System.String)">
+            <summary>
+            Constructor with parameter
+            </summary>
+            <param name="title">Title of the documentation object</param>
+            <param name="subtitle">Sub title of the documentation object</param>
+        </member>
+        <member name="M:TaskRunner.Documentation.#ctor(System.String,System.String,System.String)">
+            <summary>
+            Constructor with parameters
+            </summary>
+            <param name="title">Title of the documentation object</param>
+            <param name="description">Description of the documentation object</param>
+            <param name="subtitle">Sub title of the documentation object</param>
+        </member>
+        <member name="M:TaskRunner.Documentation.AddTuple(System.String,System.String)">
+            <summary>
+            Adds a tuple to the documentation object
+            </summary>
+            <param name="value">Value of the tuple</param>
+            <param name="description">Description of the tuple</param>
+        </member>
+        <member name="M:TaskRunner.Documentation.AddTuple(System.String,System.String,System.Boolean)">
+            <summary>
+            Adds a tuple to the documentation object
+            </summary>
+            <param name="value">Value of the tuple</param>
+            <param name="description">Description of the tuple</param>
+            <param name="overrodeTagFormatting">If true, the tuple will be displayed with its raw value and not as XML tag</param>
+        </member>
+        <member name="M:TaskRunner.Documentation.GetDocumentation(System.Int32)">
+            <summary>
+            Returns the documentation object as string
+            </summary>
+            <param name="maxLength">>Length in numbers of characters (console width)</param>
+            <returns></returns>
+        </member>
+        <member name="M:TaskRunner.Documentation.GetDocumentation(System.Int32,System.Boolean)">
+            <summary>
+            Returns the documentation object as string
+            </summary>
+            <param name="maxLength">>Length in numbers of characters (console width)</param>
+            <param name="asTagDoc">If true, the documentation will be rendered as documentation for tags</param>
+            <returns></returns>
+        </member>
+        <member name="M:TaskRunner.Documentation.GetDocumentation(System.Int32,System.Boolean,System.Boolean)">
+            <summary>
+            Returns the documentation object as string
+            </summary>
+            <param name="maxLength">Length in numbers of characters (console width)</param>
+            <param name="asTagDoc">If true, the documentation will be rendered as documentation for tags</param>
+            <param name="asMarkdown">If true, the documentation will be rendered as markdown, The lengthparameter will be skipped</param>
+            <returns></returns>
+        </member>
+        <member name="M:TaskRunner.Documentation.GetDocumentation(System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Returns the documentation object as string
+            </summary>
+            <param name="maxLength">Length in numbers of characters (console width)</param>
+            <param name="asTagDoc">If true, the documentation will be rendered as documentation for tags</param>
+            <param name="asHeader">If true, the header will be rendered</param>
+            <param name="asMarkdown">If true, the documentation will be rendered as markdown, The length parameter will be skipped</param>
+            <param name="skipTitle">If true, no Title will be rendered</param>
+            <returns></returns>
+        </member>
+        <member name="M:TaskRunner.Documentation.GetMarkdownTable(System.Boolean,System.String,System.String)">
+            <summary>
+            Returns the tuples as markdown table
+            </summary>
+            <param name="asTag">If true, the line will be rendered as documentation for tags</param>
+            <param name="leftHeader">Left header text</param>
+            <param name="rightHeader">Right header text</param>
+            <returns>Formatted markdown table</returns>
+        </member>
+        <member name="M:TaskRunner.Documentation.FormatLines(System.Int32,System.Boolean)">
+            <summary>
+            Returns the a formatted string with line breaks
+            </summary>
+            <param name="maxlength">Length in numbers of characters (console width)</param>
+            <param name="asTag">If true, the line will be rendered as documentation for tags</param>
+            <returns>Formatted string</returns>
+        </member>
+        <member name="M:TaskRunner.Documentation.GetSplitPosition">
+            <summary>
+            Returns the number of characters where the text splits between value and description (over all tuples)
+            </summary>
+            <returns>Number of characters</returns>
+        </member>
+        <member name="M:TaskRunner.Documentation.ConcatLine(System.Text.StringBuilder@,System.String,System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Concatenates lines according to windows widths an split values
+            </summary>
+            <param name="sb">StringBuilder as reference</param>
+            <param name="item">Input value</param>
+            <param name="description">Description text</param>
+            <param name="split">Number of characters to splits</param>
+            <param name="lenght">Window width in number of characters</param>
+            <param name="noDelimitation">If true, no delimitation will be applied</param>
+        </member>
+        <member name="P:TaskRunner.Documentation.Tuples">
+            <summary>
+            Tuples of the documentation object
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Documentation.Title">
+            <summary>
+            Title of the documentation object
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Documentation.SubTitle">
+            <summary>
+            Sub title of the document object
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Documentation.Description">
+            <summary>
+            Description of the documentation object
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Documentation.Suffix">
+            <summary>
+            Suffix of the documentation object
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Documentation.T">
+            <summary>
+            Subclass representing a general purpose tuple for the documentation
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Documentation.T.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Documentation.T.#ctor(System.String,System.String)">
+            <summary>
+            Constructor with parameters
+            </summary>
+            <param name="value">Value of the tuple</param>
+            <param name="description">Description of the tuple</param>
+        </member>
+        <member name="M:TaskRunner.Documentation.T.#ctor(System.String,System.String,System.Boolean)">
+            <summary>
+            Constructor with all parameters
+            </summary>
+            <param name="value">Value of the tuple</param>
+            <param name="description">Description of the tuple</param>
+            <param name="overrideTagFormatting">If true, the tuple will be displayed with its raw value and not as XML tag</param>
+        </member>
+        <member name="P:TaskRunner.Documentation.T.Value">
+            <summary>
+            Value of the tuple
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Documentation.T.Description">
+            <summary>
+            Description of the tuple
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Documentation.T.OverrideTagFormatting">
+            <summary>
+            If true, the tuple will be displayed with its raw value and not as XML tag
+            </summary>
+        </member>
         <member name="T:TaskRunner.LogEntry">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -100,6 +292,19 @@
             Returns a formated log entry as string (line). The first value is the current date
             </summary>
             <returns>Formated log entry as string</returns>
+        </member>
+        <member name="M:TaskRunner.LogEntry.PrintExecutionCode">
+            <summary>
+            Prints the execution Code as Hex string
+            </summary>
+            <returns>4 byte Hex string</returns>
+        </member>
+        <member name="M:TaskRunner.LogEntry.InsertCodeByte(System.Byte,System.Int32)">
+            <summary>
+            Inserts a byte into the execution code
+            </summary>
+            <param name="value">byte to replace</param>
+            <param name="index">Index (0 to 3)</param>
         </member>
         <member name="P:TaskRunner.LogEntry.TaskName">
             <summary>
@@ -123,7 +328,7 @@
         </member>
         <member name="P:TaskRunner.LogEntry.ExecutionCode">
             <summary>
-            The execution code of the Sub-Task
+            The execution code of the Sub-Task (4 bytes)
             </summary>
         </member>
         <member name="T:TaskRunner.Program">
@@ -147,6 +352,11 @@
             <param name="headerOnly">If true, only the header is returned, otherwise the usage is added after the header</param>
             <returns>Header and/or usage of the program as text</returns>
         </member>
+        <member name="M:TaskRunner.Program.Documentation">
+            <summary>
+            Method to handle he output of the documentation
+            </summary>
+        </member>
         <member name="M:TaskRunner.Program.CheckArgs(TaskRunner.ArgsTuple@,System.String,TaskRunner.ArgsTuple.ArgType)">
             <summary>
             Method to check the passed arguments
@@ -156,12 +366,12 @@
             <param name="argType">The expected type of the argument</param>
             <returns>The expected type of the next argument. In case of -r|--run and -l|--log, this is configFile or logFile</returns>
         </member>
-        <member name="T:TaskRunner.SubTasks.DeleteFileTask">
+        <member name="T:TaskRunner.SubTasks.ControlServiceTask">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
-            Derived Sub-Task Class for deleting files
+            Derived Sub-Task Class to control Windows services
             </summary>
         </member>
         <member name="T:TaskRunner.SubTasks.SubTask">
@@ -189,6 +399,87 @@
             </summary>
             <param name="number">Optional number to indicate several Sub-Tasks</param>
             <returns>Sub-Task object of the implemented class</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetDocumentation(TaskRunner.SubTasks.SubTask.DocumentationType,System.Int32)">
+            <summary>
+            Gets the Documentation as Text
+            </summary>
+            <param name="type">Type of the documentation</param>
+            <returns>Formated documentation</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.SaveMarkdown(System.String)">
+            <summary>
+            Saves the whole documentation as markdown text
+            </summary>
+            <param name="fileName">Filename of the markdown file</param>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetStatusCodeProlog(System.String,System.String)">
+            <summary>
+            Returns the static prolog of status codes as documentation 
+            </summary>
+            <param name="title">Title to display</param>
+            <param name="subtitle">Subtitle to display</param>
+            <returns>Formatted document</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetStatusModes(System.String,System.String)">
+            <summary>
+            Returns the static documentation of the execution modes
+            </summary>
+            <param name="title">Title to display</param>
+            <param name="subtitle">Subtitle to display</param>
+            <returns>Formatted document</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.AppendCommonAttributes(TaskRunner.Documentation@,System.String,System.String)">
+            <summary>
+            Appends common attributes to the attribute documentation
+            </summary>
+            <param name="documentation">Specific attribute documentation object</param>
+            <param name="baseTag">Base tag of the Sub-Task</param>
+            <param name="type">Type of the task as string</param>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.AppendCommonTags(TaskRunner.Documentation@,System.String)">
+            <summary>
+            Appends the common tags to the tag documentation
+            </summary>
+            <param name="documentation">Specific tag documentation object</param>
+            <param name="baseTag">Base tag of the Sub-Task</param>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.PrintStatusCode(System.Boolean,System.Byte)">
+            <summary>
+            Prints a status code to a specific task
+            </summary>
+            <param name="status">Status (success or failure) of the task</param>
+            <param name="code">Status code to print</param>
+            <returns>Formatted string</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetDocumentationDescription">
+            <summary>
+            Gets the description of the Sub-Task as documentation collection
+            </summary>
+            <returns>Documentation collection</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetDocumentationStatusCodes">
+            <summary>
+            Gets the status codes of the Sub-Task as documentation collection
+            </summary>
+            <returns>Documentation collection</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetTagDocumentationParameters">
+            <summary>
+            Gets the tag parameters of the Sub-Task as documentation collection
+            </summary>
+            <returns>Documentation collection</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetAttributesDocumentationParameters">
+            <summary>
+            Gets the attributes parameters (of all tags) of the Sub-Task as documentation collection
+            </summary>
+            <returns>Documentation collection</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.Enabled">
+            <summary>
+            Indicates whether the Sub-Task is executed (enabled) or not
+            </summary>
         </member>
         <member name="P:TaskRunner.SubTasks.SubTask.Name">
             <summary>
@@ -220,9 +511,124 @@
             Optional Message before execution of the Sub-Task. This Message is not serialized
             </summary>
         </member>
-        <member name="P:TaskRunner.SubTasks.SubTask.ExecutionCode">
+        <member name="P:TaskRunner.SubTasks.SubTask.StatusCode">
             <summary>
-            Returned Code after execution. Please see documentation about the various codes
+            Returned status Code (1 byte)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.TaskTypeCode">
+            <summary>
+            Abstract hex code of the task type (2 bytes)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
+        <member name="T:TaskRunner.SubTasks.SubTask.DocumentationType">
+            <summary>
+            Type of the documentation
+            </summary>
+        </member>
+        <member name="F:TaskRunner.SubTasks.SubTask.DocumentationType.Description">
+            <summary>
+            General description as documentation
+            </summary>
+        </member>
+        <member name="F:TaskRunner.SubTasks.SubTask.DocumentationType.StatusCodes">
+            <summary>
+            Status codes as documentation
+            </summary>
+        </member>
+        <member name="F:TaskRunner.SubTasks.SubTask.DocumentationType.Tags">
+            <summary>
+            Tags as documentation
+            </summary>
+        </member>
+        <member name="F:TaskRunner.SubTasks.SubTask.DocumentationType.Attributes">
+            <summary>
+            Attributes as documentation
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.ControlServiceTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.ControlServiceTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>True if the task was executed successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.ControlServiceTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.ControlServiceTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.ControlServiceTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.ControlServiceTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.ControlServiceTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.ControlServiceTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (05)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.ControlServiceTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.ControlServiceTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.ControlServiceTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
+        <member name="T:TaskRunner.SubTasks.DeleteFileTask">
+            <summary>
+            Task Runner - (c) 2017 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Derived Sub-Task Class for deleting files
             </summary>
         </member>
         <member name="M:TaskRunner.SubTasks.DeleteFileTask.#ctor">
@@ -242,6 +648,50 @@
             </summary>
             <param name="number">Optional number to indicate several Sub-Tasks</param>
             <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteFileTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteFileTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteFileTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteFileTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteFileTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (01)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteFileTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteFileTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteFileTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
         </member>
         <member name="T:TaskRunner.SubTasks.DeleteRegKeyTask">
             <summary>
@@ -268,6 +718,55 @@
             </summary>
             <param name="number">Optional number to indicate several Sub-Tasks</param>
             <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteRegKeyTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteRegKeyTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteRegKeyTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DeleteRegKeyTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteRegKeyTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (02)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteRegKeyTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteRegKeyTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteRegKeyTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DeleteRegKeyTask.Hive">
+            <summary>
+            The hive of the registry key (e.g. HKLM or HKCU)
+            </summary>
         </member>
         <member name="T:TaskRunner.SubTasks.StartProgramTask">
             <summary>
@@ -303,6 +802,50 @@
             <param name="number">Optional number to indicate several Sub-Tasks</param>
             <returns>Instance of the implemented class</returns>
         </member>
+        <member name="M:TaskRunner.SubTasks.StartProgramTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.StartProgramTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.StartProgramTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.StartProgramTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.StartProgramTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (03)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.StartProgramTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.StartProgramTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.StartProgramTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
         <member name="T:TaskRunner.SubTasks.WriteLogTask">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -329,6 +872,60 @@
             <param name="number">Optional number to indicate several Sub-Tasks</param>
             <returns>Instance of the implemented class</returns>
         </member>
+        <member name="M:TaskRunner.SubTasks.WriteLogTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.WriteLogTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.WriteLogTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.WriteLogTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.WriteLogTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (04)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.WriteLogTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.WriteLogTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.WriteLogTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.WriteLogTask.CreateFolders">
+            <summary>
+            If true, the application will try to create the folder structure of the logfile if not existing
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.WriteLogTask.Header">
+            <summary>
+            The header of the logfile (optional)
+            </summary>
+        </member>
         <member name="T:TaskRunner.Task">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -342,18 +939,33 @@
             Globally used format string for dates / times
             </summary>
         </member>
+        <member name="M:TaskRunner.Task.EnumerateTaskTypes">
+            <summary>
+            Gets a List of all task types as instances of Sub-Tasks
+            </summary>
+            <returns>List of types (SubTask)</returns>
+        </member>
         <member name="M:TaskRunner.Task.#ctor">
             <summary>
             Default constructor
             </summary>
         </member>
-        <member name="M:TaskRunner.Task.Run(System.Boolean,System.Boolean)">
+        <member name="M:TaskRunner.Task.Run(System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Method to run all SUb-Tasks of the current configuration
             </summary>
             <param name="stopOnError">If true, the method stops if an error occurs during execution of the Sub-Tasks</param>
-            <param name="displayOutput">In true, information about the executed Sub-Tasks is passed to the command shell</param>
+            <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
+            <param name="log">If true, the execution of the Task and its Sub-Tasks will be logged</param>
             <returns>True if no errors occurred, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.Task.ResolveTaskMode(System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Resolves the mode how the Task is executed by the program (2 byte)
+            </summary>
+            <param name="stopOnError">If true, the task stops if an error occurs during execution of the Sub-Tasks</param>
+            <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
+            <param name="log">If true, the execution of the Task and its Sub-Tasks will be logged</param>
         </member>
         <member name="M:TaskRunner.Task.Deserialize(System.String)">
             <summary>
@@ -380,6 +992,18 @@
             Method to write all log entries of the executed Tasks
             </summary>
             <param name="logFile">File name of the logfile</param>
+        </member>
+        <member name="M:TaskRunner.Task.PrintExecutionCode(TaskRunner.LogEntry)">
+            <summary>
+            Prints the execution code of the task
+            </summary>
+            <param name="logEntry">Log entry to print the code from</param>
+            <returns>Execution code as string</returns>
+        </member>
+        <member name="P:TaskRunner.Task.Enabled">
+            <summary>
+            Indicates whether the whole task is executed (enabled) or not
+            </summary>
         </member>
         <member name="P:TaskRunner.Task.Type">
             <summary>
@@ -422,6 +1046,11 @@
             List of log entries. Each executed Sub-Task has one entry
             </summary>
         </member>
+        <member name="P:TaskRunner.Task.TaskMode">
+            <summary>
+            The mode how the Task is executed by the program (1 byte)
+            </summary>
+        </member>
         <member name="T:TaskRunner.Task.TaskType">
             <summary>
             Type of the Task and its Sub-Tasks
@@ -447,6 +1076,11 @@
             Task start programs
             </summary>
         </member>
+        <member name="F:TaskRunner.Task.TaskType.ControlService">
+            <summary>
+            Starts, stops, restarts, pauses or resumes a Windows service
+            </summary>
+        </member>
         <member name="T:TaskRunner.Utils">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -463,6 +1097,20 @@
             <param name="headerValue">Header as string. The values are separated by tab</param>
             <param name="value">Value or values to write. Use tab in case of several values to separate them</param>
             <returns>True if the entry could be written, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.Utils.ConvertBytesToString(System.Byte[])">
+            <summary>
+            Converts a byte array into a hex string
+            </summary>
+            <param name="input">Byte array to convert</param>
+            <returns>Hex string (e.g. '0AF3')</returns>
+        </member>
+        <member name="M:TaskRunner.Utils.ConvertBytesToString(System.Byte)">
+            <summary>
+            Converts a single byte into a hex string
+            </summary>
+            <param name="input">Byte to convert</param>
+            <returns>Hex string (e.g. '00', '51' or 'BC')</returns>
         </member>
     </members>
 </doc>

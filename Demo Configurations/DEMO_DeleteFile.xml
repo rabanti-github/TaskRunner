@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" enabled="true" type="DeleteFile" name="Demo-Task">
   <items>
-    <deleteFileItem enabled="true" name="Delete-File-Task_1">
+    <deleteFileItem enabled="true" useParam="false" name="Delete-File-Task_1">
       <mainValue>C:\temp\filesToDelete\file1.txt</mainValue>
       <description>This is sub-task 1</description>
-      <arguments />
     </deleteFileItem>
-    <deleteFileItem enabled="true" name="Delete-File-Task_2">
+    <deleteFileItem enabled="true" useParam="false" name="Delete-File-Task_2">
       <mainValue>C:\temp\filesToDelete\file2.txt</mainValue>
       <description>This is sub-task 2</description>
-      <arguments />
     </deleteFileItem>
-    <deleteFileItem enabled="true" name="Delete-File-Task_3">
-      <mainValue>C:\temp\filesToDelete\file3.txt</mainValue>
-      <description>This is sub-task 3</description>
-      <arguments />
+    <deleteFileItem enabled="true" useParam="true" name="Delete-File-Task_3">
+      <mainValue>PARAM_NAME_1</mainValue>
+      <description>This is sub-task 3. This Sub-Tasks uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1</description>
     </deleteFileItem>
   </items>
   <description>This is a demo Task with several sub-tasks of the type DeleteFile</description>

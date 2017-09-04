@@ -39,11 +39,20 @@ namespace TaskRunner.SubTasks
             Attributes,
         }
 
+        private bool killSubTask = false;
+
         /// <summary>
         /// Indicates whether the Sub-Task is executed (enabled) or not
         /// </summary>
         [XmlAttribute("enabled")]
         public bool Enabled { get; set; }
+
+        /// <summary>
+        /// Indicates whether a global parameter is used instead of the main value. In this case the main value is the parameter name
+        /// </summary>
+        [XmlAttribute("useParam")]
+        public bool UseParameter { get; set; }
+
         /// <summary>
         /// Name of the Sub-Task. Will be displayed in -o mode
         /// </summary>
@@ -107,6 +116,12 @@ namespace TaskRunner.SubTasks
         public abstract string MarkdownFileName { get; }
 
         /// <summary>
+        /// Base task of this Sub-Task
+        /// </summary>
+        [XmlIgnore]
+        public Task ParentTask { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public SubTask()
@@ -116,6 +131,7 @@ namespace TaskRunner.SubTasks
             this.Prolog = string.Empty;
             this.StatusCode = 0x0;
             this.Enabled = true;
+            this.UseParameter = false;
         }
         /// <summary>
         /// Abstract method to run the Sub-Task
@@ -214,6 +230,33 @@ namespace TaskRunner.SubTasks
         }
 
         /// <summary>
+        /// Returns the main value. In case of parameter usage, the value will be taken from the global parameter, otherwise from the value of the config file
+        /// </summary>
+        /// <param name="displayOutput">If true, error messages will be displayed</param>
+        /// <returns>Resolved main value as string</returns>
+        public string GetMainValue(bool displayOutput)
+        {
+            if (this.UseParameter == true)
+            {
+                Parameter p = Parameter.GetParameter(this.MainValue, displayOutput);
+                if (p.Valid == false)
+                {
+                    this.killSubTask = true;
+                    return "";
+                }
+                else
+                {
+                    return p.Value;
+                }
+            }
+            else
+            {
+                return this.MainValue;
+            }
+        }
+
+
+        /// <summary>
         /// Returns the static prolog of status codes as documentation 
         /// </summary>
         /// <param name="title">Title to display</param>
@@ -261,6 +304,7 @@ namespace TaskRunner.SubTasks
             documentation.AddTuple("name [1]", "The first name attribute is a informal identifier for the Task. It is part of the <task> tag (root tag) and mandatory.");
             documentation.AddTuple("type", "The type attribute is a the identifier for the Task type. It is part of the <task> tag (root tag) and mandatory. For this Task-Type the valid value is '" + type+"'.");
             documentation.AddTuple("name [2]", "The second name attribute is a informal identifier for the Sub-Task. It is part of the " + baseTag + " tag and mandatory. ");
+            documentation.AddTuple("useParam", "The useParam attribute indicates whether a global parameter is used instead of the main value of the config file. In this case, the <mainValue> tag contains the parameter name and not the actual value. It is part of the " + baseTag + " tag and mandatory. Valid values are 'true' and 'false' (default).");
         }
 
         /// <summary>

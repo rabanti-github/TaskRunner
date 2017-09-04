@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" enabled="true" type="DeleteRegKey" name="Demo-Task">
   <items>
-    <deleteRegKeyItem enabled="true" name="Delete-Registry-Task_1" hive="HKLM">
+    <deleteRegKeyItem enabled="true" useParam="false" name="Delete-Registry-Task_1" hive="HKLM" argumentIsParamName="false">
       <mainValue>Software\Microsoft\Windows\CurrentVersion\Run\base_key1</mainValue>
       <description>This is sub-task 1</description>
       <arguments>
@@ -10,7 +10,7 @@
         <argument>value_to_delete_3</argument>
       </arguments>
     </deleteRegKeyItem>
-    <deleteRegKeyItem enabled="true" name="Delete-Registry-Task_2" hive="HKLM">
+    <deleteRegKeyItem enabled="true" useParam="false" name="Delete-Registry-Task_2" hive="HKLM" argumentIsParamName="false">
       <mainValue>Software\Microsoft\Windows\CurrentVersion\Run\base_key2</mainValue>
       <description>This is sub-task 2</description>
       <arguments>
@@ -19,13 +19,13 @@
         <argument>value_to_delete_3</argument>
       </arguments>
     </deleteRegKeyItem>
-    <deleteRegKeyItem enabled="true" name="Delete-Registry-Task_3" hive="HKLM">
-      <mainValue>Software\Microsoft\Windows\CurrentVersion\Run\base_key3</mainValue>
-      <description>This is sub-task 3</description>
+    <deleteRegKeyItem enabled="true" useParam="true" name="Delete-Registry-Task_3" hive="HKLM" argumentIsParamName="true">
+      <mainValue>PARAM_NAME_1</mainValue>
+      <description>This is sub-task 3. The arguments are the names of global parameters and not the actual values to delete in the registry. This Sub-Tasks uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1</description>
       <arguments>
-        <argument>value_to_delete_1</argument>
-        <argument>value_to_delete_2</argument>
-        <argument>value_to_delete_3</argument>
+        <argument>PARAM_NAME_2</argument>
+        <argument>PARAM_NAME_3</argument>
+        <argument>PARAM_NAME_4</argument>
       </arguments>
     </deleteRegKeyItem>
   </items>

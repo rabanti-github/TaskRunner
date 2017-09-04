@@ -54,7 +54,7 @@ namespace TaskRunner
             {
                 Console.WriteLine(Usage(true));
                 Console.WriteLine("Generating markdown files in current folder...");
-                List<SubTask> types = Task.EnumerateTaskTypes();
+                List<SubTask> types = Task.EnumerateSubTasks();
                 foreach (SubTask subtask in types)
                 {
                     subtask.SaveMarkdown(subtask.MarkdownFileName);
@@ -65,7 +65,7 @@ namespace TaskRunner
             {
                 Console.WriteLine(Usage(true));
                 Console.WriteLine("Generating demo files in current folder...");
-                List<SubTask> types = Task.EnumerateTaskTypes();
+                List<SubTask> types = Task.EnumerateSubTasks();
                 foreach(SubTask subtask in types)
                 {
                     Task.CreateDemoFile(subtask.DemoFileName, subtask.Type);
@@ -124,19 +124,42 @@ configuration as XML file
 
 Flags / Options
 ---------------
--r | --run:     Runs a task defined in the subsequent config file (path)
--e | --example: Runs the demo command and generates example
-                configurations in the current selected folder
--o | --output:  Enables the output mode. The results of the task
-                will be displayed in the command shell
--s | --stop:    The task runner stops after an error, otherwise all
-                sub-tasks are executed until the end of the configuration
--l | --log:     Enables logging. After the flag a valid path
-                (absolute or relative) to a logfile must be defined
--h | --help:    Shows the program help (this text) 
--d | --docs     Shows the menu with the task documentation
--m | --markdown Saves the documentation of all task types to markdown
-                files in the current folder
+-r | --run:      Runs a task defined in the subsequent config file (path)
+-e | --example:  Runs the demo command and generates example
+                 configurations in the current selected folder
+-o | --output:   Enables the output mode. The results of the task
+                 will be displayed in the command shell
+-s | --stop:     The task runner stops after an error, otherwise all
+                 sub-tasks are executed until the end of the configuration
+-l | --log:      Enables logging. After the flag a valid path
+                 (absolute or relative) to a logfile must be defined
+-h | --help:     Shows the program help (this text) 
+-d | --docs:     Shows the menu with the task documentation
+-m | --markdown: Saves the documentation of all task types to markdown
+                 files in the current folder
+-p | --param     Stores a temporary variable while runtime. The variable
+                 Can be used by the Tasks
+
+Parameter Handling
+------------------
+Syntax: -p|--param:<data type>:<param name>:<param value>
+The flag -p or --param delivers a temporary parameter to the TaskRunner.
+The parameter is only valid during the execution of the loaded task. The
+parameter flag contains 3 or 4 parts, delimited by colons:
+- 1: Flag Identifier (-p or --param)
+- 2: (Optional) Data Type. Valid values are 's' for string, 'b' for boolean
+     and 'n' for number (double). If this part is omitted, the value will
+     be handled as string
+- 3: Parameter Name (unique string, without spaces or colons)
+- 4: Parameter Value (The value will be parsed to boolean or double in case
+     of the data types 'b' or 'n')
+
+Examples:
+-p:n:NUMBER_OF_FILES:8
+--param:b:MATCH:true
+--param:NAME:machien1
+-p:s:NAME:""Name with spaces""
+--param:COMMENT:'Other quotes are also OK'
 
 Task Documentation
 ------------------
@@ -165,7 +188,7 @@ Available documentation:
         /// </summary>
         private static void Documentation()
         {
-            List<SubTask> types = Task.EnumerateTaskTypes();
+            List<SubTask> types = Task.EnumerateSubTasks();
             int len = types.Count;
             string input, text;
             int number, number2;
@@ -251,7 +274,6 @@ Available documentation:
             ArgsTuple.ArgType nextArgIs = ArgsTuple.ArgType.flag;
             if (argType == ArgsTuple.ArgType.flag)
             {
-
                 arg = arg.ToLower();
                 if (arg == "--run" || arg == "-r")
                 {
@@ -295,7 +317,16 @@ Available documentation:
                 }
                 else
                 {
-                    nextArgIs = ArgsTuple.ArgType.undefined;
+                    if (arg.StartsWith("--param") || arg.StartsWith("-p"))
+                    {
+                        Parameter p = Parameter.Parse(argValue);
+                        Parameter.AddParameter(p, true);
+                        nextArgIs = ArgsTuple.ArgType.flag;
+                    }
+                    else
+                    {
+                        nextArgIs = ArgsTuple.ArgType.undefined;
+                    }  
                 }
             }
             else if (argType == ArgsTuple.ArgType.configFile)

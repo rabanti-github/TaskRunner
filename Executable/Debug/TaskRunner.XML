@@ -413,6 +413,13 @@
             </summary>
             <param name="fileName">Filename of the markdown file</param>
         </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetMainValue(System.Boolean)">
+            <summary>
+            Returns the main value. In case of parameter usage, the value will be taken from the global parameter, otherwise from the value of the config file
+            </summary>
+            <param name="displayOutput">If true, error messages will be displayed</param>
+            <returns>Resolved main value as string</returns>
+        </member>
         <member name="M:TaskRunner.SubTasks.SubTask.GetStatusCodeProlog(System.String,System.String)">
             <summary>
             Returns the static prolog of status codes as documentation 
@@ -481,6 +488,11 @@
             Indicates whether the Sub-Task is executed (enabled) or not
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.UseParameter">
+            <summary>
+            Indicates whether a global parameter is used instead of the main value. In this case the main value is the parameter name
+            </summary>
+        </member>
         <member name="P:TaskRunner.SubTasks.SubTask.Name">
             <summary>
             Name of the Sub-Task. Will be displayed in -o mode
@@ -534,6 +546,11 @@
         <member name="P:TaskRunner.SubTasks.SubTask.MarkdownFileName">
             <summary>
             Name of the markdown file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.ParentTask">
+            <summary>
+            Base task of this Sub-Task
             </summary>
         </member>
         <member name="T:TaskRunner.SubTasks.SubTask.DocumentationType">
@@ -621,6 +638,11 @@
         <member name="P:TaskRunner.SubTasks.ControlServiceTask.MarkdownFileName">
             <summary>
             Name of the markdown file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.ControlServiceTask.ArgumentIsParamName">
+            <summary>
+            If true, the arguments are the parameter names (of global parameters) and not the actual values
             </summary>
         </member>
         <member name="T:TaskRunner.SubTasks.DeleteFileTask">
@@ -768,6 +790,143 @@
             The hive of the registry key (e.g. HKLM or HKCU)
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.DeleteRegKeyTask.ArgumentIsParamName">
+            <summary>
+            If true, the arguments are the parameter names (of global parameters) and not the actual values
+            </summary>
+        </member>
+        <member name="T:TaskRunner.SubTasks.KillProcessTask">
+            <summary>
+            Task Runner - (c) 2017 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Derived Sub-Task Class for killing a windows process
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.KillProcessTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.KillProcessTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>True if the task was executed successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.KillProcessTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.KillProcessTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.KillProcessTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.KillProcessTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.KillProcessTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.KillProcessTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (06)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.KillProcessTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.KillProcessTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.KillProcessTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.KillProcessTask.ArgumentIsParamName">
+            <summary>
+            If true, the arguments are the parameter names (of global parameters) and not the actual values
+            </summary>
+        </member>
+        <member name="T:TaskRunner.SubTasks.MetaTask">
+            <summary>
+            Task Runner - (c) 2017 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Derived Sub-Task Class to load the config files of other tasks for execution
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.MetaTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.MetaTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>True if the task was executed successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.MetaTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.MetaTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.MetaTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.MetaTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (07)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.MetaTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.MetaTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.MetaTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
         <member name="T:TaskRunner.SubTasks.StartProgramTask">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -846,6 +1005,11 @@
             Name of the markdown file
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.StartProgramTask.ArgumentIsParamName">
+            <summary>
+            If true, the arguments are the parameter names (of global parameters) and not the actual values
+            </summary>
+        </member>
         <member name="T:TaskRunner.SubTasks.WriteLogTask">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -921,6 +1085,11 @@
             If true, the application will try to create the folder structure of the logfile if not existing
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.WriteLogTask.ArgumentIsParamName">
+            <summary>
+            If true, the arguments are the parameter names (of global parameters) and not the actual values
+            </summary>
+        </member>
         <member name="P:TaskRunner.SubTasks.WriteLogTask.Header">
             <summary>
             The header of the logfile (optional)
@@ -939,7 +1108,7 @@
             Globally used format string for dates / times
             </summary>
         </member>
-        <member name="M:TaskRunner.Task.EnumerateTaskTypes">
+        <member name="M:TaskRunner.Task.EnumerateSubTasks">
             <summary>
             Gets a List of all task types as instances of Sub-Tasks
             </summary>
@@ -952,7 +1121,7 @@
         </member>
         <member name="M:TaskRunner.Task.Run(System.Boolean,System.Boolean,System.Boolean)">
             <summary>
-            Method to run all SUb-Tasks of the current configuration
+            Method to run all Sub-Tasks of the current configuration
             </summary>
             <param name="stopOnError">If true, the method stops if an error occurs during execution of the Sub-Tasks</param>
             <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
@@ -967,12 +1136,22 @@
             <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
             <param name="log">If true, the execution of the Task and its Sub-Tasks will be logged</param>
         </member>
+        <member name="M:TaskRunner.Task.AssignTaskToSubtask">
+            <summary>
+            Assigns the task object to tits subtasks
+            </summary>
+        </member>
         <member name="M:TaskRunner.Task.Deserialize(System.String)">
             <summary>
             Method to deserialize a configuration
             </summary>
             <param name="filename">File name of the configuration</param>
             <returns>The deserialized configuration. In case of an error, an empty object with the parameter Valid=false is returned</returns>
+        </member>
+        <member name="M:TaskRunner.Task.RemoveUnusedValues">
+            <summary>
+            Removes unused values to omit them in the serialized XML code
+            </summary>
         </member>
         <member name="M:TaskRunner.Task.Serialize(System.String)">
             <summary>
@@ -1072,6 +1251,21 @@
             The mode how the Task is executed by the program (1 byte)
             </summary>
         </member>
+        <member name="P:TaskRunner.Task.StopOnError">
+            <summary>
+            If true, the method stops if an error occurs during execution of the Sub-Tasks
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.DisplayOutput">
+            <summary>
+            If true, information about the executed Sub-Tasks is passed to the command shell
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.WriteLog">
+            <summary>
+            If true, the execution of the Task and its Sub-Tasks will be logged
+            </summary>
+        </member>
         <member name="T:TaskRunner.Task.TaskType">
             <summary>
             Type of the Task and its Sub-Tasks
@@ -1100,6 +1294,21 @@
         <member name="F:TaskRunner.Task.TaskType.ControlService">
             <summary>
             Starts, stops, restarts, pauses or resumes a Windows service
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.TaskType.KillProcess">
+            <summary>
+            Kills a Windows process
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.TaskType.MetaTask">
+            <summary>
+            Loads further config files to execute
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.TaskType.MixedTask">
+            <summary>
+            Task with several different Sub-Tasks
             </summary>
         </member>
         <member name="T:TaskRunner.Utils">

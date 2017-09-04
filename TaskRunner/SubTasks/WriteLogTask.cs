@@ -57,13 +57,19 @@ namespace TaskRunner.SubTasks
         /// If true, the application will try to create the folder structure of the logfile if not existing
         /// </summary>
         [XmlAttribute("createFolders")]
-        public Boolean CreateFolders { get; set; }
+        public bool CreateFolders { get; set; }
+
+        /// <summary>
+        /// If true, the arguments are the parameter names (of global parameters) and not the actual values
+        /// </summary>
+        [XmlAttribute("argumentIsParamName")]
+        public bool ArgumentIsParamName { get; set; }
 
         /// <summary>
         /// The header of the logfile (optional)
         /// </summary>
         [XmlElement("header")]
-        public String Header { get; set; }
+        public string Header { get; set; }
 
         /// <summary>
         /// Default constructor
@@ -114,9 +120,27 @@ namespace TaskRunner.SubTasks
                 StringBuilder sb = new StringBuilder();
                 sb.Append(DateTime.Now.ToString(Task.DATEFORMAT));
                 sb.Append('\t');
+                Parameter p;
                 foreach(string item in this.Arguments)
                 {
-                    sb.Append(item);
+                    if (this.ArgumentIsParamName == true)
+                    {
+                        p = Parameter.GetParameter(item, this.ParentTask.DisplayOutput);
+                        if (p.Valid == false)
+                        {
+                            this.Message = "The parameter with the name '" + item + "' is not defined";
+                            this.StatusCode = 0x05;
+                            return false;
+                        }
+                        else
+                        {
+                            sb.Append(p.Value);
+                        }
+                    }
+                    else
+                    {
+                        sb.Append(item);
+                    }
                     sb.Append('\t');
                 }
                 string text = sb.ToString().TrimEnd('\t');
@@ -157,9 +181,20 @@ namespace TaskRunner.SubTasks
             t.Header = "Date\tHeaderValue1\tHeaderValue2\r\n*********************************************";
             t.Description = "This is sub-task " + number.ToString();
             t.MainValue = @"C:\temp\logs\logfile.log";
-            t.Arguments.Add("Text token to write 1");
-            t.Arguments.Add("Text token to write 2");
-            t.Arguments.Add("Text token to write 3");
+            if (number == 3)
+            {
+                t.ArgumentIsParamName = true;
+                t.Arguments.Add("PARAM_NAME_2");
+                t.Arguments.Add("PARAM_NAME_3");
+                t.Arguments.Add("PARAM_NAME_4");
+                t.Description = t.Description = t.Description + ". The arguments are the names of global parameters and not the actual values to write";
+            }
+            else
+            {
+                t.Arguments.Add("Text token to write 1");
+                t.Arguments.Add("Text token to write 2");
+                t.Arguments.Add("Text token to write 3");
+            }
             return t;
         }
 
@@ -175,6 +210,7 @@ namespace TaskRunner.SubTasks
             codes.AddTuple(this.PrintStatusCode(false, 0x02), "Logfile could not be created or opened");
             codes.AddTuple(this.PrintStatusCode(false, 0x03), "The directory of the logfile could not be created");
             codes.AddTuple(this.PrintStatusCode(false, 0x04), "No logfile was defined");
+            codes.AddTuple(this.PrintStatusCode(false, 0x05), "The parameter is not defined");
             return codes;
         }
 
@@ -184,12 +220,13 @@ namespace TaskRunner.SubTasks
         /// <returns>Documentation object</returns>
         public override Documentation GetTagDocumentationParameters()
         {
-            Documentation tags = new Documentation("Write Log Task", "Tags", "The following specific tags are defined (see also demo files)");
+            Documentation tags = new Documentation("Write Log Task", "Tags", "The following specific tags are defined (see also the demo files or the example configuration)");
             this.AppendCommonTags(ref tags, "<writeLogItem>");
             tags.AddTuple("writeLogItem", "Main tag of a Sub-Task within the <items> tag.");
             tags.AddTuple("mainValue", "Defines filename and path of the logfile.");
             tags.AddTuple("header", "Tag to describe a header of a logfile. The particular fields are divided by tabs (\\t).");
-            tags.AddTuple("argument", "Each <argument> tag within the <arguments> tag contains one filed of the log entry. No tabs are required.");
+            tags.AddTuple("argument", "Each <argument> tag within the <arguments> tag contains one filed of the log entry. No tabs are required. If the argumentIsParamName attribute is set to true, each argument is a global parameter name instead of the actual value. In this case, the value will be resolved at runtime");
+
             return tags;
         }
 
@@ -202,6 +239,7 @@ namespace TaskRunner.SubTasks
             Documentation attributes = new Documentation("Write Log Task", "Attributes", "The following attributes are defined");
             this.AppendCommonAttributes(ref attributes, "<writeLogItem>", "WriteLog");
             attributes.AddTuple("createFolders", "Indicates whether a missing folder structure will be created when writing a log entry to a new file. Valid values are 'true' and 'false'. The attribute is part of the <writeLogItem> tag and is optional.");
+            attributes.AddTuple("argumentIsParamName", "Indicates whether the arguments are the parameter names (of global parameters) and not the actual values. Valid values of the parameter are 'true' and 'false'. The attribute is part of the <writeLogItem> tag and is optional.");
             return attributes;
         }
 

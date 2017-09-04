@@ -76,6 +76,8 @@ namespace TaskRunner
         /// </summary>
         public String ConfigFilePath { get; set; }
 
+
+
         /// <summary>
         /// Default constructor
         /// </summary>

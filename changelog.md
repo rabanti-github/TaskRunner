@@ -1,5 +1,14 @@
 ﻿# Change Log
 
+## v1.2.0 (04.09.2017)
+
+* Added KillProcessTask
+* Added MetaTask
+* Added the possibility of mixed Tasks (several Sub-Task types in a single Task file)
+* Introduced parameters (can be passed as arguments)
+* Added further Status codes
+* Cleaned up Example files and added more examples
+
 ## v1.1.1 (02.09.2017)
 
 * Improved markdown output
@@ -7,7 +16,7 @@
 ## v1.1.0 (02.09.2017)
 
 * Added ControlServiceTask
-* Added documentationoutput (console)
+* Added documentation output (console)
 * Added output of the documentation ad markdown files
 * Console handling rewritten
 * Execution codes changed to 4 byte scheme

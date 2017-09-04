@@ -66,6 +66,12 @@ namespace TaskRunner.SubTasks
         }
 
         /// <summary>
+        /// If true, the arguments are the parameter names (of global parameters) and not the actual values
+        /// </summary>
+        [XmlAttribute("argumentIsParamName")]
+        public bool ArgumentIsParamName { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public ControlServiceTask()
@@ -80,7 +86,6 @@ namespace TaskRunner.SubTasks
         /// <returns>True if the task was executed successfully, otherwise false</returns>
         public override bool Run()
         {
-
             if (string.IsNullOrEmpty(this.MainValue))
             {
                 this.Message = "No service to control was defined";
@@ -141,7 +146,24 @@ namespace TaskRunner.SubTasks
                     }
                     else
                     {
-                        svc = new ServiceController(s.ServiceName, this.Arguments[0]);
+                        if (this.ArgumentIsParamName == true)
+                        {
+                            Parameter p = Parameter.GetParameter(this.Arguments[0], this.ParentTask.DisplayOutput);
+                            if (p.Valid == false)
+                            {
+                                this.Message = "The parameter with the name '" + this.Arguments[0] + "' is not defined";
+                                this.StatusCode = 0x07;
+                                return false;
+                            }
+                            else
+                            {
+                                svc = new ServiceController(s.ServiceName, p.Value);
+                            }
+                        }
+                        else
+                        {
+                            svc = new ServiceController(s.ServiceName, this.Arguments[0]);
+                        }  
                     }
                     break;
                 }
@@ -233,10 +255,17 @@ namespace TaskRunner.SubTasks
             t.Action = "stop";
             t.WaitForStatus = true;
             t.MainValue = "WindowsService_" + number.ToString();
-            if (number > 1)
+            if (number == 2)
             {
                 t.Arguments.Add("remote_machine_name");
                 t.WaitForStatus = false;
+            }
+            else if (number == 3)
+            {
+                t.Arguments.Add("PARAM_NAME_2");
+                t.WaitForStatus = false;
+                t.ArgumentIsParamName = true;
+                t.Description = t.Description = t.Description + ". The argument is the name of a global parameter and not the actual value of the remote machine name";
             }
             return t;
         }
@@ -259,6 +288,7 @@ namespace TaskRunner.SubTasks
             codes.AddTuple(this.PrintStatusCode(false, 0x04), "An undefined control action was defined");
             codes.AddTuple(this.PrintStatusCode(false, 0x05), "No timeout value was defined");
             codes.AddTuple(this.PrintStatusCode(false, 0x06), "The timeout value is invalid");
+            codes.AddTuple(this.PrintStatusCode(false, 0x07), "The parameter is not defined");
             return codes;
         }
 
@@ -268,11 +298,11 @@ namespace TaskRunner.SubTasks
         /// <returns>Documentation object</returns>
         public override Documentation GetTagDocumentationParameters()
         {
-            Documentation tags = new Documentation("Control Service Task", "Tags", "The following specific tags are defined (see also demo files)");
+            Documentation tags = new Documentation("Control Service Task", "Tags", "The following specific tags are defined (see also the demo files or the example configuration)");
             this.AppendCommonTags(ref tags, "<controlServiceItem>");
             tags.AddTuple("controlServiceItem", "Main tag of a Sub-Task within the <items> tag");
             tags.AddTuple("mainValue", "Defines the name of the service");
-            tags.AddTuple("argument", "The optional <argument> tag within the <arguments> tag contains the name of the remote machine if applicable");
+            tags.AddTuple("argument", "The optional <argument> tag within the <arguments> tag contains the name of the remote machine if applicable.  If the argumentIsParamName attribute is set to true, each argument is a global parameter name instead of the actual value. In this case, the value will be resolved at runtime");
             return tags;
         }
 
@@ -287,6 +317,7 @@ namespace TaskRunner.SubTasks
             attributes.AddTuple("action", "Indicates the action of the task. Valid values are 'start', 'stop', 'restart', 'pause' and 'resume'. The attribute is part of the <controlServiceItem> tag.");
             attributes.AddTuple("waitForStatus", "Indicates whether TaskRunner waits until the final status of the action is reached. Valid values are 'true' and 'false'. The attribute is part of the <controlServiceItem> tag.");
             attributes.AddTuple("timeout", "Indicates the number of seconds to wait until abort of the attempt. Valid values are 0 and positive integers. The attribute is part of the <controlServiceItem> tag.");
+            attributes.AddTuple("argumentIsParamName", "Indicates whether the arguments are the parameter names (of global parameters) and not the actual values. Valid values of the parameter are 'true' and 'false'. The attribute is part of the <controlServiceItem> tag and is optional.");
             return attributes;
         }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" enabled="true" type="WriteLog" name="Demo-Task">
   <items>
-    <writeLogItem enabled="true" name="Write-Log-Task_1" createFolders="true">
+    <writeLogItem enabled="true" useParam="false" name="Write-Log-Task_1" createFolders="true" argumentIsParamName="false">
       <mainValue>C:\temp\logs\logfile.log</mainValue>
       <description>This is sub-task 1</description>
       <arguments>
@@ -12,7 +12,7 @@
       <header>Date	HeaderValue1	HeaderValue2
 *********************************************</header>
     </writeLogItem>
-    <writeLogItem enabled="true" name="Write-Log-Task_2" createFolders="true">
+    <writeLogItem enabled="true" useParam="false" name="Write-Log-Task_2" createFolders="true" argumentIsParamName="false">
       <mainValue>C:\temp\logs\logfile.log</mainValue>
       <description>This is sub-task 2</description>
       <arguments>
@@ -23,13 +23,13 @@
       <header>Date	HeaderValue1	HeaderValue2
 *********************************************</header>
     </writeLogItem>
-    <writeLogItem enabled="true" name="Write-Log-Task_3" createFolders="true">
-      <mainValue>C:\temp\logs\logfile.log</mainValue>
-      <description>This is sub-task 3</description>
+    <writeLogItem enabled="true" useParam="true" name="Write-Log-Task_3" createFolders="true" argumentIsParamName="true">
+      <mainValue>PARAM_NAME_1</mainValue>
+      <description>This is sub-task 3. The arguments are the names of global parameters and not the actual values to write. This Sub-Tasks uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1</description>
       <arguments>
-        <argument>Text token to write 1</argument>
-        <argument>Text token to write 2</argument>
-        <argument>Text token to write 3</argument>
+        <argument>PARAM_NAME_2</argument>
+        <argument>PARAM_NAME_3</argument>
+        <argument>PARAM_NAME_4</argument>
       </arguments>
       <header>Date	HeaderValue1	HeaderValue2
 *********************************************</header>

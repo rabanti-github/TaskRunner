@@ -60,6 +60,12 @@ namespace TaskRunner.SubTasks
         public string Hive { get; set; }
 
         /// <summary>
+        /// If true, the arguments are the parameter names (of global parameters) and not the actual values
+        /// </summary>
+        [XmlAttribute("argumentIsParamName")]
+        public bool ArgumentIsParamName { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public DeleteRegKeyTask()
@@ -147,8 +153,29 @@ namespace TaskRunner.SubTasks
                 {
                     int counter = 0;
                     object o;
-                    foreach(string value in this.Arguments)
+                    Parameter p;
+                    string value;
+                    foreach(string item in this.Arguments)
                     {
+
+                        if (this.ArgumentIsParamName == true)
+                        {
+                            p = Parameter.GetParameter(item, this.ParentTask.DisplayOutput);
+                            if (p.Valid == false)
+                            {
+                                this.Message = "The parameter with the name '" + item + "' is not defined";
+                                this.StatusCode = 0x06;
+                                return false;
+                            }
+                            else
+                            {
+                                value = p.Value;
+                            }
+                        }
+                        else
+                        {
+                            value = item;
+                        }
                         o = key.GetValue(value);
                         if (o != null)
                         {
@@ -193,9 +220,20 @@ namespace TaskRunner.SubTasks
             t.Description = "This is sub-task " + number.ToString();
             t.Hive = "HKLM";
             t.MainValue = @"Software\Microsoft\Windows\CurrentVersion\Run\base_key" + number.ToString();
-            t.Arguments.Add("value_to_delete_1");
-            t.Arguments.Add("value_to_delete_2");
-            t.Arguments.Add("value_to_delete_3");
+            if (number == 3)
+            {
+                t.Arguments.Add("PARAM_NAME_2");
+                t.Arguments.Add("PARAM_NAME_3");
+                t.Arguments.Add("PARAM_NAME_4");
+                t.ArgumentIsParamName = true;
+                t.Description = t.Description = t.Description + ". The arguments are the names of global parameters and not the actual values to delete in the registry";
+            }
+            else
+            {
+                t.Arguments.Add("value_to_delete_1");
+                t.Arguments.Add("value_to_delete_2");
+                t.Arguments.Add("value_to_delete_3");
+            }
             return t;
         }
 
@@ -214,6 +252,7 @@ namespace TaskRunner.SubTasks
             codes.AddTuple(this.PrintStatusCode(false, 0x03), "No value to delete was defined");
             codes.AddTuple(this.PrintStatusCode(false, 0x04), "The hive is not defined / unknown");
             codes.AddTuple(this.PrintStatusCode(false, 0x05), "No key to check was defined");
+            codes.AddTuple(this.PrintStatusCode(false, 0x06), "The parameter is not defined");
             return codes;
         }
 
@@ -223,11 +262,11 @@ namespace TaskRunner.SubTasks
         /// <returns>Documentation object</returns>
         public override Documentation GetTagDocumentationParameters()
         {
-            Documentation tags = new Documentation("Delete Registry-Key (Value) Task", "Tags", "The following specific tags are defined (see also demo files)");
+            Documentation tags = new Documentation("Delete Registry-Key (Value) Task", "Tags", "The following specific tags are defined (see also the demo files or the example configuration)");
             this.AppendCommonTags(ref tags, "<deleteRegKeyItem>");
             tags.AddTuple("deleteRegKeyItem", "Main tag of a Sub-Task within the <items> tag");
             tags.AddTuple("mainValue", "Defines the path to the registry key without the hive");
-            tags.AddTuple("argument", "Each <argument> tag within the <arguments> tag contains one value to delete within the key");
+            tags.AddTuple("argument", "Each <argument> tag within the <arguments> tag contains one value to delete within the key. If the argumentIsParamName attribute is set to true, each argument is a global parameter name instead of the actual value. In this case, the value will be resolved at runtime");
             return tags;
         }
 
@@ -240,6 +279,7 @@ namespace TaskRunner.SubTasks
             Documentation attributes = new Documentation("Delete Registry-Key (Value) Task", "Attributes", "The following attributes are defined");
             this.AppendCommonAttributes(ref attributes, "<deleteRegKeyItem>", "DeleteRegKey");
             attributes.AddTuple("hive", "Indicates which registry hive is accessed. Valid values are 'HKLM', 'HKCU', 'HKCR', 'HKCC', 'HKU' and 'HKPD'. The attribute is part of the <deleteRegKeyItem> tag.");
+            attributes.AddTuple("argumentIsParamName", "Indicates whether the arguments are the parameter names (of global parameters) and not the actual values. Valid values of the parameter are 'true' and 'false'. The attribute is part of the <deleteRegKeyItem> tag and is optional.");
             return attributes;
         }
 

@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" enabled="true" type="ControlService" name="Demo-Task">
   <items>
-    <controlServiceItem enabled="true" name="Control-Service-Task_1" action="stop" waitForStatus="true" timeout="10">
+    <controlServiceItem enabled="true" useParam="false" name="Control-Service-Task_1" action="stop" waitForStatus="true" timeout="10" argumentIsParamName="false">
       <mainValue>WindowsService_1</mainValue>
       <description>This is sub-task 1</description>
-      <arguments />
     </controlServiceItem>
-    <controlServiceItem enabled="true" name="Control-Service-Task_2" action="stop" waitForStatus="false" timeout="10">
+    <controlServiceItem enabled="true" useParam="false" name="Control-Service-Task_2" action="stop" waitForStatus="false" timeout="10" argumentIsParamName="false">
       <mainValue>WindowsService_2</mainValue>
       <description>This is sub-task 2</description>
       <arguments>
         <argument>remote_machine_name</argument>
       </arguments>
     </controlServiceItem>
-    <controlServiceItem enabled="true" name="Control-Service-Task_3" action="stop" waitForStatus="false" timeout="10">
-      <mainValue>WindowsService_3</mainValue>
-      <description>This is sub-task 3</description>
+    <controlServiceItem enabled="true" useParam="true" name="Control-Service-Task_3" action="stop" waitForStatus="false" timeout="10" argumentIsParamName="true">
+      <mainValue>PARAM_NAME_1</mainValue>
+      <description>This is sub-task 3. The argument is the name of a global parameter and not the actual value of the remote machine name. This Sub-Tasks uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1</description>
       <arguments>
-        <argument>remote_machine_name</argument>
+        <argument>PARAM_NAME_2</argument>
       </arguments>
     </controlServiceItem>
   </items>

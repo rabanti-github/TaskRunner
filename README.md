@@ -1,5 +1,5 @@
 # TaskRunner
-Task Runner is a simple Windows command line tool to execute several tasks controlled by XML config files, such as deleting files, deleting registry entries, write logfile entries or execute programs.
+Task Runner is a simple Windows command line tool to execute several tasks controlled by XML config files, such as deleting files, terminate processes, deleting registry entries, write logfile entries or execute programs.
 
 <b>Please have a look into the <a href="../../wiki">Wiki</a> for more information.</b>
 
@@ -50,6 +50,27 @@ Furthermore, you need the following knowledge when using TaskRunner:
 
 Path to the configuration: A relative or absolute path to the configuration as XML file
 
+**Parameter Handling**
+---------------
+The flag <code>-p</code> or <code>--param</code> delivers a temporary parameter to the TaskRunner. The parameter is only valid during the execution of the loaded task.
+
+Syntax: <code>-p|--param:<i>&lt;data type&gt</i>:<i>&lt;param name&gt;</i>:<i>&lt;param value&gt;</i></code>
+
+The parameter flag contains 3 or 4 parts, delimited by colons:
+* 1: <b>Flag Identifier</b> (-p or --param)
+* 2: (Optional) <b>Data Type</b>. Valid values are '<code>s</code>' for string, '<code>b</code>' for boolean and '<code>n</code>' for number (double). If this part is omitted, the value will be handled as string
+* 3: <b>Parameter Name</b> (unique string, without spaces or colons)
+* 4: <b>Parameter Value</b> (The value will be parsed to boolean or double in case of the data types '<code>b</code>' or '<code>n</code>')
+
+<b>Examples:</b>
+<code>
+-p:n:NUMBER_OF_FILES:8
+--param:b:MATCH:true
+--param:NAME:machien1
+-p:s:NAME:""Name with spaces""
+--param:COMMENT:'Other quotes are also OK'
+</code>
+
 **Flags / Options**
 ---------------
 <code>-r | --run</code>:      Runs a task defined in the subsequent config file (path)
@@ -92,3 +113,14 @@ Starts one or several programs with optional arguments. It is possible to define
 <b>ControlServiceTask:</b>
 
 Starts, restarts, pauses, resumes or stops a Windows Servcie by its name. It is possible to define a remote machine name. Furthermore a specific tmeout period can be defined.
+
+<b>KillProcessTask:</b>
+Termines one or more processes by its name. It is possible to define a remote machine name.
+
+<b>MetaTask:</b>
+ A MetaTask loads the configuration files (xml) of other TaskRunner configurations and executes them
+ 
+ 
+**Mixed Tasks**
+--------------
+If the attribute <code>type</code> in the <code>&lt;task&gt;</code> is set to the value <b>MixedTask</b>, any of the available Tasks can be described in one configuration file. Otherwise, only one task type (as Sub-Tasks) is used in one configuration file.

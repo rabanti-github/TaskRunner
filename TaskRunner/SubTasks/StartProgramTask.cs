@@ -67,6 +67,12 @@ namespace TaskRunner.SubTasks
         }
 
         /// <summary>
+        /// If true, the arguments are the parameter names (of global parameters) and not the actual values
+        /// </summary>
+        [XmlAttribute("argumentIsParamName")]
+        public bool ArgumentIsParamName { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public StartProgramTask()
@@ -115,9 +121,27 @@ namespace TaskRunner.SubTasks
 
                 StringBuilder sb = new StringBuilder();
                 bool executed = true;
+                Parameter p;
                 foreach (string arg in Arguments)
                 {
-                    sb.Append(arg);
+                    if (this.ArgumentIsParamName == true)
+                    {
+                        p = Parameter.GetParameter(arg, this.ParentTask.DisplayOutput);
+                        if (p.Valid == false)
+                        {
+                            this.Message = "The parameter with the name '" + arg + "' is not defined";
+                            this.StatusCode = 0x04;
+                            return false;
+                        }
+                        else
+                        {
+                            sb.Append(p.Value);
+                        }
+                    }
+                    else
+                    {
+                        sb.Append(arg);
+                    }
                     sb.Append(" ");
                 }
                 string argString = sb.ToString().TrimEnd(' ');
@@ -178,9 +202,19 @@ namespace TaskRunner.SubTasks
             t.Name = "Start-Program-Task_" + number.ToString();
             t.Description = "This is sub-task " + number.ToString();
             t.MainValue = @"C:\temp\apps\app" + number.ToString() + ".exe";
-            t.Arguments.Add("ARG1");
-            t.Arguments.Add("ARG2");
             t.Asynchronous = true;
+            if (number == 3)
+            {
+                t.Arguments.Add("PARAM_NAME_2");
+                t.Arguments.Add("PARAM_NAME_3");
+            }
+            else
+            {
+                t.Arguments.Add("ARG1");
+                t.Arguments.Add("ARG2");
+                t.ArgumentIsParamName = true;
+                t.Description = t.Description = t.Description + ". The arguments are the names of global parameters and not the actual values of the program arguments";
+            }
             return t;
         }
 
@@ -197,6 +231,7 @@ namespace TaskRunner.SubTasks
             codes.AddTuple(this.PrintStatusCode(false, 0x01), "The program could not be executed due to an unknown reason");
             codes.AddTuple(this.PrintStatusCode(false, 0x02), "An error occurred during the asynchronous execution");
             codes.AddTuple(this.PrintStatusCode(false, 0x03), "No program to execute was defined");
+            codes.AddTuple(this.PrintStatusCode(false, 0x04), "The parameter is not defined");
             return codes;
         }
 
@@ -206,11 +241,11 @@ namespace TaskRunner.SubTasks
         /// <returns>Documentation object</returns>
         public override Documentation GetTagDocumentationParameters()
         {
-            Documentation tags = new Documentation("Start Program Task", "Tags", "The following specific tags are defined (see also demo files)");
+            Documentation tags = new Documentation("Start Program Task", "Tags", "The following specific tags are defined (see also the demo files or the example configuration)");
             this.AppendCommonTags(ref tags, "<startProgramItem>");
             tags.AddTuple("startProgramItem", "Main tag of a Sub-Task within the <items> tag.");
             tags.AddTuple("mainValue", "Defines full path to the program to start.");
-            tags.AddTuple("argument", "Each <argument> tag within the <arguments> tag contains one (optional) program argument");
+            tags.AddTuple("argument", "Each <argument> tag within the <arguments> tag contains one (optional) program argument. If the argumentIsParamName attribute is set to true, each argument is a global parameter name instead of the actual value. In this case, the value will be resolved at runtime ");
             return tags;
         }
 
@@ -223,6 +258,7 @@ namespace TaskRunner.SubTasks
             Documentation attributes = new Documentation("Start Program Task", "Attributes", "The following attributes are defined");
             this.AppendCommonAttributes(ref attributes, "<startProgramItem>", "StartProgram");
             attributes.AddTuple("runAsynchronous", "Indicates whether the Sub-Tasks are executed synchronous (all programs are started at the same time) or asynchronous (programs are started sequentially). Valid values are 'true' and 'false'. The attribute is part of the <startProgramItem> tag.");
+            attributes.AddTuple("argumentIsParamName", "Indicates whether the arguments are the parameter names (of global parameters) and not the actual values. Valid values of the parameter are 'true' and 'false'. The attribute is part of the <startProgramItem> tag and is optional.");
             return attributes;
         }
 

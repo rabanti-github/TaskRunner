@@ -119,7 +119,7 @@ namespace TaskRunner.SubTasks
         {
             Documentation codes = new Documentation("Delete File Task", "Status Codes");
             codes.AddTuple(this.PrintStatusCode(true, 0x01), "The file was deleted successfully");
-            codes.AddTuple(this.PrintStatusCode(true, 0x02), "The file dies not exist. Nothing to do");
+            codes.AddTuple(this.PrintStatusCode(true, 0x02), "The file does not exist. Nothing to do");
             codes.AddTuple(this.PrintStatusCode(false, 0x01), "The file could not be deleted due to an unknown reason");
             codes.AddTuple(this.PrintStatusCode(false, 0x02), "No file to delete was defined");
             return codes;
@@ -131,7 +131,7 @@ namespace TaskRunner.SubTasks
         /// <returns>Documentation object</returns>
         public override Documentation GetTagDocumentationParameters()
         {
-            Documentation tags = new Documentation("Delete File Task", "Tags", "The following specific tags are defined (see also demo files)");
+            Documentation tags = new Documentation("Delete File Task", "Tags", "The following specific tags are defined (see also the demo files or the example configuration)");
             this.AppendCommonTags(ref tags, "<deleteFileItem>");
             tags.AddTuple("deleteFileItem", "Main tag of a Sub-Task within the <items> tag");
             tags.AddTuple("mainValue", "Defines the full path to the file to delete");

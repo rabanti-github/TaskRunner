@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" enabled="true" type="StartProgram" name="Demo-Task">
   <items>
-    <startProgramItem enabled="true" name="Start-Program-Task_1" runAsynchronous="true">
+    <startProgramItem enabled="true" useParam="false" name="Start-Program-Task_1" runAsynchronous="true" argumentIsParamName="true">
       <mainValue>C:\temp\apps\app1.exe</mainValue>
-      <description>This is sub-task 1</description>
+      <description>This is sub-task 1. The arguments are the names of global parameters and not the actual values of the program arguments</description>
       <arguments>
         <argument>ARG1</argument>
         <argument>ARG2</argument>
       </arguments>
     </startProgramItem>
-    <startProgramItem enabled="true" name="Start-Program-Task_2" runAsynchronous="true">
+    <startProgramItem enabled="true" useParam="false" name="Start-Program-Task_2" runAsynchronous="true" argumentIsParamName="true">
       <mainValue>C:\temp\apps\app2.exe</mainValue>
-      <description>This is sub-task 2</description>
+      <description>This is sub-task 2. The arguments are the names of global parameters and not the actual values of the program arguments</description>
       <arguments>
         <argument>ARG1</argument>
         <argument>ARG2</argument>
       </arguments>
     </startProgramItem>
-    <startProgramItem enabled="true" name="Start-Program-Task_3" runAsynchronous="true">
-      <mainValue>C:\temp\apps\app3.exe</mainValue>
-      <description>This is sub-task 3</description>
+    <startProgramItem enabled="true" useParam="true" name="Start-Program-Task_3" runAsynchronous="true" argumentIsParamName="false">
+      <mainValue>PARAM_NAME_1</mainValue>
+      <description>This is sub-task 3. This Sub-Tasks uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1</description>
       <arguments>
-        <argument>ARG1</argument>
-        <argument>ARG2</argument>
+        <argument>PARAM_NAME_2</argument>
+        <argument>PARAM_NAME_3</argument>
       </arguments>
     </startProgramItem>
   </items>

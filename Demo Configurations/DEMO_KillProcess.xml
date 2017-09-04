@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<task xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" enabled="true" type="KillProcess" name="Demo-Task">
+  <items>
+    <killProcessItem enabled="true" useParam="false" name="Kill-Process-Task_1" argumentIsParamName="false">
+      <mainValue>notepad</mainValue>
+      <description>This is sub-task1</description>
+    </killProcessItem>
+    <killProcessItem enabled="true" useParam="false" name="Kill-Process-Task_2" argumentIsParamName="false">
+      <mainValue>notepad</mainValue>
+      <description>This is sub-task2</description>
+      <arguments>
+        <argument>remote_machine_name</argument>
+      </arguments>
+    </killProcessItem>
+    <killProcessItem enabled="true" useParam="true" name="Kill-Process-Task_3" argumentIsParamName="true">
+      <mainValue>PARAM_NAME_1</mainValue>
+      <description>This is sub-task3. The argument is the name of a global parameter and not the actual value of the remote machine name. This Sub-Tasks uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1</description>
+      <arguments>
+        <argument>PARAM_NAME_2</argument>
+      </arguments>
+    </killProcessItem>
+  </items>
+  <description>This is a demo Task with several sub-tasks of the type KillProcess</description>
+</task>

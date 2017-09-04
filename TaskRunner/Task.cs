@@ -47,13 +47,25 @@ namespace TaskRunner
             /// Starts, stops, restarts, pauses or resumes a Windows service
             /// </summary>
             ControlService,
+            /// <summary>
+            /// Kills a Windows process
+            /// </summary>
+            KillProcess,
+            /// <summary>
+            /// Loads further config files to execute
+            /// </summary>
+            MetaTask,
+            /// <summary>
+            /// Task with several different Sub-Tasks
+            /// </summary>
+            MixedTask,
         }
 
         /// <summary>
         /// Gets a List of all task types as instances of Sub-Tasks
         /// </summary>
         /// <returns>List of types (SubTask)</returns>
-        public static List<SubTask> EnumerateTaskTypes()
+        public static List<SubTask> EnumerateSubTasks()
         {
             List<SubTask> output = new List<SubTask>();
             output.Add(new DeleteFileTask());
@@ -61,8 +73,11 @@ namespace TaskRunner
             output.Add(new WriteLogTask());
             output.Add(new StartProgramTask());
             output.Add(new ControlServiceTask());
+            output.Add(new KillProcessTask());
+            output.Add(new MetaTask());
             return output;
         }
+
 
         /// <summary>
         /// Indicates whether the whole task is executed (enabled) or not
@@ -86,6 +101,8 @@ namespace TaskRunner
         [XmlArrayItem(Type = typeof(WriteLogTask), ElementName = "writeLogItem")]
         [XmlArrayItem(Type = typeof(StartProgramTask), ElementName = "startProgramItem")]
         [XmlArrayItem(Type = typeof(ControlServiceTask), ElementName = "controlServiceItem")]
+        [XmlArrayItem(Type = typeof(KillProcessTask), ElementName = "killProcessItem")]
+        [XmlArrayItem(Type = typeof(MetaTask), ElementName = "metaItem")]
         public List<SubTask> Items { get; set; }
         /// <summary>
         /// Optional Task name
@@ -123,6 +140,24 @@ namespace TaskRunner
         /// </summary>
         [XmlIgnore]
         public byte TaskMode { get; set; }
+       
+        /// <summary>
+        /// If true, the method stops if an error occurs during execution of the Sub-Tasks
+        /// </summary>
+        [XmlIgnore]
+        public bool StopOnError { get; set; }
+
+        /// <summary>
+        /// If true, information about the executed Sub-Tasks is passed to the command shell
+        /// </summary>
+        [XmlIgnore]
+        public bool DisplayOutput { get; set; }
+
+        /// <summary>
+        /// If true, the execution of the Task and its Sub-Tasks will be logged
+        /// </summary>
+        [XmlIgnore]
+        public bool WriteLog { get; set; }
 
         /// <summary>
         /// Default constructor
@@ -136,7 +171,7 @@ namespace TaskRunner
         }
 
         /// <summary>
-        /// Method to run all SUb-Tasks of the current configuration
+        /// Method to run all Sub-Tasks of the current configuration
         /// </summary>
         /// <param name="stopOnError">If true, the method stops if an error occurs during execution of the Sub-Tasks</param>
         /// <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
@@ -144,6 +179,9 @@ namespace TaskRunner
         /// <returns>True if no errors occurred, otherwise false</returns>
         public bool Run(bool stopOnError, bool displayOutput, bool log)
         {
+            this.StopOnError = stopOnError;
+            this.DisplayOutput = displayOutput;
+            this.WriteLog = log;
             ResolveTaskMode(stopOnError, displayOutput, log);
             LogEntry entry;
             this.LogEntries.Clear();
@@ -157,6 +195,14 @@ namespace TaskRunner
             bool status;
             foreach(SubTask subTask in this.Items)
             {
+                if (subTask.Enabled == false)
+                {
+                    if (displayOutput == true)
+                    {
+                        System.Console.WriteLine("==> SUB-TASK '" + subTask.Name + "' SKIPPED\n");
+                    }
+                    continue;
+                }
                 entry = new LogEntry();
                 entry.TaskName = this.TaskName;
                 entry.SubTaskName = subTask.Name;
@@ -175,6 +221,7 @@ namespace TaskRunner
                         System.Console.WriteLine("Prolog:\t\t" + subTask.Prolog);
                     }
                 }
+                subTask.MainValue = subTask.GetMainValue(displayOutput); // Resolves the main value by the config file or param name
                 status = subTask.Run();
                 entry.Status = status;
                 entry.InsertCodeByte(subTask.StatusCode, 3);
@@ -225,6 +272,17 @@ namespace TaskRunner
         }
 
         /// <summary>
+        /// Assigns the task object to tits subtasks
+        /// </summary>
+        private void AssignTaskToSubtask()
+        {
+            for(int i = 0; i < this.Items.Count; i++)
+            {
+                this.Items[i].ParentTask = this;
+            }
+        }
+
+        /// <summary>
         /// Method to deserialize a configuration
         /// </summary>
         /// <param name="filename">File name of the configuration</param>
@@ -238,6 +296,7 @@ namespace TaskRunner
                 XmlSerializer ser = new XmlSerializer(typeof(Task));
                 object o = ser.Deserialize(sr);
                 Task t = (Task)o;
+                t.AssignTaskToSubtask();
                 t.Valid = true;
                 return t;
             }
@@ -249,11 +308,26 @@ namespace TaskRunner
         }
 
         /// <summary>
+        /// Removes unused values to omit them in the serialized XML code
+        /// </summary>
+        private void RemoveUnusedValues()
+        {
+            for (int i = 0; i < this.Items.Count; i++)
+            {
+                if (this.Items[i].Arguments.Count == 0)
+                {
+                    this.Items[i].Arguments = null;
+                }
+            }
+        }
+
+        /// <summary>
         /// Method to serialize the current configuration
         /// </summary>
         /// <param name="filename">File name of the configuration</param>
         public void Serialize(string filename)
         {
+            RemoveUnusedValues();
             try
             {
                 FileStream fs = new FileStream(filename, FileMode.Create);
@@ -273,6 +347,7 @@ namespace TaskRunner
         /// <returns>Memory stream</returns>
         private MemoryStream SerializeAsStream()
         {
+            RemoveUnusedValues();
             MemoryStream ms = null;
             try
             {
@@ -345,9 +420,20 @@ namespace TaskRunner
             {
                 tb = new ControlServiceTask();
             }
+            else if (type == TaskType.KillProcess)
+            {
+                tb = new KillProcessTask();
+            }
+            else if (type == TaskType.MetaTask)
+            {
+                tb = new MetaTask();
+            }
             t1 = tb.GetDemoFile(1);
             t2 = tb.GetDemoFile(2);
             t3 = tb.GetDemoFile(3);
+            t3.UseParameter = true;
+            t3.MainValue = "PARAM_NAME_1";
+            t3.Description = t3.Description + ". This Sub-Tasks uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1";
             t.Items.Add(t1);
             t.Items.Add(t2);
             t.Items.Add(t3);

@@ -97,7 +97,7 @@ The parameter flag contains 3 or 4 parts, delimited by colons:
 
 **Possible Tasks**
 --------------
-Please look at the demo files and into the <a href="../../wiki/Possible-Tasks-&-Configuration">Wiki</a> for all parameters and a detailed description of the configuration.
+Please look at the demo files and into the <a href="../../wiki">Wiki</a> for all parameters and a detailed description of the configuration.
 
 <b>DeleteFileTask:</b>
 

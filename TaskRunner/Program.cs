@@ -157,7 +157,7 @@ parameter flag contains 3 or 4 parts, delimited by colons:
 Examples:
 -p:n:NUMBER_OF_FILES:8
 --param:b:MATCH:true
---param:NAME:machien1
+--param:NAME:machine1
 -p:s:NAME:""Name with spaces""
 --param:COMMENT:'Other quotes are also OK'
 

@@ -65,10 +65,15 @@ The parameter flag contains 3 or 4 parts, delimited by colons:
 <b>Examples:</b>
 <code>
 -p:n:NUMBER_OF_FILES:8
+
 --param:b:MATCH:true
+
 --param:NAME:machien1
+
 -p:s:NAME:""Name with spaces""
+
 --param:COMMENT:'Other quotes are also OK'
+
 </code>
 
 **Flags / Options**
@@ -115,12 +120,14 @@ Starts one or several programs with optional arguments. It is possible to define
 Starts, restarts, pauses, resumes or stops a Windows Servcie by its name. It is possible to define a remote machine name. Furthermore a specific tmeout period can be defined.
 
 <b>KillProcessTask:</b>
+
 Termines one or more processes by its name. It is possible to define a remote machine name.
 
 <b>MetaTask:</b>
+
  A MetaTask loads the configuration files (xml) of other TaskRunner configurations and executes them
  
  
 **Mixed Tasks**
 --------------
-If the attribute <code>type</code> in the <code>&lt;task&gt;</code> is set to the value <b>MixedTask</b>, any of the available Tasks can be described in one configuration file. Otherwise, only one task type (as Sub-Tasks) is used in one configuration file.
+If the attribute <code>type</code> in the <code>&lt;task&gt;</code> tag is set to the value <b>MixedTask</b>, any of the available Tasks can be described in one configuration file. Otherwise, only one task type (as Sub-Tasks) is used in one configuration file.

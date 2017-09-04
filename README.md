@@ -63,18 +63,18 @@ The parameter flag contains 3 or 4 parts, delimited by colons:
 * 4: <b>Parameter Value</b> (The value will be parsed to boolean or double in case of the data types '<code>b</code>' or '<code>n</code>')
 
 <b>Examples:</b>
-<code>
+```dos
 -p:n:NUMBER_OF_FILES:8
 
 --param:b:MATCH:true
 
 --param:NAME:machien1
 
--p:s:NAME:""Name with spaces""
+-p:s:NAME:"Name with spaces"
 
 --param:COMMENT:'Other quotes are also OK'
+```
 
-</code>
 
 **Flags / Options**
 ---------------

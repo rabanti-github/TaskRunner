@@ -68,7 +68,7 @@ The parameter flag contains 3 or 4 parts, delimited by colons:
 
 --param:b:MATCH:true
 
---param:NAME:machien1
+--param:NAME:machine1
 
 -p:s:NAME:"Name with spaces"
 
@@ -82,7 +82,7 @@ The parameter flag contains 3 or 4 parts, delimited by colons:
 
 <code>-e | --example</code>:  Runs the demo command and generates example configurations in the program folder
 
-<code>-o | --output</code>:   Enables the output mode. The results of the task will be displayed in the command shell
+<code>-o | --output</code>:   Enables the output mode. The results of the task will be displayed in the shell (cmd)
 
 <code>-s | --stop</code>:     The task runner stops after an error. Otherwise, all sub-tasks are executed until the end of the configuration
 

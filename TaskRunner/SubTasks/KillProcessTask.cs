@@ -16,7 +16,6 @@ namespace TaskRunner.SubTasks
     /// </summary>
     public class KillProcessTask : SubTask
     {
-
         /// <summary>
         /// Implemented code of the task type (06)
         /// </summary>
@@ -59,43 +58,77 @@ namespace TaskRunner.SubTasks
         [XmlAttribute("argumentIsParamName")]
         public bool ArgumentIsParamName { get; set; }
 
+
+        /// <summary>
+        /// The method how the process will be terminated. Valid values are 'name' (default) and 'pid'
+        /// </summary>
+        [XmlAttribute("method")]
+        public string Method { get; set; }
+
+
         /// <summary>
         /// Default constructor
         /// </summary>
         public KillProcessTask() : base()
-        { }
-
+        {
+            this.Method = "name";
+        }
 
         /// <summary>
         /// Implemented Run method of the SubTask class
         /// </summary>
-        /// <returns>True if the task was executed successfully, otherwise false</returns>
-        public override bool Run()
+        /// <returns>Sub-task status</returns>
+        public override Task.Status Run()
         {
             if (string.IsNullOrEmpty(this.MainValue))
             {
-                this.Message = "No process to terminate was defined";
-                this.StatusCode = 0x02;
-                return false;
+                return this.SetStatus("NO_PROCESS", "No process to terminate was defined");
+               // this.Message = "No process to terminate was defined";
+               // this.StatusCode = 0x02;
+               // return Task.Status.failed;
             }
+            if (this.Method.ToLower() != "name" && this.Method.ToLower() != "pid")
+            {
+                return this.SetStatus("INVALID_METHOD", "The method is invalid");
+                //this.Message = "The method is invalid";
+               // this.StatusCode = 0x04;
+               // return Task.Status.failed;
+            }
+            this.Method = this.Method.ToLower();
             Process[] procs;
             try
             {
                 if (this.Arguments.Count < 1)
                 {
-                    procs = Process.GetProcessesByName(this.MainValue);
+                    if (this.Method == "name")
+                    {
+                        procs = Process.GetProcessesByName(this.MainValue);
+                    }
+                    else // PID
+                    {
+                        int pid;
+                        if (int.TryParse(this.MainValue, out pid) == false)
+                        {
+                            return this.SetStatus("INVALID_PID", "The process ID is invalid");
+                            //this.Message = "The process ID is invalid";
+                            //this.StatusCode = 0x03;
+                           // return Task.Status.failed;
+                        }
+                        Process proc = Process.GetProcessById(pid);
+                        procs = new Process[] { proc };
+                    }
                 }
                 else
                 {
-
                     if (this.ArgumentIsParamName == true)
                     {
-                        Parameter p = Parameter.GetParameter(this.Arguments[0], this.ParentTask.DisplayOutput);
+                        Parameter p = Parameter.GetUserParameter(this.Arguments[0], this.ParentTask.DisplayOutput);
                         if (p.Valid == false)
                         {
-                            this.Message = "The parameter with the name '" + this.Arguments[0] + "' is not defined";
-                            this.StatusCode = 0x03;
-                            return false;
+                            return this.SetStatus("NO_PARAMETER", "The parameter with the name '" + this.Arguments[0] + "' is not defined");
+                           // this.Message = "The parameter with the name '" + this.Arguments[0] + "' is not defined";
+                           // this.StatusCode = 0x05;
+                          //  return Task.Status.failed;
                         }
                         else
                         {
@@ -109,32 +142,38 @@ namespace TaskRunner.SubTasks
                 }
                 if (procs.Length == 0)
                 {
-                    this.Message = "The process "+ this.MainValue + " was not found. Nothing to do";
-                    this.StatusCode = 0x02;
+                    return this.SetStatus("SUCCESS_NO_PROCESS", "The process " + this.MainValue + " was not found. Nothing to do");
+                   // this.Message = "The process "+ this.MainValue + " was not found. Nothing to do";
+                   // this.StatusCode = 0x02;
                 }
                 else
                 {
+                    string msg;
                     for(int i = 0; i < procs.Length; i++)
                     {
                         procs[i].Kill();
                     }
                     if (procs.Length > 1)
                     {
-                        this.Message = "The process " + this.MainValue + " was terminated (" + procs.Length.ToString() + " instance)";
+                        //this.Message = "The process " + this.MainValue + " was terminated (" + procs.Length.ToString() + " instances)";
+                        msg = "The process " + this.MainValue + " was terminated (" + procs.Length.ToString() + " instances)";
                     }
                     else
                     {
-                        this.Message = "The process " + this.MainValue + " was terminated";
+                        //this.Message = "The process " + this.MainValue + " was terminated";
+                        msg = "The process " + this.MainValue + " was terminated";
                     }
-                    this.StatusCode = 0x01;
+                    return this.SetStatus("SUCCESS_TERMINATED", msg);
+                    //this.StatusCode = 0x01;
                 }
-                return true;
+               // return Task.Status.success;
             }
             catch(Exception e)
             {
-                this.Message = this.MainValue + " could not be terminated:\n" + e.Message;
-                this.StatusCode = 0x01;
-                return false;
+                return this.SetStatus("ERROR", "The process " + this.MainValue + " could not be terminated:\n" + e.Message);
+                //this.Message = "The process " + this.MainValue + " could not be terminated:\n" + e.Message;
+                //this.StatusCode = 0x01;
+                //return Task.Status.failed;
             }
         }
 
@@ -151,6 +190,8 @@ namespace TaskRunner.SubTasks
             t.MainValue = "notepad";
             if (number == 2)
             {
+                t.Method = "pid";
+                t.MainValue = "4485";
                 t.Arguments.Add("remote_machine_name");
             }
             else if (number == 3)
@@ -178,11 +219,14 @@ namespace TaskRunner.SubTasks
         public override Documentation GetDocumentationStatusCodes()
         {
             Documentation codes = new Documentation("Kill Process Task", "Status Codes");
-            codes.AddTuple(this.PrintStatusCode(true, 0x01), "The process was terminated successfully");
-            codes.AddTuple(this.PrintStatusCode(true, 0x02), "The process does not exist. Nothing to do");
-            codes.AddTuple(this.PrintStatusCode(false, 0x01), "The process could not be terminated due to an unknown reason");
-            codes.AddTuple(this.PrintStatusCode(false, 0x02), "No process to terminate was defined");
-            codes.AddTuple(this.PrintStatusCode(false, 0x03), "The parameter is not defined");
+            this.AppendCommonStatusCodes(ref codes);
+
+            this.RegisterStatusCode("NO_PROCESS", Task.Status.failed, "No process to terminate was defined", ref codes);
+            this.RegisterStatusCode("INVALID_PID", Task.Status.failed, "The process ID is invalid", ref codes);
+            this.RegisterStatusCode("INVALID_METHOD", Task.Status.failed, "The method is invalid", ref codes);
+            this.RegisterStatusCode("NO_PARAMETER", Task.Status.failed, "The parameter is not defined", ref codes);
+            this.RegisterStatusCode("SUCCESS_TERMINATED", Task.Status.success, "The process was terminated successfully", ref codes);
+            this.RegisterStatusCode("SUCCESS_NO_PROCESS", Task.Status.success, "The process does not exist. Nothing to do", ref codes);
             return codes;
         }
 
@@ -209,6 +253,7 @@ namespace TaskRunner.SubTasks
             Documentation attributes = new Documentation("Kill Process Task", "Attributes", "The following attributes are defined");
             this.AppendCommonAttributes(ref attributes, "<killProcessItem>", "KillProcess");
             attributes.AddTuple("argumentIsParamName", "Indicates whether the arguments are the parameter names (of global parameters) and not the actual values. Valid values of the parameter are 'true' and 'false'. The attribute is part of the <killProcessItem> tag and is optional.");
+            attributes.AddTuple("method", "Method how the process is determined. Valid values of the parameter are 'name' (default: process name) and 'pid' (process ID). The attribute is part of the <killProcessItem> tag.");
             return attributes;
         }
     }

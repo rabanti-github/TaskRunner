@@ -44,14 +44,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArgsTuple.cs" />
+    <Compile Include="Condition.cs" />
+    <Compile Include="Evaluation.cs" />
     <Compile Include="Documentation.cs" />
     <Compile Include="LogEntry.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StatusCodeEntry.cs" />
     <Compile Include="SubTasks\ControlServiceTask.cs" />
+    <Compile Include="SubTasks\DelayTask.cs" />
     <Compile Include="SubTasks\DeleteFileTask.cs" />
     <Compile Include="SubTasks\DeleteRegKeyTask.cs" />
+    <Compile Include="SubTasks\DummyTask.cs" />
     <Compile Include="SubTasks\KillProcessTask.cs" />
     <Compile Include="SubTasks\MetaTask.cs" />
     <Compile Include="SubTasks\StartProgramTask.cs" />

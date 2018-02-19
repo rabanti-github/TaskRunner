@@ -14,7 +14,6 @@ namespace TaskRunner.SubTasks
     /// </summary>
     public class DeleteRegKeyTask : SubTask
     {
-
         /// <summary>
         /// Implemented code of the task type (02)
         /// </summary>
@@ -28,7 +27,6 @@ namespace TaskRunner.SubTasks
         /// Type of the Task / Sub-task
         /// </summary>
         [XmlIgnore]
-        //public override Task.TaskType Type => Task.TaskType.DeleteRegKey;
          public override Task.TaskType Type
         {
             get { return Task.TaskType.DeleteRegKey; }
@@ -38,7 +36,6 @@ namespace TaskRunner.SubTasks
         /// Name of the demo file
         /// </summary>
         [XmlIgnore]
-       // public override string DemoFileName => "DEMO_DeleteregKey.xml";
         public override string DemoFileName
         {
             get { return "DEMO_DeleteRegKey.xml"; }
@@ -68,8 +65,7 @@ namespace TaskRunner.SubTasks
         /// <summary>
         /// Default constructor
         /// </summary>
-        public DeleteRegKeyTask()
-            : base()
+        public DeleteRegKeyTask() : base()
         {
 
         }
@@ -77,35 +73,26 @@ namespace TaskRunner.SubTasks
         /// <summary>
         /// Implemented Run method of the SubTask class
         /// </summary>
-        /// <returns>True if the task was executed successfully, otherwise false</returns>
-        public override bool Run()
+        /// <returns>Sub-task status</returns>
+        public override Task.Status Run()
         {
-            //string hive = "";
-            //string regValue = "";
             bool status = true;
             RegistryKey key = null;
             try
             {
                 if (string.IsNullOrEmpty(this.MainValue))
                 {
-                    this.Message = "No key was defined";
-                    this.StatusCode = 0x05;
-                    return false;
+                    return this.SetStatus("NO_KEY", "No key was defined");
                 }
                 if (string.IsNullOrEmpty(this.Hive))
                 {
-                    this.Message = "The Hive of the key " + this.MainValue + " was not defined";
-                    this.StatusCode = 0x02;
-                    return false;
+                    return this.SetStatus("NO_HIVE", "The Hive of the key " + this.MainValue + " was not defined");
                 }
                 if (this.Arguments.Count < 1)
                 {
-                    this.Message = "No value in the key " + this.MainValue + " to delete was defined";
-                    this.StatusCode = 0x03;
-                    return false;
+                    return this.SetStatus("NO_VALUE", "No value in the key " + this.MainValue + " to delete was defined");
                 }
                 this.Hive = this.Hive.ToUpper();
-                //regValue = this.Arguments[1];
                 if (this.Hive == "HKLM")
                 {
                     key = Registry.LocalMachine.OpenSubKey(this.MainValue, true);
@@ -138,16 +125,12 @@ namespace TaskRunner.SubTasks
                 }
                 else
                 {
-                    this.Message = "The hive " + this.Hive + " is undefined";
-                    this.StatusCode = 0x04;
-                    return false;
+                    return this.SetStatus("INVALID_HIVE", "The hive " + this.Hive + " is undefined");
                 }
 
                 if (status == false)
                 {
-                    this.Message = "The key " + this.MainValue + " is not present in " + this.Hive + ". Nothing to do";
-                    this.StatusCode = 0x02;
-                    return true;
+                    return this.SetStatus("SUCCESS_NO_ACTION", "The key " + this.MainValue + " is not present in " + this.Hive + ". Nothing to do");
                 }
                 else
                 {
@@ -160,12 +143,10 @@ namespace TaskRunner.SubTasks
 
                         if (this.ArgumentIsParamName == true)
                         {
-                            p = Parameter.GetParameter(item, this.ParentTask.DisplayOutput);
+                            p = Parameter.GetUserParameter(item, this.ParentTask.DisplayOutput);
                             if (p.Valid == false)
                             {
-                                this.Message = "The parameter with the name '" + item + "' is not defined";
-                                this.StatusCode = 0x06;
-                                return false;
+                                return this.SetStatus("NO_PARAMETER", "The parameter with the name '" + item + "' is not defined");
                             }
                             else
                             {
@@ -185,27 +166,18 @@ namespace TaskRunner.SubTasks
                     }
                     if (counter == 0)
                     {
-                        this.Message = "No value to delete was found in the key " + this.MainValue + ". Nothing to do";
-                        this.StatusCode = 0x03;
-                        return true;
+                        return this.SetStatus("SUCCESS_NO_ACTION2", "No value to delete was found in the key " + this.MainValue + ". Nothing to do");
                     }
                     else
                     {
-                        this.Message = counter + " values were deleted in the key " + this.MainValue + " in " + this.Hive;
-                        this.StatusCode = 0x01;
-                        return true;
+                        return this.SetStatus("SUCCESS_DELETED", counter + " values were deleted in the key " + this.MainValue + " in " + this.Hive);
                     }
                 }
-
-
             }
             catch (Exception e)
             {
-                this.Message = "The value(s) in the key " + this.MainValue + " in " + this.Hive + " could not be deleted" + e.Message;
-                this.StatusCode = 0x01;
-                return false;
+                return this.SetStatus("ERROR", "The value(s) in the key " + this.MainValue + " in " + this.Hive + " could not be deleted" + e.Message);
             }
-
         }
 
         /// <summary>
@@ -244,15 +216,17 @@ namespace TaskRunner.SubTasks
         public override Documentation GetDocumentationStatusCodes()
         {
             Documentation codes = new Documentation("Delete Registry-Key (Value) Task", "Status Codes");
-            codes.AddTuple(this.PrintStatusCode(true, 0x01), "The value was deleted successfully");
-            codes.AddTuple(this.PrintStatusCode(true, 0x02), "The key is not existing. Nothing to do");
-            codes.AddTuple(this.PrintStatusCode(true, 0x03), "The value was not found in the key. Nothing to do");
-            codes.AddTuple(this.PrintStatusCode(false, 0x01), "The value could not be deleted due to an unknown reason");
-            codes.AddTuple(this.PrintStatusCode(false, 0x02), "The hive was not defined");
-            codes.AddTuple(this.PrintStatusCode(false, 0x03), "No value to delete was defined");
-            codes.AddTuple(this.PrintStatusCode(false, 0x04), "The hive is not defined / unknown");
-            codes.AddTuple(this.PrintStatusCode(false, 0x05), "No key to check was defined");
-            codes.AddTuple(this.PrintStatusCode(false, 0x06), "The parameter is not defined");
+            this.AppendCommonStatusCodes(ref codes);
+
+            this.RegisterStatusCode("NO_HIVE", Task.Status.failed, "The hive was not defined", ref codes);
+            this.RegisterStatusCode("NO_VALUE", Task.Status.failed, "No value to delete was defined", ref codes);
+            this.RegisterStatusCode("INVALID_HIVE", Task.Status.failed, "The hive is not defined / unknown", ref codes);
+            this.RegisterStatusCode("NO_KEY", Task.Status.failed, "No key to check was defined", ref codes);
+            this.RegisterStatusCode("NO_PARAMETER", Task.Status.failed, "The parameter is not defined", ref codes);
+
+            this.RegisterStatusCode("SUCCESS_DELETED", Task.Status.success, "The value was deleted successfully", ref codes);
+            this.RegisterStatusCode("SUCCESS_NO_ACTION", Task.Status.success, "The key is not existing. Nothing to do", ref codes);
+            this.RegisterStatusCode("SUCCESS_NO_ACTION2", Task.Status.success, "The value was not found in the key. Nothing to do", ref codes);
             return codes;
         }
 

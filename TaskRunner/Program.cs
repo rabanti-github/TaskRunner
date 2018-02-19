@@ -20,6 +20,10 @@ namespace TaskRunner
         /// <param name="args">Arguments like -r, -d, -o, h or -l</param>
         static void Main(string[] args)
         {
+          //  args = new string[] { "-r", "ConditionTest_StartProgram.xml", "-o" };
+            //Parameter.RegisterSystemParameters();
+            //Evaluation.ParseCondition("(22 == SYSTEM_TIME_START)", false);
+
              if (args.Length < 1)
              {
                  Console.WriteLine(Usage(false));
@@ -84,17 +88,17 @@ namespace TaskRunner
             }
             if (a.Run == true)
             {
+                Parameter.RegisterSystemParameters();
+                //Parameter.UpdateSystemParameters(Parameter.SysParam.SYSTEM_TIME_START, DateTime.Now);
                 if (a.Output == true)
                 {
                     Console.WriteLine(Usage(true));
                 }
                 t = Task.Deserialize(a.ConfigFilePath);
                 if (t.Valid == false) { return; }
-                t.Run(a.HaltOnError, a.Output, a.Log);
-                if (a.Log == true)
-                {
-                    t.Log(a.LogFilePath);
-                }
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_TIME_START, DateTime.Now);
+                t.Run(a.HaltOnError, a.Output, a.Log, a.LogFilePath);
+                
             }
         }
 
@@ -109,6 +113,11 @@ namespace TaskRunner
 Task Runner - Run tasks controlled by config files
 (c) 2017 - Raphael Stoeckli
 https://github.com/rabanti-github/TaskRunner
+--------------------------------------------------
+DISCLAIMER: USE THIS SOFTWARE AT YOUR OWN RISK.
+THE AUTHOR(S) OF THIS SOFTWARE IS/ARE NOT LIABLE FOR
+ANY DAMAGE OR OTHER NEGATIVE EFFECTS ARISING FROM
+THE USAGE OF TASKRUNNER. --> License: MIT 
 --------------------------------------------------
 ";
             string usage =
@@ -235,22 +244,22 @@ Available documentation:
                     }
                     if (number2 == 2 || number2 == 1)
                     {
-                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Description, Console.WindowWidth);
+                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Description, Console.WindowWidth -1);
                         Console.WriteLine(text + "\n");
                     }
                     if (number2 == 3 || number2 == 1)
                     {
-                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Tags, Console.WindowWidth);
+                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Tags, Console.WindowWidth -1);
                         Console.WriteLine(text + "\n");
                     }
                     if (number2 == 4 || number2 == 1)
                     {
-                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Attributes, Console.WindowWidth);
+                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Attributes, Console.WindowWidth -1);
                         Console.WriteLine(text + "\n");
                     }
                     if (number2 == 5 || number2 == 1)
                     {
-                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.StatusCodes, Console.WindowWidth);
+                        text = types[number - 1].GetDocumentation(SubTask.DocumentationType.StatusCodes, Console.WindowWidth -1);
                         Console.WriteLine(text + "\n");
                     }
                     Console.WriteLine("\nPress any key to continue...");
@@ -320,7 +329,7 @@ Available documentation:
                     if (arg.StartsWith("--param") || arg.StartsWith("-p"))
                     {
                         Parameter p = Parameter.Parse(argValue);
-                        Parameter.AddParameter(p, true);
+                        Parameter.AddUserParameter(p, true);
                         nextArgIs = ArgsTuple.ArgType.flag;
                     }
                     else

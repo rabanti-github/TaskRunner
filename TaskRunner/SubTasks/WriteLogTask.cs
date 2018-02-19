@@ -28,7 +28,6 @@ namespace TaskRunner.SubTasks
         /// Type of the Task / Sub-task
         /// </summary>
         [XmlIgnore]
-        //public override Task.TaskType Type => Task.TaskType.WriteLog;
         public override Task.TaskType Type
         {
 	        get { return Task.TaskType.WriteLog; }
@@ -38,7 +37,6 @@ namespace TaskRunner.SubTasks
         /// Name of the demo file
         /// </summary>
         [XmlIgnore]
-        //public override string DemoFileName => "DEMO_WriteLog.xml";
         public override string DemoFileName
         {
             get { return "DEMO_WriteLog.xml"; }
@@ -74,8 +72,7 @@ namespace TaskRunner.SubTasks
         /// <summary>
         /// Default constructor
         /// </summary>
-        public WriteLogTask()
-            : base()
+        public WriteLogTask() : base()
         {
 
         }
@@ -83,20 +80,16 @@ namespace TaskRunner.SubTasks
         /// <summary>
         /// Implemented Run method of the SubTask class
         /// </summary>
-        /// <returns>True if the task was executed successfully, otherwise false</returns>
-        public override bool Run()
+        /// <returns>Sub-task status</returns>
+        public override Task.Status Run()
         {
             if (string.IsNullOrEmpty(this.MainValue))
             {
-                this.Message = "No logfile was defined";
-                this.StatusCode = 0x04;
-                return false;
+                return this.SetStatus("NO_LOGFILE", "No logfile was defined");
             }
             if (Arguments.Count < 1)
             {
-                this.Message = "No text to write was defined. Pass at least one argument (e.g. a space character)";
-                this.StatusCode = 0x05;
-                return false;
+                return this.SetStatus("NO_PARAM", "No text to write was defined. Pass at least one argument (e.g. a space character)");
             }
                 if (this.CreateFolders == true)
                 {
@@ -110,9 +103,7 @@ namespace TaskRunner.SubTasks
                     }
                     catch(Exception e)
                     {
-                        this.Message = "The directory of the logfile could not be created\n" + e.Message;
-                        this.StatusCode = 0x03;
-                        return false;
+                        return this.SetStatus("FAILED_DIR", "The directory of the logfile could not be created\n" + e.Message);
                     }
                 }
             try
@@ -125,12 +116,10 @@ namespace TaskRunner.SubTasks
                 {
                     if (this.ArgumentIsParamName == true)
                     {
-                        p = Parameter.GetParameter(item, this.ParentTask.DisplayOutput);
+                        p = Parameter.GetUserParameter(item, this.ParentTask.DisplayOutput);
                         if (p.Valid == false)
                         {
-                            this.Message = "The parameter with the name '" + item + "' is not defined";
-                            this.StatusCode = 0x05;
-                            return false;
+                            return this.SetStatus("NO_PARAM", "The parameter with the name '" + item + "' is not defined");
                         }
                         else
                         {
@@ -148,23 +137,17 @@ namespace TaskRunner.SubTasks
                 bool check = Utils.Log(this.MainValue, this.Header, text);
                 if (check == true)
                 {
-                    this.Message = "Logfile entry was written";
-                    this.StatusCode = 0x01;
-                    return true;
+                    return this.SetStatus("SUCCESS", "Logfile entry was written");
                 }
                 else
                 {
-                    this.Message = "Logfile could not be created or opened";
-                    this.StatusCode = 0x02;
-                    return false;
+                    return this.SetStatus("FAILED_OPEN", "Logfile could not be created or opened");
                 }
                 
             }
             catch (Exception e)
             {
-                this.Message = "The logfile entry could not be written\n" + e.Message;
-                this.StatusCode = 0x01;
-                return false;
+                return this.SetStatus("ERROR", "The logfile entry could not be written\n" + e.Message);
             }
         }
 
@@ -205,12 +188,13 @@ namespace TaskRunner.SubTasks
         public override Documentation GetDocumentationStatusCodes()
         {
             Documentation codes = new Documentation("Write Log Task", "Status Codes");
-            codes.AddTuple(this.PrintStatusCode(true, 0x01), "Logfile entry was written");
-            codes.AddTuple(this.PrintStatusCode(false, 0x01), "The logfile entry could not be written due to an unknown reason");
-            codes.AddTuple(this.PrintStatusCode(false, 0x02), "Logfile could not be created or opened");
-            codes.AddTuple(this.PrintStatusCode(false, 0x03), "The directory of the logfile could not be created");
-            codes.AddTuple(this.PrintStatusCode(false, 0x04), "No logfile was defined");
-            codes.AddTuple(this.PrintStatusCode(false, 0x05), "The parameter is not defined");
+            this.AppendCommonStatusCodes(ref codes);
+
+            this.RegisterStatusCode("FAILED_OPEN", Task.Status.failed, "Logfile could not be created or opened", ref codes);
+            this.RegisterStatusCode("FAILED_DIR", Task.Status.failed, "The directory of the logfile could not be created", ref codes);
+            this.RegisterStatusCode("NO_LOGFILE", Task.Status.failed, "No logfile was defined", ref codes);
+            this.RegisterStatusCode("NO_PARAM", Task.Status.failed, "The parameter is not defined", ref codes);
+            this.RegisterStatusCode("SUCCESS", Task.Status.success, "Logfile entry was written", ref codes);
             return codes;
         }
 

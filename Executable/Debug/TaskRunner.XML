@@ -92,6 +92,143 @@
             The argument is not defined
             </summary>
         </member>
+        <member name="T:TaskRunner.Condition">
+            <summary>
+            Class to handle conditions
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Condition.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Condition.#ctor(System.String,System.String,System.String,System.String)">
+            <summary>
+            Constructor with all parameters
+            </summary>
+            <param name="expression">Expression to evaluate</param>
+            <param name="action">Action to execute if expression is true</param>
+            <param name="defaultAction">Action to execute if expression is false</param>
+            <param name="type">Type of evaluation</param>
+        </member>
+        <member name="M:TaskRunner.Condition.Evaluate(System.Boolean)">
+            <summary>
+            Evaluates the expression and returns whether the evaluation is true or false
+            </summary>
+            <param name="displayOutput">If true, errors will be displayed</param>
+            <returns>Evaluation state of the expression</returns>
+        </member>
+        <member name="M:TaskRunner.Condition.CheckOperation(System.Boolean)">
+            <summary>
+            Checks the action and default
+            </summary>
+            <param name="checkAction">If true the action will be checked otherwise the default action</param>
+            <returns>Returns the appropriate value</returns>
+        </member>
+        <member name="M:TaskRunner.Condition.CheckType">
+            <summary>
+            Checks the type of the condition
+            </summary>
+            <returns>Returns the appropriate value</returns>
+        </member>
+        <member name="P:TaskRunner.Condition.Expression">
+            <summary>
+            Logic expression as string
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Condition.Action">
+            <summary>
+            Action as string. Available are: run (default), restart_last_subtast, skip, exit, restart_task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Condition.Default">
+            <summary>
+            Default action as string if the condition is not met. Available are: run, restart_last_subtast, skip (default), exit, restart_task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Condition.Type">
+            <summary>
+            Type of the conditional check. Available are: pre (default: Check before execution of task or Sub-Task) and post (check after execution)
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Condition.ConditionAction">
+            <summary>
+            Enum of actions for conditions
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionAction.run">
+            <summary>
+            Task or Sub-Task will be executed if condition is met
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionAction.restart_task">
+            <summary>
+            Task will be restarted if condition is met
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionAction.restart_last_subtask">
+            <summary>
+            Last Sub-Task will be restarted if condition is met
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionAction.skip">
+            <summary>
+            Current Task or Sub-Task will be skipped if condition is met
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionAction.exit">
+            <summary>
+            Program will be terminated if condition is met
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionAction.none">
+            <summary>
+            Default - No action / Error
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Condition.ConditionType">
+            <summary>
+            Enum of the evaluation type / timing
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionType.pre">
+            <summary>
+            Condition is checked before the execution of the task or sub task
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionType.post">
+            <summary>
+            Condition is checked after the execution of the task or sub task
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Condition.ConditionType.none">
+            <summary>
+            Default - No check / Error
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Evaluation">
+            <summary>
+            Task Runner - (c) 2017 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Class for handling of the evaluation of expressions
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Evaluation.ParseCondition(System.String,System.Boolean)">
+            <summary>
+            Method for expression parsing
+            </summary>
+            <param name="expression">Raw expression to parse</param>
+            <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
+            <returns>True, if the expression was evaluates successfully, otherwise false</returns>
+        </member>
+        <member name="M:TaskRunner.Evaluation.ParseParameters(System.String)">
+            <summary>
+            Method to resolve parameters in an expression string and to correct the logical syntax into a valid format
+            </summary>
+            <param name="expression">Raw expression string</param>
+            <returns>Resolved expression string</returns>
+        </member>
         <member name="T:TaskRunner.Documentation">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -287,10 +424,11 @@
             Default constructor
             </summary>
         </member>
-        <member name="M:TaskRunner.LogEntry.getLogString">
+        <member name="M:TaskRunner.LogEntry.getLogString(TaskRunner.Task.Status)">
             <summary>
             Returns a formated log entry as string (line). The first value is the current date
             </summary>
+            <param name="status">Status of the log entry</param>
             <returns>Formated log entry as string</returns>
         </member>
         <member name="M:TaskRunner.LogEntry.PrintExecutionCode">
@@ -316,11 +454,6 @@
             The name of the Sub-Task
             </summary>
         </member>
-        <member name="P:TaskRunner.LogEntry.Status">
-            <summary>
-            The execution status
-            </summary>
-        </member>
         <member name="P:TaskRunner.LogEntry.ExecutionDate">
             <summary>
             The execution date
@@ -329,6 +462,447 @@
         <member name="P:TaskRunner.LogEntry.ExecutionCode">
             <summary>
             The execution code of the Sub-Task (4 bytes)
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Parameter">
+            <summary>
+            Task Runner - (c) 2017 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Class for parameter handling
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Parameter.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Parameter.#ctor(System.String,System.String)">
+            <summary>
+            Parameter with arguments
+            </summary>
+            <param name="name">Parameter name</param>
+            <param name="value">String value of the parameter</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.#ctor(System.String)">
+            <summary>
+            Parameter with arguments
+            </summary>
+            <param name="rawValue">Raw value</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.RegisterTaskIterations(TaskRunner.Task)">
+            <summary>
+            Method to register a task in the list to check iterations
+            </summary>
+            <param name="task">Task to register</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.CheckTaskIteration(System.String,System.Boolean)">
+            <summary>
+            Method to check the number of iterations of a Task
+            </summary>
+            <param name="taskID">Task ID to check</param>
+            <param name="displayOutput">If true, information about errors is passed to the command shell</param>
+            <returns>If true, the task can be executed, otherwise the program will be terminated</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.CheckSubTaskIteration(System.String,System.Boolean)">
+            <summary>
+            Method to check the number of iterations of a Sub-Task
+            </summary>
+            <param name="subTaskID">Sub-Task ID to check</param>
+            <param name="displayOutput">If true, information about errors is passed to the command shell</param>
+            <returns>If true, the task can be executed, otherwise the program will be terminated</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.GetParameter(System.String,System.Boolean)">
+            <summary>
+            Method to return the value of a parameter
+            </summary>
+            <param name="name">Parameter to check</param>
+            <param name="displayOutput">If true, information about errors is passed to the command shell</param>
+            <returns>Parameter of the name</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.GetUserParameter(System.String,System.Boolean)">
+            <summary>
+            Method to return a user parameter
+            </summary>
+            <param name="name">Parameter to check</param>
+            <param name="displayOutput">If true, information about errors is passed to the command shell</param>
+            <returns>Parameter of the name</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.GetSystemParameter(System.String)">
+            <summary>
+            Method to return a system parameter
+            </summary>
+            <param name="parameter">Parameter to check</param>
+            <returns>Parameter of the name</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.GetSystemParameter(TaskRunner.Parameter.SysParam)">
+            <summary>
+            Method to return a system parameter
+            </summary>
+            <param name="parameter">Parameter to check</param>
+            <returns>Parameter of the name</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.GetParameter(System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Internal method to return a parameter
+            </summary>
+            <param name="name">Parameter to check</param>
+            <param name="displayOutput">If true, information about errors is passed to the command shell</param>
+            <param name="userParameter">If true, a user parameter will be retrieved, otherwise a system parameter</param>
+            <returns>Parameter of the name</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.AddUserParameter(TaskRunner.Parameter,System.Boolean)">
+            <summary>
+            Method to add a user parameter
+            </summary>
+            <param name="parameter">Parameter name</param>
+            <param name="displayOutput">If true, information about errors is passed to the command shell</param>
+            <returns>In true the parameter was added successfully</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.AddSystemParameter(TaskRunner.Parameter,TaskRunner.Parameter.ParamType)">
+            <summary>
+            Method to add a system parameter
+            </summary>
+            <param name="parameter">Parameter name</param>
+            <param name="flag">Parameter type</param>
+            <returns>In true the parameter was added successfully</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.AddParameter(TaskRunner.Parameter,System.Boolean,System.Boolean)">
+            <summary>
+            Internal method to add a parameter
+            </summary>
+            <param name="parameter">Parameter name</param>
+            <param name="displayOutput">If true, information about errors is passed to the command shell</param>
+            <param name="userParameter">If true, the parameter is a user parameter, otherwise a system parameter</param>
+            <returns>In true the parameter was added successfully</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.ValidateParameterName(System.String)">
+            <summary>
+            Method to check a parameter before inserting
+            </summary>
+            <param name="name">Parameter name</param>
+            <returns>If true, the parameter is valid</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.UpdateSystemParameterNumber(TaskRunner.Parameter.SysParam)">
+            <summary>
+            Method to add 1 to a numeric system parameter
+            </summary>
+            <param name="key">Parameter enumeration</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.UpdateSystemParameter(TaskRunner.Parameter.SysParam,System.Double)">
+            <summary>
+            Method to update a numeric system parameter
+            </summary>
+            <param name="key">Parameter number</param>
+            <param name="number">Value to update</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.UpdateSystemParameter(TaskRunner.Parameter.SysParam,System.DateTime)">
+            <summary>
+            Method to update a DateTime system parameter
+            </summary>
+            <param name="key">Parameter number</param>
+            <param name="date">Value to update</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.UpdateSystemParameter(TaskRunner.Parameter.SysParam,System.Boolean)">
+            <summary>
+            Method to update a boolean system parameter
+            </summary>
+            <param name="key">Parameter number</param>
+            <param name="boolvalue">Value to update</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.UpdateSystemParameter(TaskRunner.Parameter.SysParam,System.String)">
+            <summary>
+            Method to update a string system parameter
+            </summary>
+            <param name="key">Parameter number</param>
+            <param name="value">Value to update</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.UpdateSystemParameterInternal(TaskRunner.Parameter.SysParam,System.Object)">
+            <summary>
+            Internal method to update a system parameter
+            </summary>
+            <param name="parameter">Parameter number</param>
+            <param name="o">Value to update</param>
+        </member>
+        <member name="M:TaskRunner.Parameter.RegisterSystemParameters">
+            <summary>
+            Method to register all system parameters
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Parameter.ResetSubTaskParameters">
+            <summary>
+            Method to reset the parameters regarding Sub-Tasks
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Parameter.ResetTaskParameters">
+            <summary>
+            Method to reset the parameters regarding Tasks
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Parameter.CheckGlobalParameterName(System.String,TaskRunner.Parameter.ParamType@,TaskRunner.Parameter.Types@)">
+            <summary>
+            Method to check whether a global parameter name is valid
+            </summary>
+            <param name="name">Name to check</param>
+            <param name="paramType">Type of the parameter as out parameter</param>
+            <param name="dataType">Data type of the parameter</param>
+            <returns>If true, the checked parameter is valid</returns>
+        </member>
+        <member name="M:TaskRunner.Parameter.Parse(System.String)">
+            <summary>
+            Method to parse a parameter from a string
+            </summary>
+            <param name="rawValue">Raw value</param>
+            <returns>Resolved parameter</returns>
+        </member>
+        <member name="P:TaskRunner.Parameter.UserParameters">
+            <summary>
+            Static dictionary for user parameters 
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.SystemParameters">
+            <summary>
+            Static dictionary for system parameters 
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.TaskIterations">
+            <summary>
+            Static dictionary to check the iterations of Tasks
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.SubTaskIterations">
+            <summary>
+            Static dictionary to check the iterations of Sub-Tasks
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.Name">
+            <summary>
+            Name of the parameter
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.Value">
+            <summary>
+            String value of the parameter
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.ParameterType">
+            <summary>
+            Data type of the parameter
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.BooleanValue">
+            <summary>
+            Boolean value of the parameter
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.NumericValue">
+            <summary>
+            Numeric value of the parameter
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.DateTimeValue">
+            <summary>
+            DateTime value of the parameter
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.Valid">
+            <summary>
+            If true, the parameter is valid
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Parameter.Flag">
+            <summary>
+            Type of the parameter
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Parameter.Types">
+            <summary>
+            Enum for data types
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.Types.String">
+            <summary>
+            Data type is a string
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.Types.Number">
+            <summary>
+            Data type is a number (double)
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.Types.Boolean">
+            <summary>
+            Data type is a boolean
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.Types.DateTime">
+            <summary>
+            Data type is a date / time
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Parameter.ParamType">
+            <summary>
+            Enum for the parameter type
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.ParamType.SYSTEM">
+            <summary>
+            Parameter is a read-only system parameter
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.ParamType.ENV">
+            <summary>
+            Parameter is a overridable system / environment parameter
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.ParamType.TASK">
+            <summary>
+            Parameter is a read-only task-related parameter
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.ParamType.SUBTASK">
+            <summary>
+            Parameter is a read-only sub-task-related parameter
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.ParamType.USER">
+            <summary>
+            Parameter is a free user parameter
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.ParamType.NONE">
+            <summary>
+            Default parameter / Not defined
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Parameter.SysParam">
+            <summary>
+            Enum for the available system parameters
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_LAST_SUCCESS">
+            <summary>
+            Boolean parameter whether the last task was successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_LAST_SUCCESS_PARTIAL">
+            <summary>
+            Boolean parameter whether the last task was partially successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_LAST_TIME_START">
+            <summary>
+            DateTime parameter of starting time of the last task
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_LAST_TIME_END">
+            <summary>
+            DateTime parameter of end time of the last task
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_LAST_LOGGING_SUPPERSS">
+            <summary>
+            Boolean parameter whether the logging if the last task is suppressed
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_ALL_SUCCESS">
+            <summary>
+            Boolean parameter whether all tasks were successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_ALL_SUCCESS_PARTIAL">
+            <summary>
+            Boolean parameter whether all tasks were partially successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_ALL_NUMBER_TOTAL">
+            <summary>
+            Numeric parameter regarding the total number of tasks
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_ALL_NUMBER_SUCCESS">
+            <summary>
+            Numeric parameter regarding the total number of successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.TASK_ALL_NUMBER_FAIL">
+            <summary>
+            Numeric parameter regarding the total number of failed tasks
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_LAST_SUCCESS">
+            <summary>
+            Boolean parameter whether the last sub-task was successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL">
+            <summary>
+            Boolean parameter whether the last sub-task was partially successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_ALL_SUCCESS">
+            <summary>
+            Boolean parameter whether all sub-tasks were successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_LAST_TIME_START">
+            <summary>
+            DateTime parameter of starting time of the last sub-task
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_LAST_TIME_END">
+            <summary>
+            DateTime parameter of end time of the last sub-task
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL">
+            <summary>
+            Boolean parameter whether all sub-task were partially successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_ALL_NUMBER_TOTAL">
+            <summary>
+            Numeric parameter regarding the total number of sub-tasks
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS">
+            <summary>
+            Numeric parameter regarding the total number of successfully sub-tasks
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SUBTASK_ALL_NUMBER_FAIL">
+            <summary>
+            Numeric parameter regarding the total number of failed sub-tasks
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SYSTEM_TIME_START">
+            <summary>
+            DateTime parameter of start time of the program
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SYSTEM_TIME_END">
+            <summary>
+            DateTime parameter of end time of the program
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SYSTEM_CONDITION_TRUE">
+            <summary>
+            String parameter regarding the result of the last condition evaluation (true branch)
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SYSTEM_CONDITION_FALSE">
+            <summary>
+            String parameter regarding the result of the last condition evaluation (false branch)
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.ENV_MAX_TASK_ITERATIONS">
+            <summary>
+            Overridable maximum number of iterations of tasks to avoid infinite loops
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.ENV_MAX_SUBTASK_ITERATIONS">
+            <summary>
+            Overridable maximum number of iterations of sub-tasks to avoid infinite loops
             </summary>
         </member>
         <member name="T:TaskRunner.Program">
@@ -366,6 +940,53 @@
             <param name="argType">The expected type of the argument</param>
             <returns>The expected type of the next argument. In case of -r|--run and -l|--log, this is configFile or logFile</returns>
         </member>
+        <member name="T:TaskRunner.StatusCodeEntry">
+            <summary>
+            Task Runner - (c) 2017 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Class representing a status code entry
+            </summary>
+        </member>
+        <member name="M:TaskRunner.StatusCodeEntry.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.StatusCodeEntry.#ctor(System.String,System.Byte,TaskRunner.Task.Status)">
+            <summary>
+            Constructor with parameters
+            </summary>
+            <param name="id">ID as string</param>
+            <param name="code">Status code as byte</param>
+            <param name="status">Task status</param>
+        </member>
+        <member name="M:TaskRunner.StatusCodeEntry.GetNumber">
+            <summary>
+            Gets the number of the status code (byte to integer)
+            </summary>
+            <returns>Integer of the status byte</returns>
+        </member>
+        <member name="P:TaskRunner.StatusCodeEntry.Code">
+            <summary>
+            Status code as byte
+            </summary>
+        </member>
+        <member name="P:TaskRunner.StatusCodeEntry.ID">
+            <summary>
+            Status ID as string
+            </summary>
+        </member>
+        <member name="P:TaskRunner.StatusCodeEntry.Description">
+            <summary>
+            Description of the status
+            </summary>
+        </member>
+        <member name="P:TaskRunner.StatusCodeEntry.Status">
+            <summary>
+            Task status
+            </summary>
+        </member>
         <member name="T:TaskRunner.SubTasks.ControlServiceTask">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -391,7 +1012,7 @@
             <summary>
             Abstract method to run the Sub-Task
             </summary>
-            <returns>True if the task was executed successfully, otherwise false</returns>
+            <returns>Sub-task status</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.SubTask.GetDemoFile(System.Int32)">
             <summary>
@@ -405,6 +1026,7 @@
             Gets the Documentation as Text
             </summary>
             <param name="type">Type of the documentation</param>
+            <param name="maxLength">Number of characters in of one line in the console</param>
             <returns>Formated documentation</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.SubTask.SaveMarkdown(System.String)">
@@ -451,12 +1073,48 @@
             <param name="documentation">Specific tag documentation object</param>
             <param name="baseTag">Base tag of the Sub-Task</param>
         </member>
-        <member name="M:TaskRunner.SubTasks.SubTask.PrintStatusCode(System.Boolean,System.Byte)">
+        <member name="M:TaskRunner.SubTasks.SubTask.AppendCommonStatusCodes(TaskRunner.Documentation@)">
+            <summary>
+            Appends the common status codes, applicable for all Sub-Task types
+            </summary>
+            <param name="documentation">Specific tag documentation object</param>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.RegisterStatusCode(System.String,TaskRunner.Task.Status,System.String,TaskRunner.Documentation@)">
+            <summary>
+            Registers a status code
+            </summary>
+            <param name="id">ID as string</param>
+            <param name="status">Task status</param>
+            <param name="description">Description text</param>
+            <param name="documentation">Documentation object</param>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetStatusCode(System.String)">
+            <summary>
+            Gets the status code as byte
+            </summary>
+            <param name="id">ID as string</param>
+            <returns>Byte of the status code</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.SetStatus(System.String,System.String)">
+            <summary>
+            Sets the status of the Sub-Task
+            </summary>
+            <param name="id">ID of the status as string</param>
+            <param name="message">Additional message of the status</param>
+            <returns>Resolved status</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.GetStatusCodeEntry(System.String)">
+            <summary>
+            Gets the status code entry
+            </summary>
+            <param name="id">Status code as string</param>
+            <returns>Resolved SatusCodeEntry</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.SubTask.PrintStatusCode(System.String)">
             <summary>
             Prints a status code to a specific task
             </summary>
-            <param name="status">Status (success or failure) of the task</param>
-            <param name="code">Status code to print</param>
+            <param name="id">ID of the status code</param>
             <returns>Formatted string</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.SubTask.GetDocumentationDescription">
@@ -513,6 +1171,11 @@
             Optional arguments as strings to execute the Sub-Task. The meaning of these values varies depending on the actual implementation of the derived class
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.SubTaskCondition">
+            <summary>
+            Optional condition check for the current SubTask
+            </summary>
+        </member>
         <member name="P:TaskRunner.SubTasks.SubTask.Message">
             <summary>
             Message after execution of the Sub-Task. This Message is not serialized
@@ -553,6 +1216,11 @@
             Base task of this Sub-Task
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.SubTask.SubTaskID">
+            <summary>
+            Internal ID of the Sub-Task. The ID is calculated by the Task ID and a sequence number
+            </summary>
+        </member>
         <member name="T:TaskRunner.SubTasks.SubTask.DocumentationType">
             <summary>
             Type of the documentation
@@ -587,7 +1255,7 @@
             <summary>
             Implemented Run method of the SubTask class
             </summary>
-            <returns>True if the task was executed successfully, otherwise false</returns>
+            <returns>Sub-task status</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.ControlServiceTask.GetDemoFile(System.Int32)">
             <summary>
@@ -625,6 +1293,21 @@
             Implemented code of the task type (05)
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.ControlServiceTask.Action">
+            <summary>
+            Action of the task (start, stop, restart, pause, resume)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.ControlServiceTask.WaitForStatus">
+            <summary>
+            If true, the program will wait until the target status or timeout is reached 
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.ControlServiceTask.Timeout">
+            <summary>
+            Timeout in seconds
+            </summary>
+        </member>
         <member name="P:TaskRunner.SubTasks.ControlServiceTask.Type">
             <summary>
             Type of the Task / Sub-task
@@ -645,6 +1328,71 @@
             If true, the arguments are the parameter names (of global parameters) and not the actual values
             </summary>
         </member>
+        <member name="T:TaskRunner.SubTasks.DelayTask">
+            <summary>
+            Task Runner - (c) 2017 - Raphael Stoeckli
+            This program and its code is released under the MIT license
+            -----------------------------------------------------------
+            Derived Sub-Task Class to pause the program for a particular number of milliseconds
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DelayTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>Sub-task status</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DelayTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DelayTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DelayTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DelayTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DelayTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DelayTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (07)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DelayTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DelayTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DelayTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
         <member name="T:TaskRunner.SubTasks.DeleteFileTask">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -662,7 +1410,7 @@
             <summary>
             Implemented Run method of the SubTask class
             </summary>
-            <returns>True if the task was executed successfully, otherwise false</returns>
+            <returns>Sub-task status</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.DeleteFileTask.GetDemoFile(System.Int32)">
             <summary>
@@ -732,7 +1480,7 @@
             <summary>
             Implemented Run method of the SubTask class
             </summary>
-            <returns>True if the task was executed successfully, otherwise false</returns>
+            <returns>Sub-task status</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.DeleteRegKeyTask.GetDemoFile(System.Int32)">
             <summary>
@@ -795,6 +1543,73 @@
             If true, the arguments are the parameter names (of global parameters) and not the actual values
             </summary>
         </member>
+        <member name="T:TaskRunner.SubTasks.DummyTask">
+            <summary>
+            Dummy Task to handle Pre-Sub-Task conditions
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DummyTask.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DummyTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DummyTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DummyTask.GetDocumentationDescription">
+            <summary>
+            Returns the description as documentation for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DummyTask.GetDocumentationStatusCodes">
+            <summary>
+            Returns the documentation of the status codes for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DummyTask.GetTagDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DummyTask.Run">
+            <summary>
+            Implemented Run method of the SubTask class
+            </summary>
+            <returns>Sub-task status</returns>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DummyTask.TaskTypeCode">
+            <summary>
+            Implemented code of the task type (00 = Pre-Sub-Task condition)
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DummyTask.Type">
+            <summary>
+            Type of the Task / Sub-task
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DummyTask.DemoFileName">
+            <summary>
+            Name of the demo file
+            </summary>
+        </member>
+        <member name="P:TaskRunner.SubTasks.DummyTask.MarkdownFileName">
+            <summary>
+            Name of the markdown file
+            </summary>
+        </member>
         <member name="T:TaskRunner.SubTasks.KillProcessTask">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -812,7 +1627,7 @@
             <summary>
             Implemented Run method of the SubTask class
             </summary>
-            <returns>True if the task was executed successfully, otherwise false</returns>
+            <returns>Sub-task status</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.KillProcessTask.GetDemoFile(System.Int32)">
             <summary>
@@ -870,6 +1685,11 @@
             If true, the arguments are the parameter names (of global parameters) and not the actual values
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.KillProcessTask.Method">
+            <summary>
+            The method how the process will be terminated. Valid values are 'name' (default) and 'pid'
+            </summary>
+        </member>
         <member name="T:TaskRunner.SubTasks.MetaTask">
             <summary>
             Task Runner - (c) 2017 - Raphael Stoeckli
@@ -887,7 +1707,14 @@
             <summary>
             Implemented Run method of the SubTask class
             </summary>
-            <returns>True if the task was executed successfully, otherwise false</returns>
+            <returns>Sub-task status</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.MetaTask.GetDemoFile(System.Int32)">
+            <summary>
+            Implemented GetDemoFile method of the SubTask class
+            </summary>
+            <param name="number">Optional number to indicate several Sub-Tasks</param>
+            <returns>Instance of the implemented class</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.MetaTask.GetDocumentationDescription">
             <summary>
@@ -904,6 +1731,12 @@
         <member name="M:TaskRunner.SubTasks.MetaTask.GetTagDocumentationParameters">
             <summary>
             Returns the documentation of the XML tags for the specific Sub-Task
+            </summary>
+            <returns>Documentation object</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.MetaTask.GetAttributesDocumentationParameters">
+            <summary>
+            Returns the documentation of the XML attributes for the specific Sub-Task
             </summary>
             <returns>Documentation object</returns>
         </member>
@@ -952,7 +1785,7 @@
             <summary>
             Implemented Run method of the SubTask class
             </summary>
-            <returns>True if the task was executed successfully, otherwise false</returns>
+            <returns>Sub-task status</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.StartProgramTask.GetDemoFile(System.Int32)">
             <summary>
@@ -1005,6 +1838,11 @@
             Name of the markdown file
             </summary>
         </member>
+        <member name="P:TaskRunner.SubTasks.StartProgramTask.Asynchronous">
+            <summary>
+            If true, the program will be executed asynchronous
+            </summary>
+        </member>
         <member name="P:TaskRunner.SubTasks.StartProgramTask.ArgumentIsParamName">
             <summary>
             If true, the arguments are the parameter names (of global parameters) and not the actual values
@@ -1027,7 +1865,7 @@
             <summary>
             Implemented Run method of the SubTask class
             </summary>
-            <returns>True if the task was executed successfully, otherwise false</returns>
+            <returns>Sub-task status</returns>
         </member>
         <member name="M:TaskRunner.SubTasks.WriteLogTask.GetDemoFile(System.Int32)">
             <summary>
@@ -1119,14 +1957,15 @@
             Default constructor
             </summary>
         </member>
-        <member name="M:TaskRunner.Task.Run(System.Boolean,System.Boolean,System.Boolean)">
+        <member name="M:TaskRunner.Task.Run(System.Boolean,System.Boolean,System.Boolean,System.String)">
             <summary>
             Method to run all Sub-Tasks of the current configuration
             </summary>
             <param name="stopOnError">If true, the method stops if an error occurs during execution of the Sub-Tasks</param>
             <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
             <param name="log">If true, the execution of the Task and its Sub-Tasks will be logged</param>
-            <returns>True if no errors occurred, otherwise false</returns>
+            <param name="logFilePath">Path to the system logfile</param>
+            <returns>Task status</returns>
         </member>
         <member name="M:TaskRunner.Task.ResolveTaskMode(System.Boolean,System.Boolean,System.Boolean)">
             <summary>
@@ -1187,10 +2026,11 @@
             <param name="type">Task type of the demo configuration</param>
             <param name="asFile">If true a file will be generated, otherwise a string returned</param>
         </member>
-        <member name="M:TaskRunner.Task.Log(System.String)">
+        <member name="M:TaskRunner.Task.Log(System.String,TaskRunner.Task.Status)">
             <summary>
             Method to write all log entries of the executed Tasks
             </summary>
+            <param name="status">Status of the task</param>
             <param name="logFile">File name of the logfile</param>
         </member>
         <member name="M:TaskRunner.Task.PrintExecutionCode(TaskRunner.LogEntry)">
@@ -1226,12 +2066,17 @@
             Optional Task description
             </summary>
         </member>
+        <member name="P:TaskRunner.Task.TaskCondition">
+            <summary>
+            Optional condition check for the current SubTask
+            </summary>
+        </member>
         <member name="P:TaskRunner.Task.Valid">
             <summary>
             If proper deserialized, this value is set to true. It indicates that the configuration is valid (valid XML)
             </summary>
         </member>
-        <member name="P:TaskRunner.Task.ExecutedTasks">
+        <member name="P:TaskRunner.Task.ExecutedSubTasks">
             <summary>
             The number of executed Sub-Tasks
             </summary>
@@ -1266,9 +2111,24 @@
             If true, the execution of the Task and its Sub-Tasks will be logged
             </summary>
         </member>
+        <member name="P:TaskRunner.Task.LogfilePath">
+            <summary>
+            Path to the system logfile
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Task.TaskID">
+            <summary>
+            Internal ID of the task. The ID is calculated by the file name
+            </summary>
+        </member>
         <member name="T:TaskRunner.Task.TaskType">
             <summary>
             Type of the Task and its Sub-Tasks
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.TaskType.DummyTask">
+            <summary>
+            Dummy Task (Pre-Sub-Task condition, will not be listed)
             </summary>
         </member>
         <member name="F:TaskRunner.Task.TaskType.DeleteFile">
@@ -1306,9 +2166,44 @@
             Loads further config files to execute
             </summary>
         </member>
+        <member name="F:TaskRunner.Task.TaskType.DelayTask">
+            <summary>
+            Delays the program execution. This tasks is used to play a delay between two other tasks 
+            </summary>
+        </member>
         <member name="F:TaskRunner.Task.TaskType.MixedTask">
             <summary>
             Task with several different Sub-Tasks
+            </summary>
+        </member>
+        <member name="T:TaskRunner.Task.Status">
+            <summary>
+            Status of the task or sub task
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.Status.success">
+            <summary>
+            Task or sub task was successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.Status.failed">
+            <summary>
+            Task or sub task was not successful
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.Status.skipped">
+            <summary>
+            Task or sub task was skipped
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.Status.terminate">
+            <summary>
+            Program will be terminated
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Task.Status.none">
+            <summary>
+            Error - Status unclear
             </summary>
         </member>
         <member name="T:TaskRunner.Utils">

@@ -1,5 +1,12 @@
 ﻿# Change Log
 
+
+## v1.3.0 (xx.09.2017)
+
+* Added DelayTask
+* Added system parameters beside user parameters
+* Added disclaimer
+
 ## v1.2.0 (04.09.2017)
 
 * Added KillProcessTask

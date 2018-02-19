@@ -28,7 +28,6 @@ namespace TaskRunner.SubTasks
         /// Type of the Task / Sub-task
         /// </summary>
         [XmlIgnore]
-        //public override Task.TaskType Type => Task.TaskType.DeleteFile;
         public override Task.TaskType Type
         {
 	        get { return Task.TaskType.DeleteFile; }
@@ -38,7 +37,6 @@ namespace TaskRunner.SubTasks
         /// Name of the demo file
         /// </summary>
         [XmlIgnore]
-       // public override string DemoFileName => "DEMO_DeleteFile.xml";
         public override string DemoFileName
         {
             get { return "DEMO_DeleteFile.xml"; }
@@ -65,35 +63,29 @@ namespace TaskRunner.SubTasks
         /// <summary>
         /// Implemented Run method of the SubTask class
         /// </summary>
-        /// <returns>True if the task was executed successfully, otherwise false</returns>
-        public override bool Run()
+        /// <returns>Sub-task status</returns>
+        public override Task.Status Run()
         {
             try
             {
                 if (string.IsNullOrEmpty(this.MainValue))
                 {
-                    this.Message = "No file to delete was defined";
-                    this.StatusCode = 0x02;
-                    return false;
+                    return this.SetStatus("NO_FILE", "No file to delete was defined");
                 }
                 if (File.Exists(this.MainValue) == false)
                 {
-                    this.Message = this.MainValue + " does not exist. Nothing to do";
-                    this.StatusCode = 0x02;
+                    return this.SetStatus("SUCCESS_NO_ACTION", this.MainValue + " does not exist. Nothing to do");
                 }
                 else
                 {
                     System.IO.File.Delete(this.MainValue);
-                    this.Message = this.MainValue + " was deleted";
-                    this.StatusCode = 0x01;
+                    return this.SetStatus("SUCCESS_DELETED", this.MainValue + " was deleted");
                 }
-                return true;
+                //return Task.Status.success;
             }
             catch (Exception e)
             {
-                this.Message = this.MainValue + " could not be deleted:\n" + e.Message;
-                this.StatusCode = 0x01;
-                return false;
+                return this.SetStatus("ERROR", this.MainValue + " could not be deleted:\n" + e.Message);
             }
         }
 
@@ -118,10 +110,10 @@ namespace TaskRunner.SubTasks
         public override Documentation GetDocumentationStatusCodes()
         {
             Documentation codes = new Documentation("Delete File Task", "Status Codes");
-            codes.AddTuple(this.PrintStatusCode(true, 0x01), "The file was deleted successfully");
-            codes.AddTuple(this.PrintStatusCode(true, 0x02), "The file does not exist. Nothing to do");
-            codes.AddTuple(this.PrintStatusCode(false, 0x01), "The file could not be deleted due to an unknown reason");
-            codes.AddTuple(this.PrintStatusCode(false, 0x02), "No file to delete was defined");
+            this.AppendCommonStatusCodes(ref codes);
+            this.RegisterStatusCode("NO_FILE", Task.Status.failed, "No file to delete was defined", ref codes);
+            this.RegisterStatusCode("SUCCESS_DELETED", Task.Status.success, "The file was deleted successfully", ref codes);
+            this.RegisterStatusCode("SUCCESS_NO_ACTION", Task.Status.success, "The file does not exist. Nothing to do", ref codes);
             return codes;
         }
 

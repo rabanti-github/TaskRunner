@@ -5,6 +5,7 @@ using System.IO;
 using Microsoft.Win32;
 using TaskRunner.SubTasks;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace TaskRunner
 {
@@ -27,6 +28,10 @@ namespace TaskRunner
         /// </summary>
         public enum TaskType
         {
+            /// <summary>
+            /// Dummy Task (Pre-Sub-Task condition, will not be listed)
+            /// </summary>
+            DummyTask,
             /// <summary>
             /// Task deletes files
             /// </summary>
@@ -56,9 +61,40 @@ namespace TaskRunner
             /// </summary>
             MetaTask,
             /// <summary>
+            /// Delays the program execution. This tasks is used to play a delay between two other tasks 
+            /// </summary>
+            DelayTask,
+            /// <summary>
             /// Task with several different Sub-Tasks
             /// </summary>
             MixedTask,
+        }
+
+        /// <summary>
+        /// Status of the task or sub task
+        /// </summary>
+        public enum Status
+        {
+            /// <summary>
+            /// Task or sub task was successful
+            /// </summary>
+            success,
+            /// <summary>
+            /// Task or sub task was not successful
+            /// </summary>
+            failed,
+            /// <summary>
+            /// Task or sub task was skipped
+            /// </summary>
+            skipped,
+            /// <summary>
+            /// Program will be terminated
+            /// </summary>
+            terminate,
+            /// <summary>
+            /// Error - Status unclear
+            /// </summary>
+            none,
         }
 
         /// <summary>
@@ -75,6 +111,7 @@ namespace TaskRunner
             output.Add(new ControlServiceTask());
             output.Add(new KillProcessTask());
             output.Add(new MetaTask());
+            output.Add(new DelayTask());
             return output;
         }
 
@@ -103,6 +140,7 @@ namespace TaskRunner
         [XmlArrayItem(Type = typeof(ControlServiceTask), ElementName = "controlServiceItem")]
         [XmlArrayItem(Type = typeof(KillProcessTask), ElementName = "killProcessItem")]
         [XmlArrayItem(Type = typeof(MetaTask), ElementName = "metaItem")]
+        [XmlArrayItem(Type = typeof(DelayTask), ElementName = "delayItem")]
         public List<SubTask> Items { get; set; }
         /// <summary>
         /// Optional Task name
@@ -115,6 +153,11 @@ namespace TaskRunner
         [XmlElement("description")]
         public string Description { get; set; }
         /// <summary>
+        /// Optional condition check for the current SubTask
+        /// </summary>
+        [XmlElement("condition")]
+        public Condition TaskCondition { get; set; }
+        /// <summary>
         /// If proper deserialized, this value is set to true. It indicates that the configuration is valid (valid XML)
         /// </summary>
         [XmlIgnore]
@@ -123,7 +166,7 @@ namespace TaskRunner
         /// The number of executed Sub-Tasks
         /// </summary>
         [XmlIgnore]
-        public int ExecutedTasks { get; set; }
+        public int ExecutedSubTasks { get; set; }
         /// <summary>
         /// The number of occurred errors during execution
         /// </summary>
@@ -160,6 +203,18 @@ namespace TaskRunner
         public bool WriteLog { get; set; }
 
         /// <summary>
+        /// Path to the system logfile
+        /// </summary>
+        [XmlIgnore]
+        public string LogfilePath { get; set; }
+
+        /// <summary>
+        /// Internal ID of the task. The ID is calculated by the file name
+        /// </summary>
+        [XmlIgnore]
+        public string TaskID { get; set; }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         public Task()
@@ -170,31 +225,432 @@ namespace TaskRunner
             this.Enabled = true;
         }
 
+        private bool CheckCondition(Condition condition, ref SubTask subtask, out  Condition.ConditionAction action, out Condition.ConditionAction defaultAction)
+        {
+            action = Condition.ConditionAction.none; // Default = error
+            defaultAction = Condition.ConditionAction.none; // Default = error
+            Condition.ConditionType type;
+            if (string.IsNullOrEmpty(condition.Expression))
+            {
+                subtask.SetStatus("CONDITION_INVALID_ARGS", "No condition to evaluate was defined");
+                return false;
+            }
+            if (string.IsNullOrEmpty(condition.Action))
+            {
+                subtask.SetStatus("CONDITION_INVALID_ACTIONS", "No action to execute was defined");
+                return false;
+            }
+            if (string.IsNullOrEmpty(condition.Default))
+            {
+                subtask.SetStatus("CONDITION_INVALID_ACTIONS", "No default action to execute was defined");
+                return false;
+            }
+            if (string.IsNullOrEmpty(condition.Type))
+            {
+                subtask.SetStatus("CONDITION_INVALID_TYPE", "No evaluation type was defined");
+                return false;
+            }
+            action = condition.CheckOperation(true);
+            if (action == Condition.ConditionAction.none)
+            {
+                subtask.SetStatus("CONDITION_INVALID_ACTIONS", "An invalid action to execute was defined");
+                return false;
+            }
+            defaultAction = condition.CheckOperation(false);
+            if (defaultAction == Condition.ConditionAction.none)
+            {
+                subtask.SetStatus("CONDITION_INVALID_ACTIONS", "An invalid default action to execute was defined");
+                return false;
+            }
+            type = condition.CheckType();
+            if (type == Condition.ConditionType.none)
+            {
+                subtask.SetStatus("CONDITION_INVALID_TYPE", "an invalid evaluation type was defined");
+                return false;
+            }
+            return true;
+        }
+
+        private bool EvaluateCondition(Condition condition, ref SubTask subtask, Condition.ConditionAction originalAction, Condition.ConditionAction defaultAction, out Condition.ConditionAction action, bool displayOutput)
+        {
+            bool status = condition.Evaluate(this.DisplayOutput);
+            if (status == true)
+            {
+                action = originalAction;
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE, condition.Action.ToString());
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_FALSE, condition.Default.ToString()); 
+                if (action == Condition.ConditionAction.skip)
+                {
+                    subtask.SetStatus("N/A", "The task was skipped");
+                }
+                else if (action == Condition.ConditionAction.exit || action == Condition.ConditionAction.restart_last_subtask || action == Condition.ConditionAction.restart_task)
+                {
+                    subtask.SetStatus("N/A", "The task was skipped - A further action follows...");
+                }
+                return true;
+            }
+            else
+            {
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE, defaultAction.ToString());
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_FALSE, originalAction.ToString());
+                action = defaultAction;
+                return false;
+            }
+        }
+
+        private void Verbose(string text)
+        {
+            Verbose(text, false);
+        }
+
+        private void Verbose(string text, bool skipNewline)
+        {
+            if (this.DisplayOutput == true)
+            {
+                if (skipNewline == true)
+                {
+                    System.Console.WriteLine(text);
+                }
+                else
+                {
+                    System.Console.WriteLine(text + "\n");
+                }
+            }
+        }
+
+        private Condition.ConditionAction HandleCondition(ref SubTask currentTask, bool preCondition, bool task)
+        {
+            bool conditionStatus = false;
+            Condition.ConditionAction action = Condition.ConditionAction.none;
+            Condition.ConditionAction execAction;
+            Condition.ConditionAction defaultAction = Condition.ConditionAction.none;
+            Condition condition;
+            string type;
+            if (task == false)
+            { 
+                type = " SUB-TASK ";
+                condition = currentTask.SubTaskCondition;
+            }
+            else
+            {
+                type = " TASK ";
+                condition = this.TaskCondition;
+            }
+            if (condition != null) // Check condition
+            {
+                if (currentTask == null)
+                {
+                    currentTask = new DummyTask();
+                }
+                currentTask.GetDocumentationStatusCodes(); // Necessary to load the status codes
+                if (this.CheckCondition(condition, ref currentTask, out execAction, out defaultAction) == false)
+                {
+                    SetLogEntry(currentTask);
+                    return Condition.ConditionAction.exit; // Terminate because of errors
+                }
+                if (condition.Type.ToLower() == "pre" && preCondition == false)
+                {
+                    return Condition.ConditionAction.run; // No action = run
+                }
+                else if (condition.Type.ToLower() == "post" && preCondition == true)
+                {
+                    return Condition.ConditionAction.run; // No action = run
+                }
+                conditionStatus = this.EvaluateCondition(condition, ref currentTask,  execAction, defaultAction, out action, this.DisplayOutput);
+                if (conditionStatus == true)
+                {
+                    if (action == Condition.ConditionAction.exit)
+                    {
+                        Verbose("==> THE PROGRAM WILL BE TREMINATED DUE TO A" + type + condition.Type.ToUpper() + "-CONDITION");
+                        currentTask.SetStatus("N/A", "The program will be terminated");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.exit;
+                    }
+                    else if (action == Condition.ConditionAction.skip)
+                    {
+                        Verbose("==> THE" + type + "WILL BE SKIPPED DUE TO A" + type + condition.Type.ToUpper() + "-CONDITION");
+                        currentTask.SetStatus("N/A", "The" + type.ToLower() + "will be skipped");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.skip;
+                    }
+                    else if (action == Condition.ConditionAction.restart_task && (condition.Type.ToLower() == "post" || task == false)) // In task only allowed as post-condition, in sub-task always
+                    {
+                        Verbose("==> THE TASK WILL BE RESTARTED DUE TO " + type + condition.Type.ToUpper() + "-CONDITION");
+                        currentTask.SetStatus("N/A", "The task will be restarted");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.restart_task;
+                    }
+                    else if (action == Condition.ConditionAction.restart_last_subtask && task == false) // TO CHECK: Sub-task can always be restarted (also the first occurrence in a task?)
+                    {
+                        Verbose("==> THE SUB-TASK WILL BE RESTARTED DUE TO " + type + condition.Type.ToUpper() + "-CONDITION");
+                        currentTask.SetStatus("N/A", "The task will be restarted");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.restart_last_subtask;
+                    }
+                    else if (action == Condition.ConditionAction.run) { } // Default
+                    else
+                    {
+                        Verbose("==> THE CONDITIONAL ACTION '" + action.ToString() + "' IS NOT ALLOWED AS " + condition.Type.ToUpper() + "-CONDITION OF A" + type.TrimEnd(' ') + ". THE PROGRAM WILL BE TERMINATED");
+                        currentTask.SetStatus("ERROR", "Condition action not allowed");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.exit;
+                    }
+
+                }
+                else
+                {
+                    if (action == Condition.ConditionAction.exit)
+                    {
+                        Verbose("==> THE PROGRAM WILL BE TREMINATED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
+                        currentTask.SetStatus("N/A", "The program will be terminated");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.exit;
+                    }
+                    else if (action == Condition.ConditionAction.skip)
+                    {
+                        Verbose("==> THE TASK WILL BE SKIPPED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
+                        currentTask.SetStatus("N/A", "The task will be skipped");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.skip;
+                    }
+                    else if (action == Condition.ConditionAction.restart_task && (condition.Type.ToLower() == "post" || task == false)) // In task only allowed as post-condition, in sub-task always
+                    {
+                        Verbose("==> THE TASK WILL BE RESTARTED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
+                        currentTask.SetStatus("N/A", "The task will be restarted");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.restart_task;
+                    }
+                    else if (action == Condition.ConditionAction.restart_last_subtask && task == false) // TO CHECK: Sub-task can always be restarted (also the first occurrence in a task?)
+                    {
+                        Verbose("==> THE SUB-TASK WILL BE RESTARTED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
+                        currentTask.SetStatus("N/A", "The sub-task will be restarted");
+                        SetLogEntry(currentTask);
+                        return Condition.ConditionAction.restart_last_subtask;
+                    }
+                    else if (action == Condition.ConditionAction.run) { } // Default
+                    else
+                    {
+                        Verbose("==> THE CONDITIONAL ACTION '" + action.ToString() + "' IS NOT ALLOWED AS " + condition.Type.ToUpper() + "-CONDITION OF A" + type.TrimEnd(' ') + ". THE PROGRAM WILL BE TERMINATED");
+                        currentTask.SetStatus("ERROR", "Condition action not allowed");
+                        SetLogEntry(currentTask);                        
+                        return Condition.ConditionAction.exit;
+                    }
+                }
+            }
+            return Condition.ConditionAction.run; // No action = run
+        }
+
+        private LogEntry SetLogEntry(SubTask currentTask)
+        {
+            LogEntry entry = new LogEntry();
+            entry.TaskName = this.TaskName;
+            entry.SubTaskName = currentTask.Name;
+            entry.ExecutionDate = DateTime.Now;
+            entry.InsertCodeByte(this.TaskMode, 0);
+            entry.InsertCodeByte(currentTask.TaskTypeCode, 1);
+            entry.InsertCodeByte(currentTask.StatusCode, 2);
+            entry.InsertCodeByte(currentTask.StatusCode, 3);
+            this.LogEntries.Add(entry);
+            return entry;
+        }
+
         /// <summary>
         /// Method to run all Sub-Tasks of the current configuration
         /// </summary>
         /// <param name="stopOnError">If true, the method stops if an error occurs during execution of the Sub-Tasks</param>
         /// <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
         /// <param name="log">If true, the execution of the Task and its Sub-Tasks will be logged</param>
-        /// <returns>True if no errors occurred, otherwise false</returns>
-        public bool Run(bool stopOnError, bool displayOutput, bool log)
+        /// <param name="logFilePath">Path to the system logfile</param>
+        /// <returns>Task status</returns>
+        public Status Run (bool stopOnError, bool displayOutput, bool log, string logFilePath)
         {
+            
+            SubTask currentTask = null;
+            LogEntry entry;
+            Status status;
+            Condition.ConditionAction action;
+            string date;
+            bool restartTask = false;
+            
+            while (true)
+            {
+
             this.StopOnError = stopOnError;
             this.DisplayOutput = displayOutput;
             this.WriteLog = log;
+            this.LogfilePath = logFilePath;
+            ResolveTaskMode(stopOnError, displayOutput, log);
+            this.LogEntries.Clear();
+            this.OccurredErrors = 0;
+            this.ExecutedSubTasks = 0;
+            date = DateTime.Now.ToString(DATEFORMAT);
+
+            Parameter.RegisterTaskIterations(this);                                                 // Registers the task (if not done before) to avoid infinite loops
+            Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_TOTAL);        // Add 1 to the total number of executed tasks
+            Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_TIME_START, DateTime.Now); // Set start time of the last (this) executed task
+            if (Parameter.CheckTaskIteration(this.TaskID, displayOutput) == false)                  // Check termination condition (max. iterations of task reached)
+            {
+                Verbose("==> THE PROGRAM WILL BE TERMINATED BECAUSE THE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_TASK_ITERATIONS).NumericValue + ") WAS REACHED");
+                return Status.terminate;
+            }
+            action = HandleCondition(ref currentTask, true, true);                                  // Pre-Check
+            if (action == Condition.ConditionAction.exit) { return Status.terminate; }
+            else if (action == Condition.ConditionAction.skip) { return Status.skipped; }
+
+            Verbose("Task: " + this.TaskName + " (ID: " + this.TaskID + ")\nSTARTING SUB-TASKS AT\t" + date);
+            for (int i = 0; i < this.Items.Count; i++)
+            {
+                restartTask = false;
+                currentTask = this.Items[i];
+                currentTask.GetDocumentationStatusCodes(); // Necessary to load the status codes
+                if (Parameter.CheckSubTaskIteration(currentTask.SubTaskID, displayOutput) == false) // Check termination condition (max. iterations of task reached)
+                {
+                    Verbose("==> THE TASK WILL BE TERMINATED BECAUSE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_SUBTASK_ITERATIONS).NumericValue + ") WAS REACHED");
+                    return Status.skipped;
+                }
+                if (currentTask.Enabled == false)
+                {
+                    Verbose("==> SUB-TASK '" + currentTask.Name + "' SKIPPED (DISABLED)");
+                    continue;
+                }
+                date = DateTime.Now.ToString(DATEFORMAT);
+
+                action = HandleCondition(ref currentTask, true, false);                             // Sub-Task pre-check
+                if (action == Condition.ConditionAction.exit) { return Status.terminate; }
+                else if (action == Condition.ConditionAction.restart_last_subtask) { i--; continue; }   // Could be a problem (to be checked)
+                else if (action == Condition.ConditionAction.restart_task) { restartTask = true; break; }
+                else if (action == Condition.ConditionAction.skip) { continue; }
+                this.ExecutedSubTasks++;
+
+                Verbose("**********************\nDate:\t\t" + date + "\nSub-Task:\t" + currentTask.Name + " (ID: " + currentTask.SubTaskID + ")", true);
+                if (string.IsNullOrEmpty(currentTask.Prolog) == false)
+                {
+                    Verbose("Prolog:\t\t" + currentTask.Prolog, true);
+                }
+
+                currentTask.MainValue = currentTask.GetMainValue(displayOutput); // Resolves the main value by the config file or param name
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_TIME_START, DateTime.Now);
+                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_TOTAL);
+                status = currentTask.Run();     // --> RUN
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_TIME_END, DateTime.Now);
+                entry = SetLogEntry(currentTask);
+                Verbose("Status:\t\t" + status.ToString() + "\nExecution Code:\t" + PrintExecutionCode(entry) + "\nMessage:\t" + currentTask.Message, true);
+
+                if (status == Status.failed)
+                {
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, false);
+                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_FAIL);
+                    this.OccurredErrors++;
+                    Verbose("==> TASK FINISHED WITH ERRORS!");
+                    if (stopOnError == true) { return Status.terminate; }
+                }
+                else if (status == Status.success)
+                {
+                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
+                }
+                else // Skipped
+                {
+                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
+                    Verbose("==> TASK SKIPPED");
+                }
+
+                action = HandleCondition(ref currentTask, false, false);                            // Sub-Task post-check
+                if (action == Condition.ConditionAction.exit) { return Status.terminate; }
+                else if (action == Condition.ConditionAction.restart_last_subtask) { i--; continue; }
+                else if (action == Condition.ConditionAction.restart_task) { restartTask = true; break; }
+                else if (action == Condition.ConditionAction.skip) { continue; }                    // Not useful but not forbidden
+
+            }
+            if (restartTask == true) { continue; }                                                  // reset
+
+            action = HandleCondition(ref currentTask, false, true);                                 // Post-Check
+            if (action == Condition.ConditionAction.exit) { return Status.terminate; }
+            else if (action == Condition.ConditionAction.restart_task) { continue; }                // reset
+            else if (action == Condition.ConditionAction.skip) { return Status.skipped; }           // Not useful but not forbidden
+
+                break; // Leave loop (default)
+            }
+            date = DateTime.Now.ToString(DATEFORMAT);
+            Verbose("\n\n******************************************\nSUB-TASKS FINISHED AT\t" + date + "\n" + this.ExecutedSubTasks.ToString() + " Sub-Tasks executed\n" + this.OccurredErrors.ToString() + " Errors occurred");
+            Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_TIME_END, DateTime.Now);
+
+            if (this.OccurredErrors == 0)
+            {
+                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_SUCCESS);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS, true);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS_PARTIAL, true);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS, true);
+                status = Status.success;
+            }
+            else
+            {
+                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_FAIL);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_ALL_SUCCESS, false);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS, false);
+                status = Status.failed;
+            }
+            if (this.WriteLog == true)
+            {
+                if (Parameter.GetSystemParameter(Parameter.SysParam.TASK_LAST_LOGGING_SUPPERSS).BooleanValue == true)
+                {
+                    this.Log(this.LogfilePath, status);
+                }
+            }
+            Parameter.ResetTaskParameters();
+            Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_TIME_END, DateTime.Now);
+            return status; 
+        }
+
+        /*
+        /// <summary>
+        /// Method to run all Sub-Tasks of the current configuration
+        /// </summary>
+        /// <param name="stopOnError">If true, the method stops if an error occurs during execution of the Sub-Tasks</param>
+        /// <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
+        /// <param name="log">If true, the execution of the Task and its Sub-Tasks will be logged</param>
+        /// <param name="logFilePath">Path to the system logfile</param>
+        /// <returns>Task status</returns>
+        public Status Run(bool stopOnError, bool displayOutput, bool log, string logFilePath)
+        {
+            Parameter.RegisterTaskIterations(this);
+            Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_TOTAL);
+            Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_TIME_START, DateTime.Now);
+            if (Parameter.CheckTaskIteration(this.TaskID, displayOutput) == false)
+            {
+                if (displayOutput == true)
+                {
+                    System.Console.WriteLine("PROGRAM WILL BE TERMINATED BECAUSE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_TASK_ITERATIONS).NumericValue + ") WAS REACHED");
+                }
+                return Status.terminate;
+            }
+            this.StopOnError = stopOnError;
+            this.DisplayOutput = displayOutput;
+            this.WriteLog = log;
+            this.LogfilePath = logFilePath;
             ResolveTaskMode(stopOnError, displayOutput, log);
             LogEntry entry;
             this.LogEntries.Clear();
             this.OccurredErrors = 0;
-            this.ExecutedTasks = 0;
+            this.ExecutedSubTasks = 0;
             string date = DateTime.Now.ToString(DATEFORMAT);
             if (displayOutput == true)
             {
+                System.Console.WriteLine("Task: " + this.TaskName + " (ID: " + this.TaskID + ")");
                 System.Console.WriteLine("STARTING SUB-TASKS AT\t" + date + "\n");
             }
-            bool status;
-            foreach(SubTask subTask in this.Items)
+            Status status;
+            SubTask subTask;
+            //foreach(SubTask subTask in this.Items)
+            for (int i = 0; i < this.Items.Count; i++ )
             {
+                subTask = this.Items[i];
+                subTask.GetDocumentationStatusCodes(); // Necessary to load the status codes
                 if (subTask.Enabled == false)
                 {
                     if (displayOutput == true)
@@ -209,30 +665,69 @@ namespace TaskRunner
                 entry.ExecutionDate = DateTime.Now;
                 entry.InsertCodeByte(this.TaskMode, 0);
                 entry.InsertCodeByte(subTask.TaskTypeCode, 1);
-                this.ExecutedTasks++;
+                this.ExecutedSubTasks++;
                 if (displayOutput == true)
                 {
                     date = DateTime.Now.ToString(DATEFORMAT);
                     System.Console.WriteLine("**********************\n");
                     System.Console.WriteLine("Date:\t\t" + date);
-                    System.Console.WriteLine("Sub-Task:\t" + subTask.Name);
+                    System.Console.WriteLine("Sub-Task:\t" + subTask.Name + " (ID: " + subTask.SubTaskID + ")");
                     if (string.IsNullOrEmpty(subTask.Prolog) == false)
                     {
                         System.Console.WriteLine("Prolog:\t\t" + subTask.Prolog);
                     }
                 }
                 subTask.MainValue = subTask.GetMainValue(displayOutput); // Resolves the main value by the config file or param name
-                status = subTask.Run();
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_TIME_START, DateTime.Now);
+                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_TOTAL);
+                if (subTask.SubTaskCondition != null)
+                {
+                    bool stat = subTask.SubTaskCondition.Evaluate(this.DisplayOutput);
+                    if (stat == true)
+                    {
+                        if (stat == true)
+                        {
+                            Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE, action.ToString());
+                            Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_FALSE, defaultAction.ToString());
+                        }
+                        else
+                        {
+                            Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE, defaultAction.ToString());
+                            Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_FALSE, action.ToString());
+                        }
+                        if (status == true && action == ConditionalAction.skip)
+                        {
+                            this.Message = "The task was skipped";
+                            this.StatusCode = 0x00;
+                            return Task.Status.skipped;
+                        }
+                        else if (status == true && (action == ConditionalAction.exit || action == ConditionalAction.restart_last_subtask || action == ConditionalAction.restart_task))
+                        {
+                            this.Message = "The task was skipped - A further action follows...";
+                            this.StatusCode = 0x00;
+                            return Task.Status.skipped;
+                        }
+
+                    }
+                }
+                else
+                {
+                    status = subTask.Run();
+                }
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_TIME_END, DateTime.Now);
                 entry.Status = status;
                 entry.InsertCodeByte(subTask.StatusCode, 3);
                 if (displayOutput == true)
                 {
                     System.Console.WriteLine("Status:\t\t" + status.ToString());
-                    System.Console.WriteLine("Execution Code:\t" +  PrintExecutionCode(entry)); //subTask.ExecutionCode.ToString());
+                    System.Console.WriteLine("Execution Code:\t" + PrintExecutionCode(entry)); //subTask.ExecutionCode.ToString());
                     System.Console.WriteLine("Message:\t" + subTask.Message + "\n");
                 }
-                if (status == false)
+                if (status == Status.failed)
                 {
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, false);
+                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_FAIL);
+                    //Parameter.UpdateSystemParameter(Parameter.SysParam., DateTime.Now);
                     this.OccurredErrors++;
                     if (displayOutput == true)
                     {
@@ -240,18 +735,86 @@ namespace TaskRunner
                     }
                     if (stopOnError == true) { break; }
                 }
+                else if (status == Status.success)
+                {
+                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
+                }
+                else // Skipped
+                {
+                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
+                    if (displayOutput == true)
+                    {
+                        System.Console.WriteLine("==> TASK SKIPPED\n");
+                    }
+                }
                 this.LogEntries.Add(entry);
+                if (status == Status.skipped && Parameter.GetSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE).Value == "exit")
+                {
+                    if (displayOutput == true)
+                    {
+                        System.Console.WriteLine("==> PROGRAM WILL BE TERMINATED\n");
+                    }
+                    return Status.terminate;
+                }
+                Parameter.ResetSubTaskParameters();
+                if (status == Status.skipped && Parameter.GetSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE).Value == "restart_last_subtask")
+                {
+                    if (displayOutput == true)
+                    { System.Console.WriteLine("==> SUB-TASK WILL BE RESTARTED\n"); }
+                    i--;
+                    continue;
+                }
+                if (status == Status.skipped && Parameter.GetSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE).Value == "restart_task")
+                {
+                    if (displayOutput == true)
+                    { System.Console.WriteLine("==> TASK WILL BE RESTARTED\n"); }
+                    i = -1;
+                    continue;
+                }
+
             }
             if (displayOutput == true)
             {
                 date = DateTime.Now.ToString(DATEFORMAT);
                 System.Console.WriteLine("\n\n******************************************\nSUB-TASKS FINISHED AT\t" + date);
-                System.Console.WriteLine(this.ExecutedTasks.ToString() + " Sub-Tasks executed");
+                System.Console.WriteLine(this.ExecutedSubTasks.ToString() + " Sub-Tasks executed");
                 System.Console.WriteLine(this.OccurredErrors.ToString() + " Errors occurred\n");
             }
-            if (this.OccurredErrors == 0) { return true; }
-            else { return false; }
+            Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_TIME_END, DateTime.Now);
+
+            if (this.WriteLog == true)
+            {
+                if (Parameter.GetSystemParameter(Parameter.SysParam.TASK_LAST_LOGGING_SUPPERSS).BooleanValue == true)
+                {
+                    this.Log(this.LogfilePath);
+                }
+            }
+            if (this.OccurredErrors == 0)
+            {
+                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_SUCCESS);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS, true);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS_PARTIAL, true);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS, true);
+                status =  Status.success;
+            }
+            else
+            {
+                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_FAIL);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_ALL_SUCCESS, false);
+                Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS, false);
+                status = Status.failed;
+            }
+            Parameter.ResetTaskParameters();
+            Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_TIME_END, DateTime.Now);
+            return status;
         }
+          */
 
         /// <summary>
         /// Resolves the mode how the Task is executed by the program (2 byte)
@@ -292,12 +855,20 @@ namespace TaskRunner
             try
             {
                 FileStream fs = new FileStream(filename, FileMode.Open);
+                MD5 md5 = MD5.Create();
+                byte[] bytes = md5.ComputeHash(fs);
+                fs.Seek(0, SeekOrigin.Begin);
                 StreamReader sr = new StreamReader(fs);
                 XmlSerializer ser = new XmlSerializer(typeof(Task));
                 object o = ser.Deserialize(sr);
                 Task t = (Task)o;
                 t.AssignTaskToSubtask();
                 t.Valid = true;
+                t.TaskID = Utils.ConvertBytesToString(bytes);
+                for (int i = 0; i < t.Items.Count; i++)
+                {
+                    t.Items[i].SubTaskID = t.TaskID + "-" + (i + 1).ToString();
+                }
                 return t;
             }
             catch(Exception e)
@@ -399,7 +970,7 @@ namespace TaskRunner
             t.Description = "This is a demo Task with several sub-tasks of the type " + type.ToString();
             t.Type = type;
             SubTask tb = null;
-            SubTask t1, t2, t3;
+            SubTask t1, t2, t3, t4;
             if (type == TaskType.DeleteFile)
             {
                 tb = new DeleteFileTask();
@@ -428,15 +999,23 @@ namespace TaskRunner
             {
                 tb = new MetaTask();
             }
+            else if (type == TaskType.DelayTask)
+            {
+                tb = new DelayTask();
+            }
             t1 = tb.GetDemoFile(1);
             t2 = tb.GetDemoFile(2);
             t3 = tb.GetDemoFile(3);
+            t4 = tb.GetDemoFile(4);
             t3.UseParameter = true;
             t3.MainValue = "PARAM_NAME_1";
-            t3.Description = t3.Description + ". This Sub-Tasks uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1";
+            t3.Description = t3.Description + ". This Sub-Task uses a value of a global Parameter (passed as flag -p|--param) with the parameter name PARAM_NAME_1";
+            t4.SubTaskCondition = new Condition("2 > 1", "run", "exit", "pre");
+            t4.Description = t4.Description + ". This Sub-Task has a pre-condition with the expression '2 > 1' (which is true) with the action 'run' if the expression is evaluated as true, and 'exit' if the expression is evaluated as false";
             t.Items.Add(t1);
             t.Items.Add(t2);
             t.Items.Add(t3);
+            t.Items.Add(t4);
             if (asFile == true)
             {
                 t.Serialize(file);
@@ -465,14 +1044,15 @@ namespace TaskRunner
         /// <summary>
         /// Method to write all log entries of the executed Tasks
         /// </summary>
+        /// <param name="status">Status of the task</param>
         /// <param name="logFile">File name of the logfile</param>
-        public void Log(string logFile)
+        public void Log(string logFile, Status status)
         {
             string headerValue = "Date\tStatus\tStatus-Code\tTask\tSub-Task\r\n---------------------------------------------------------------------------------------------";
             StringBuilder sb = new StringBuilder();
             foreach (LogEntry entry in this.LogEntries)
             {
-                sb.Append(entry.getLogString());
+                sb.Append(entry.getLogString(status));
                 sb.Append("\r\n");
             }
             char[] trim = new char[]{'\r', '\n'};

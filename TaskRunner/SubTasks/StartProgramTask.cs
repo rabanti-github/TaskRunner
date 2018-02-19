@@ -14,6 +14,7 @@ namespace TaskRunner.SubTasks
     /// </summary>
     public class StartProgramTask : SubTask
     {
+        private bool asynchronous;
 
         /// <summary>
         /// Implemented code of the task type (03)
@@ -28,7 +29,6 @@ namespace TaskRunner.SubTasks
         /// Type of the Task / Sub-task
         /// </summary>
         [XmlIgnore]
-        //public override Task.TaskType Type => Task.TaskType.StartProgram;
         public override Task.TaskType Type
         {
 	        get { return Task.TaskType.StartProgram; }
@@ -38,7 +38,6 @@ namespace TaskRunner.SubTasks
         /// Name of the demo file
         /// </summary>
         [XmlIgnore]
-        //public override string DemoFileName => "DEMO_StartProgram.xml";
         public override string DemoFileName
         {
             get { return "DEMO_StartProgram.xml"; }
@@ -53,7 +52,9 @@ namespace TaskRunner.SubTasks
             get { return "StartProgram.md"; }
         }
 
-        private bool asynchronous;
+        /// <summary>
+        /// If true, the program will be executed asynchronous
+        /// </summary>
         [XmlAttribute("runAsynchronous")]
         public bool Asynchronous
         {
@@ -75,8 +76,7 @@ namespace TaskRunner.SubTasks
         /// <summary>
         /// Default constructor
         /// </summary>
-        public StartProgramTask()
-            : base()
+        public StartProgramTask() : base()
         {
 
         }
@@ -99,7 +99,6 @@ namespace TaskRunner.SubTasks
                 source.SetResult(true);
                 proc.Dispose();
             };
-
             proc.Start();
             return source.Task;
         }
@@ -107,16 +106,14 @@ namespace TaskRunner.SubTasks
         /// <summary>
         /// Implemented Run method of the SubTask class
         /// </summary>
-        /// <returns>True if the task was executed successfully, otherwise false</returns>
-        public override bool Run()
+        /// <returns>Sub-task status</returns>
+        public override Task.Status Run()
         {
             try
             {
                 if (string.IsNullOrEmpty(this.MainValue))
                 {
-                    this.Message = "No program to execute was defined";
-                    this.StatusCode = 0x03;
-                    return false;
+                    return this.SetStatus("NO_PROGRAM", "No program to execute was defined");
                 }
 
                 StringBuilder sb = new StringBuilder();
@@ -126,12 +123,10 @@ namespace TaskRunner.SubTasks
                 {
                     if (this.ArgumentIsParamName == true)
                     {
-                        p = Parameter.GetParameter(arg, this.ParentTask.DisplayOutput);
+                        p = Parameter.GetUserParameter(arg, this.ParentTask.DisplayOutput);
                         if (p.Valid == false)
                         {
-                            this.Message = "The parameter with the name '" + arg + "' is not defined";
-                            this.StatusCode = 0x04;
-                            return false;
+                            return this.SetStatus("NO_PARAMETER", "The parameter with the name '" + arg + "' is not defined");
                         }
                         else
                         {
@@ -148,9 +143,7 @@ namespace TaskRunner.SubTasks
                 if (this.Asynchronous == false)
                 {
                     System.Diagnostics.Process.Start(this.MainValue, argString);
-                    this.Message = "The process " + this.MainValue + " was executed";
-                    this.StatusCode = 0x02;
-                    return true;
+                    return this.SetStatus("SUCCESS_SYNC", "The process " + this.MainValue + " was executed");
                 }
                 else
                 {
@@ -171,23 +164,17 @@ namespace TaskRunner.SubTasks
 
                     if (executed == false)
                     {
-                        this.Message = "The process " + this.MainValue + " could not be executed";
-                        this.StatusCode = 0x02;
-                        return false;
+                        return this.SetStatus("FAILED_ASYNC", "The process " + this.MainValue + " could not be executed");
                     }
                     else
                     {
-                        this.Message = "The process " + this.MainValue + " was executed";
-                        this.StatusCode = 0x01;
-                        return true;
+                        return this.SetStatus("SUCCESS_ASYNC", "The process " + this.MainValue + " was executed");
                     }
                 }
             }
             catch (Exception e)
             {
-                this.Message = "The process " + this.MainValue + " could not be executed\n" + e.Message;
-                this.StatusCode = 0x01;
-                return false;
+                return this.SetStatus("ERROR", "The process " + this.MainValue + " could not be executed\n" + e.Message);
             }
         }
 
@@ -218,7 +205,6 @@ namespace TaskRunner.SubTasks
             return t;
         }
 
-
         /// <summary>
         /// Returns the documentation of the status codes for the specific Sub-Task
         /// </summary>
@@ -226,12 +212,13 @@ namespace TaskRunner.SubTasks
         public override Documentation GetDocumentationStatusCodes()
         {
             Documentation codes = new Documentation("Start Program Task", "Status Codes");
-            codes.AddTuple(this.PrintStatusCode(true, 0x01), "Program was started successfully asynchronous");
-            codes.AddTuple(this.PrintStatusCode(true, 0x02), "Program was started successfully synchronous");
-            codes.AddTuple(this.PrintStatusCode(false, 0x01), "The program could not be executed due to an unknown reason");
-            codes.AddTuple(this.PrintStatusCode(false, 0x02), "An error occurred during the asynchronous execution");
-            codes.AddTuple(this.PrintStatusCode(false, 0x03), "No program to execute was defined");
-            codes.AddTuple(this.PrintStatusCode(false, 0x04), "The parameter is not defined");
+            this.AppendCommonStatusCodes(ref codes);
+
+            this.RegisterStatusCode("FAILED_ASYNC", Task.Status.failed, "An error occurred during the asynchronous execution", ref codes);
+            this.RegisterStatusCode("NO_PROGRAM", Task.Status.failed, "No program to execute was defined", ref codes);
+            this.RegisterStatusCode("NO_PARAMETER", Task.Status.failed, "The parameter is not defined", ref codes);
+            this.RegisterStatusCode("SUCCESS_SYNC", Task.Status.success, "Program was started successfully asynchronous", ref codes);
+            this.RegisterStatusCode("SUCCESS_ASYNC", Task.Status.success, "Program was started successfully synchronous", ref codes);
             return codes;
         }
 

@@ -13,10 +13,6 @@ namespace TaskRunner
     public class LogEntry
     {
 
-        private bool status;
-
-
-
         /// <summary>
         /// The name of the main Task
         /// </summary>
@@ -25,20 +21,6 @@ namespace TaskRunner
         /// The name of the Sub-Task
         /// </summary>
         public string SubTaskName { get; set; }
-        /// <summary>
-        /// The execution status
-        /// </summary>
-        public bool Status
-        {
-            get { return status; }
-            set 
-            { 
-                status = value;
-                if (value == true) { InsertCodeByte(0x01, 2); }
-                else { InsertCodeByte(0x02, 2); }
-            }
-        }
-        
 
         /// <summary>
         /// The execution date
@@ -60,10 +42,11 @@ namespace TaskRunner
         /// <summary>
         /// Returns a formated log entry as string (line). The first value is the current date
         /// </summary>
+        /// <param name="status">Status of the log entry</param>
         /// <returns>Formated log entry as string</returns>
-        public string getLogString()
+        public string getLogString(Task.Status status)
         {
-            return this.ExecutionDate.ToString(Task.DATEFORMAT) + "\t" + this.Status + "\t" + PrintExecutionCode() + "\t" + this.TaskName + "\t" + this.SubTaskName;
+            return this.ExecutionDate.ToString(Task.DATEFORMAT) + "\t" + status + "\t" + PrintExecutionCode() + "\t" + this.TaskName + "\t" + this.SubTaskName;
         }
 
         /// <summary>

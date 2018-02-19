@@ -124,9 +124,9 @@ namespace TaskRunner
         /// <param name="asTagDoc">If true, the documentation will be rendered as documentation for tags</param>
         /// <param name="asMarkdown">If true, the documentation will be rendered as markdown, The lengthparameter will be skipped</param>
         /// <returns></returns>
-        public string GetDocumentation(int maxLength, bool asTagDoc, bool asMarkdow)
+        public string GetDocumentation(int maxLength, bool asTagDoc, bool asMarkdown)
         {
-            return GetDocumentation(maxLength, asTagDoc, false, asMarkdow, false);
+            return GetDocumentation(maxLength, asTagDoc, false, asMarkdown, false);
         }
 
         /// <summary>

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TaskRunner.SubTasks;
 
 namespace TaskRunner
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Main class
@@ -20,7 +21,7 @@ namespace TaskRunner
         /// <param name="args">Arguments like -r, -d, -o, h or -l</param>
         static void Main(string[] args)
         {
-          //  args = new string[] { "-r", "ConditionTest_StartProgram.xml", "-o" };
+            //args = new string[] { "--run", "KillProcs.xml", "-o", "--log", "test.log" };
             //Parameter.RegisterSystemParameters();
             //Evaluation.ParseCondition("(22 == SYSTEM_TIME_START)", false);
 
@@ -30,16 +31,16 @@ namespace TaskRunner
                  return;
              }
 
-            ArgsTuple a = new ArgsTuple();
+            Arguments a = new Arguments();
             Task t = null;
-            ArgsTuple.ArgType type = ArgsTuple.ArgType.flag;
+            Arguments.ArgType type = Arguments.ArgType.flag;
 
             for (int i = 0; i < args.Length; i++)
             {
-                type = CheckArgs(ref a, args[i], type);
-                if (type == ArgsTuple.ArgType.undefined)
+                type = Arguments.CheckArgs(ref a, args[i], type);
+                if (type == Arguments.ArgType.undefined)
                 {
-                    Console.WriteLine("Unknown flag '" + args[i] + "'");
+                    Console.WriteLine("Unknown flag or invalid value '" + args[i] + "'");
                     Console.WriteLine(Usage(false));
                     return;
                 }
@@ -76,6 +77,11 @@ namespace TaskRunner
                 }
                 return;
             }
+            if (a.Utilities == true)
+            {
+                Utilities();
+                return;
+            }
             if (a.ConfigFilePath == "" && a.Run == true)
             {
                 Console.WriteLine("Error: No config file was defined");
@@ -88,6 +94,7 @@ namespace TaskRunner
             }
             if (a.Run == true)
             {
+       
                 Parameter.RegisterSystemParameters();
                 //Parameter.UpdateSystemParameters(Parameter.SysParam.SYSTEM_TIME_START, DateTime.Now);
                 if (a.Output == true)
@@ -96,8 +103,37 @@ namespace TaskRunner
                 }
                 t = Task.Deserialize(a.ConfigFilePath);
                 if (t.Valid == false) { return; }
-                Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_TIME_START, DateTime.Now);
-                t.Run(a.HaltOnError, a.Output, a.Log, a.LogFilePath);
+
+                int iteration = 0;
+                Task.Status status;
+                while (true)
+                {
+                    if (a.DelayExecution == true && a.DelayAmount > 0 && (a.NoInitialDelay == false || (a.NoInitialDelay == true && iteration > 0)))
+                    {
+                        if (a.Output == true)
+                        {
+                            Console.WriteLine("Waiting for " + a.DelayAmount + " milliseconds to execute the task...");
+                        }
+                        Thread.Sleep(a.DelayAmount);
+                    }
+                    Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_TIME_START, DateTime.Now);
+                    status = t.Run(a.HaltOnError, a.Output, a.Log, a.LogFilePath);
+                    if (status == Task.Status.terminate)
+                    {
+                        if (a.Output == true && a.Iterative == true)
+                        {
+                            Console.WriteLine("The iteration of the task execution was interrupted due to an error");
+                        }
+                        break;
+                    }
+
+                    iteration++;
+                    if (iteration >= a.NumberOfIterations && a.NumberOfIterations != 0)
+                    {
+                        break;
+                    }
+                }
+
                 
             }
         }
@@ -111,7 +147,7 @@ namespace TaskRunner
         {
             string header = @"
 Task Runner - Run tasks controlled by config files
-(c) 2017 - Raphael Stoeckli
+(c) 2018 - Raphael Stoeckli
 https://github.com/rabanti-github/TaskRunner
 --------------------------------------------------
 DISCLAIMER: USE THIS SOFTWARE AT YOUR OWN RISK.
@@ -127,6 +163,8 @@ Generation of example files of the configuration:
 TaskRunner.exe -d
 Generation of markdown files of the documentation:
 TaskRunner.exe -m
+Iteration example (10 times, delay of 10 seconds):
+Taskrunner.exe -r iterativeTask.xml -w 10000 -i 10 -n
 
 Path to the configuration: A relative or absolute path to the
 configuration as XML file
@@ -134,6 +172,12 @@ configuration as XML file
 Flags / Options
 ---------------
 -r | --run:      Runs a task defined in the subsequent config file (path)
+-i | --iterate:  Iterates a task the number of times defined by the
+                 following number. If 0 (zero), the number is infinite
+-w | --wait:     Waits with the execution of a task for the following
+                 number of millisecond. Useful in combination with -i
+-n | --nodelay:  Executes the first task after the start of TaskRunner
+                 without a defined delay (-w | --wait)
 -e | --example:  Runs the demo command and generates example
                  configurations in the current selected folder
 -o | --output:   Enables the output mode. The results of the task
@@ -144,6 +188,7 @@ Flags / Options
                  (absolute or relative) to a logfile must be defined
 -h | --help:     Shows the program help (this text) 
 -d | --docs:     Shows the menu with the task documentation
+-u | --utils:    Shows the menu with several Windows utility programs
 -m | --markdown: Saves the documentation of all task types to markdown
                  files in the current folder
 -p | --param     Stores a temporary variable while runtime. The variable
@@ -270,90 +315,46 @@ Available documentation:
 
         }
 
-        /// <summary>
-        /// Method to check the passed arguments
-        /// </summary>
-        /// <param name="tuple">Argument tuple as reference</param>
-        /// <param name="argValue">Passed argument value</param>
-        /// <param name="argType">The expected type of the argument</param>
-        /// <returns>The expected type of the next argument. In case of -r|--run and -l|--log, this is configFile or logFile</returns>
-        private static ArgsTuple.ArgType CheckArgs(ref ArgsTuple tuple, string argValue, ArgsTuple.ArgType argType)
+        private static void Utilities()
         {
-            string arg = argValue;
-            ArgsTuple.ArgType nextArgIs = ArgsTuple.ArgType.flag;
-            if (argType == ArgsTuple.ArgType.flag)
+            bool exit;
+            while (true)
             {
-                arg = arg.ToLower();
-                if (arg == "--run" || arg == "-r")
+                string input;
+                int number;
+                SysUtils s = new SysUtils();
+                int len = s.Utilities.Count;
+                exit = false;
+                Console.WriteLine("\n #####################");
+                Console.WriteLine(" # U T I L I T I E S #");
+                Console.WriteLine(" #####################");
+                for (int i = 0; i < len; i++)
                 {
-                    tuple.Run = true;
-                    nextArgIs = ArgsTuple.ArgType.configFile;
+                    Console.WriteLine("[" + (i + 1).ToString() + "] " + s.Utilities[i].Name);
                 }
-                else if (arg == "--help" || arg == "-h")
+                Console.WriteLine("[x] Exit");
+                Console.WriteLine("\nPlease select a number between 1 and " + len.ToString() + " or X to exit...");
+                input = Console.ReadLine();
+                if (input.ToLower() == "x") { break; }
+                if (int.TryParse(input, out number) == false)
                 {
-                    tuple.Help = true;
-                    nextArgIs = ArgsTuple.ArgType.flag;
+                    Console.WriteLine("Invalid input. Please retry...");
+                    continue;
                 }
-                else if (arg == "--output" || arg == "-o")
+                if (number < 1 || number > len)
                 {
-                    tuple.Output = true;
-                    nextArgIs = ArgsTuple.ArgType.flag;
+                    Console.WriteLine("Invalid input. Please retry...");
+                    continue;
                 }
-                else if (arg == "--stop" || arg == "-s")
-                {
-                    tuple.HaltOnError = true;
-                    nextArgIs = ArgsTuple.ArgType.flag;
-                }
-                else if (arg == "--log" || arg == "-l")
-                {
-                    tuple.Log = true;
-                    nextArgIs = ArgsTuple.ArgType.logFile;
-                }
-                else if (arg == "--example" || arg == "-e")
-                {
-                    tuple.Demo = true;
-                    nextArgIs = ArgsTuple.ArgType.flag;
-                }
-                else if (arg == "--docs" || arg == "-d")
-                {
-                    tuple.Docs = true;
-                    nextArgIs = ArgsTuple.ArgType.flag;
-                }
-                else if (arg == "--markdown" || arg == "-m")
-                {
-                    tuple.Markdown = true;
-                    nextArgIs = ArgsTuple.ArgType.flag;
-                }
-                else
-                {
-                    if (arg.StartsWith("--param") || arg.StartsWith("-p"))
-                    {
-                        Parameter p = Parameter.Parse(argValue);
-                        Parameter.AddUserParameter(p, true);
-                        nextArgIs = ArgsTuple.ArgType.flag;
-                    }
-                    else
-                    {
-                        nextArgIs = ArgsTuple.ArgType.undefined;
-                    }  
-                }
-            }
-            else if (argType == ArgsTuple.ArgType.configFile)
-            {
-                tuple.ConfigFilePath = arg;
-                nextArgIs = ArgsTuple.ArgType.flag;
-            }
-            else if (argType == ArgsTuple.ArgType.logFile)
-            {
-                tuple.LogFilePath = arg;
-                nextArgIs = ArgsTuple.ArgType.flag;
-            }
-            else
-            {
-                nextArgIs = ArgsTuple.ArgType.undefined;
-            }
-            return nextArgIs;
-        }
+                number--;
+                Console.WriteLine("Starting utility: " + s.Utilities[number].Name + "...");
+                Console.WriteLine("-----------------");
+                Console.WriteLine(s.Utilities[number].Description);
+                s.Utilities[number].Run();
 
+                Console.WriteLine("\nPress any key to continue...");
+                input = Console.ReadLine();
+            }
+        }
     }
 }

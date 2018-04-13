@@ -9,7 +9,7 @@ using System.Data;
 namespace TaskRunner
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Class for handling of the evaluation of expressions

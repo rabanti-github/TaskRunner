@@ -7,7 +7,7 @@ using System.ServiceProcess;
 namespace TaskRunner.SubTasks
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Derived Sub-Task Class to control Windows services

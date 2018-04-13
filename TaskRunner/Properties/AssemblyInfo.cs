@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("TaskRunner")]
-[assembly: AssemblyCopyright("Copyright Raphael Stoeckli ©  2017")]
+[assembly: AssemblyCopyright("Copyright Raphael Stoeckli ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

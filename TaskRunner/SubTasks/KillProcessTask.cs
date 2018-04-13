@@ -9,7 +9,7 @@ using System.Xml.Serialization;
 namespace TaskRunner.SubTasks
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Derived Sub-Task Class for killing a windows process
@@ -198,7 +198,7 @@ namespace TaskRunner.SubTasks
             {
                 t.Arguments.Add("PARAM_NAME_2");
                 t.ArgumentIsParamName = true;
-                t.Description = t.Description = t.Description + ". The argument is the name of a global parameter and not the actual value of the remote machine name";
+                t.Description = t.Description = t.Description + ". The arguments 'PARAM_NAME_1' and 'PARAM_NAME_2 are the names of global parameters and not the actual value of the process, the remote machine name, respectively";
             }
             return t;
         }

@@ -5,7 +5,7 @@ using System.Text;
 namespace TaskRunner
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Static Utils class
@@ -65,5 +65,6 @@ namespace TaskRunner
             byte[] b = new byte[] { input };
             return ConvertBytesToString(b);
         }
+
     }
 }

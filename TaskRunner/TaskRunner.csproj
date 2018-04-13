@@ -43,7 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArgsTuple.cs" />
+    <Compile Include="Arguments.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="Evaluation.cs" />
     <Compile Include="Documentation.cs" />
@@ -62,6 +62,7 @@
     <Compile Include="SubTasks\StartProgramTask.cs" />
     <Compile Include="SubTasks\SubTask.cs" />
     <Compile Include="SubTasks\WriteLogTask.cs" />
+    <Compile Include="SysUtils.cs" />
     <Compile Include="Task.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 namespace TaskRunner
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Class for orchestration and execution of the Sub-Tasks
@@ -597,7 +597,7 @@ namespace TaskRunner
             }
             if (this.WriteLog == true)
             {
-                if (Parameter.GetSystemParameter(Parameter.SysParam.TASK_LAST_LOGGING_SUPPERSS).BooleanValue == true)
+                if (Parameter.GetSystemParameter(Parameter.SysParam.TASK_LAST_LOGGING_SUPPERSS).BooleanValue == false)
                 {
                     this.Log(this.LogfilePath, status);
                 }

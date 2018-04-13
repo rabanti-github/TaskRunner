@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 namespace TaskRunner
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Class for parameter handling
@@ -128,7 +128,7 @@ namespace TaskRunner
             /// </summary>
             SUBTASK,
             /// <summary>
-            /// Parameter is a free user parameter
+            /// Parameter is a freely assignable user parameter
             /// </summary>
             USER,
             /// <summary>
@@ -143,11 +143,11 @@ namespace TaskRunner
         public enum SysParam
         {
             /// <summary>
-            /// Boolean parameter whether the last task was successful
+            /// Boolean parameter indicates whether the last task was successful
             /// </summary>
             TASK_LAST_SUCCESS,
             /// <summary>
-            /// Boolean parameter whether the last task was partially successful
+            /// Boolean parameter indicates whether the last task was partially successful
             /// </summary>
             TASK_LAST_SUCCESS_PARTIAL,
             /// <summary>
@@ -159,15 +159,15 @@ namespace TaskRunner
             /// </summary>
             TASK_LAST_TIME_END,
             /// <summary>
-            /// Boolean parameter whether the logging if the last task is suppressed
+            /// Boolean parameter indicates whether the logging of the last task is suppressed
             /// </summary>
             TASK_LAST_LOGGING_SUPPERSS,
             /// <summary>
-            /// Boolean parameter whether all tasks were successful
+            /// Boolean parameter indicates whether all tasks were successful
             /// </summary>
             TASK_ALL_SUCCESS,
             /// <summary>
-            /// Boolean parameter whether all tasks were partially successful
+            /// Boolean parameter indicates whether all tasks were partially successful
             /// </summary>
             TASK_ALL_SUCCESS_PARTIAL,
             /// <summary>
@@ -183,15 +183,15 @@ namespace TaskRunner
             /// </summary>
             TASK_ALL_NUMBER_FAIL,
             /// <summary>
-            /// Boolean parameter whether the last sub-task was successful
+            /// Boolean parameter indicates whether the last sub-task was successful
             /// </summary>
             SUBTASK_LAST_SUCCESS,
             /// <summary>
-            /// Boolean parameter whether the last sub-task was partially successful
+            /// Boolean parameter indicates whether the last sub-task was partially successful
             /// </summary>
             SUBTASK_LAST_SUCCESS_PARTIAL,
             /// <summary>
-            /// Boolean parameter whether all sub-tasks were successful
+            /// Boolean parameter indicates whether all sub-tasks were successful
             /// </summary>
             SUBTASK_ALL_SUCCESS,
             /// <summary>
@@ -203,7 +203,7 @@ namespace TaskRunner
             /// </summary>
             SUBTASK_LAST_TIME_END,
             /// <summary>
-            /// Boolean parameter whether all sub-task were partially successful
+            /// Boolean parameter indicates whether all sub-task were partially successful
             /// </summary>
             SUBTASK_ALL_SUCCESS_PARTIAL,
             /// <summary>

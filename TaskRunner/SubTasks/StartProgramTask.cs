@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 namespace TaskRunner.SubTasks
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Derived Sub-Task Class for staring programs synchronous or asynchronous

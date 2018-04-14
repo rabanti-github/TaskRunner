@@ -826,8 +826,18 @@ namespace TaskRunner
             }
             if (p.ParameterType == Types.Number)
             {
+                System.Globalization.NumberStyles style = NumberStyles.Any;
+                CultureInfo ci = CultureInfo.InvariantCulture;
                 double dv;
-                if (double.TryParse(p.Value, out dv) == false)
+                /*
+                decimal dv2;
+                if (Decimal.TryParse(p.Value, style, ci, out dv2) == false)
+                {
+                    p.Valid = false;
+                    return p;
+                }
+                */
+                if (double.TryParse(p.Value, style, ci, out dv) == false)
                 {
                     p.Valid = false;
                     return p;

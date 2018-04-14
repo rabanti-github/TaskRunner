@@ -48,6 +48,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LogEntryTest.cs" />
+    <Compile Include="ParameterTest.cs" />
+    <Compile Include="StatusCodeEntryTest.cs" />
     <Compile Include="SysUtilsTest.cs" />
     <Compile Include="UtilsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

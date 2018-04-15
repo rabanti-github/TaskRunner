@@ -206,10 +206,13 @@ parameter flag contains 3 or 4 parts, delimited by colons:
      be handled as string
 - 3: Parameter Name (unique string, without spaces or colons)
 - 4: Parameter Value (The value will be parsed to boolean or double in case
-     of the data types 'b' or 'n')
+     of the data types 'b' or 'n'). Note: Very small or big numbers can cause
+     arithmetic errors. Use MIN or MAX to define the minimum or maximum
+     value of a double number (+/- 1.797~e+308)
 
 Examples:
 -p:n:NUMBER_OF_FILES:8
+-p:n:MAX_VALUE:MAX
 --param:b:MATCH:true
 --param:NAME:machine1
 -p:s:NAME:""Name with spaces""

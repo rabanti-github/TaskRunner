@@ -20,6 +20,7 @@ namespace TaskRunner
         private static Dictionary<string, Parameter> systemParameters;
         private static Dictionary<string, int> taskIterations;
         private static Dictionary<string, int> subTaskIterations;
+        private static string[] dateFormats = null;
 
         /// <summary>
         /// Static dictionary for user parameters 
@@ -829,28 +830,40 @@ namespace TaskRunner
                 System.Globalization.NumberStyles style = NumberStyles.Any;
                 CultureInfo ci = CultureInfo.InvariantCulture;
                 double dv;
-                /*
-                decimal dv2;
-                if (Decimal.TryParse(p.Value, style, ci, out dv2) == false)
+                if (p.Value.ToLower() == "min")
                 {
-                    p.Valid = false;
-                    return p;
+                    dv = Double.MinValue;
+                    p.NumericValue = dv;
                 }
-                */
-                if (double.TryParse(p.Value, style, ci, out dv) == false)
+                else if (p.Value.ToLower() == "max")
                 {
-                    p.Valid = false;
-                    return p;
+                    dv = Double.MaxValue;
+                    p.NumericValue = dv;
                 }
                 else
                 {
-                    p.NumericValue = dv;
+                    if (double.TryParse(p.Value, style, ci, out dv) == false)
+                    {
+                        p.Valid = false;
+                        return p;
+                    }
+                    else
+                    {
+                        p.NumericValue = dv;
+                    }
                 }
             }
             if (p.ParameterType == Types.DateTime)
             {
+                if (Parameter.dateFormats == null)
+                {
+                    GetDateParsingFormats();
+                }
                 DateTime dv;
-                if (DateTime.TryParse(p.Value, out dv) == false)
+                CultureInfo ci = CultureInfo.InvariantCulture;
+                DateTimeStyles style = DateTimeStyles.AdjustToUniversal;
+              //  string[] formats = ci.DateTimeFormat.GetAllDateTimePatterns();
+                if (DateTime.TryParseExact(p.Value, Parameter.dateFormats, ci, style, out dv) == false)
                 {
                     p.Valid = false;
                     return p;
@@ -862,6 +875,28 @@ namespace TaskRunner
             }
             p.Valid = true;
             return p;
+        }
+
+        private static void GetDateParsingFormats()
+        {
+            List<string> formats = new List<string>();
+            string[] localFormats;
+            CultureInfo[] ci = CultureInfo.GetCultures(CultureTypes.AllCultures);
+            int len = ci.Length;
+            int j, len2;
+            for (int i = 0; i < len; i++)
+            {
+                localFormats = ci[i].DateTimeFormat.GetAllDateTimePatterns();
+                len2 = localFormats.Length;
+                for (j = 0; j < len2; j++)
+                {
+                    if (formats.Contains(localFormats[j]) == false)
+                    {
+                        formats.Add(localFormats[j]);
+                    }
+                }
+            }
+            dateFormats = formats.ToArray();
         }
 
     }

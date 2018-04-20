@@ -485,12 +485,12 @@ namespace TaskRunner
             this.ExecutedSubTasks = 0;
             date = DateTime.Now.ToString(DATEFORMAT);
 
-            Parameter.RegisterTaskIterations(this);                                                 // Registers the task (if not done before) to avoid infinite loops
+            Parameter.RegisterTaskIterations(this);                                                 // Registers the task (if not done before) to avoid infinite loops. If already registered, it will be incremented by 1
             Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_TOTAL);        // Add 1 to the total number of executed tasks
             Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_TIME_START, DateTime.Now); // Set start time of the last (this) executed task
             if (Parameter.CheckTaskIteration(this.TaskID, displayOutput) == false)                  // Check termination condition (max. iterations of task reached)
             {
-                Verbose("==> THE PROGRAM WILL BE TERMINATED BECAUSE THE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_TASK_ITERATIONS).NumericValue + ") WAS REACHED");
+                Verbose("==> THE PROGRAM WILL BE TERMINATED DUET TO THE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_TASK_ITERATIONS).NumericValue + ") WAS REACHED");
                 return Status.terminate;
             }
             action = HandleCondition(ref currentTask, true, true);                                  // Pre-Check
@@ -498,14 +498,14 @@ namespace TaskRunner
             else if (action == Condition.ConditionAction.skip) { return Status.skipped; }
 
             Verbose("Task: " + this.TaskName + " (ID: " + this.TaskID + ")\nSTARTING SUB-TASKS AT\t" + date);
-            for (int i = 0; i < this.Items.Count; i++)
+            for (int i = 0; i < this.Items.Count; i++) // Loop of sub-tasks
             {
                 restartTask = false;
                 currentTask = this.Items[i];
                 currentTask.GetDocumentationStatusCodes(); // Necessary to load the status codes
                 if (Parameter.CheckSubTaskIteration(currentTask.SubTaskID, displayOutput) == false) // Check termination condition (max. iterations of task reached)
                 {
-                    Verbose("==> THE TASK WILL BE TERMINATED BECAUSE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_SUBTASK_ITERATIONS).NumericValue + ") WAS REACHED");
+                    Verbose("==> THE TASK WILL BE TERMINATED DUE TO THE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_SUBTASK_ITERATIONS).NumericValue + ") WAS REACHED");
                     return Status.skipped;
                 }
                 if (currentTask.Enabled == false)

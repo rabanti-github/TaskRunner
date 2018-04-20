@@ -323,13 +323,14 @@ namespace TaskRunner
         }
 
         /// <summary>
-        /// Method to register a task in the list to check iterations
+        /// Method to register or increment a task in the list to check iterations. If the task does not exist, it will be added with the counter 0. In it exists, the counter will be increased by 1.
         /// </summary>
         /// <param name="task">Task to register</param>
         public static void RegisterTaskIterations(Task task)
         {
             if (Parameter.TaskIterations.ContainsKey(task.TaskID))
             {
+                Parameter.TaskIterations[task.TaskID]++;
                 return;
             }
             else
@@ -510,11 +511,11 @@ namespace TaskRunner
                         }
                         return false;
                     }
-                    return Parameter.AddParameter(parameter, displayOutput, true);
+                    return Parameter.AddParameter(parameter, displayOutput, true, paramType);
                 }
-                else
+                else // User
                 {
-                    return Parameter.AddParameter(parameter, displayOutput, false);
+                    return Parameter.AddParameter(parameter, displayOutput, true);
                 }
             }
         }
@@ -536,9 +537,10 @@ namespace TaskRunner
         /// </summary>
         /// <param name="parameter">Parameter name</param>
         /// <param name="displayOutput">If true, information about errors is passed to the command shell</param>
-        /// <param name="userParameter">If true, the parameter is a user parameter, otherwise a system parameter</param>
+        /// <param name="userParameter">If true, the parameter is a user or environment parameter, otherwise a system parameter</param>
+        /// <param name="paramType">Optional parameter type to check whether parameter is a user, system or overridable environment parameter</param>
         /// <returns>In true the parameter was added successfully</returns>
-        private static bool AddParameter(Parameter parameter, bool displayOutput, bool userParameter)
+        private static bool AddParameter(Parameter parameter, bool displayOutput, bool userParameter, ParamType paramType = ParamType.NONE)
         {
             string msg = "";
             bool error = false;
@@ -557,7 +559,7 @@ namespace TaskRunner
                 if (displayOutput == true) { Console.WriteLine(msg); }
                 return false;
             }
-            if (userParameter == true)
+            if (userParameter == true && paramType != ParamType.ENV) // ENV is assigned to system parameters although passed as user parameter
             {
                 if (Parameter.UserParameters.ContainsKey(parameter.Name))
                 {
@@ -576,8 +578,9 @@ namespace TaskRunner
             {
                 if (Parameter.SystemParameters.ContainsKey(parameter.Name))
                 {
+                    parameter.Flag = paramType; // set to appropriate flag
                     Parameter.SystemParameters[parameter.Name] = parameter;
-                    if (displayOutput == true && parameter.Flag == ParamType.ENV)
+                    if (displayOutput == true && paramType == ParamType.ENV)
                     {
                         Console.WriteLine("the environment parameter '" + parameter.Name + "' was overwritten by value '" + parameter.Value + "'");
                     }
@@ -736,7 +739,9 @@ namespace TaskRunner
         /// <returns>If true, the checked parameter is valid</returns>
         private static bool CheckGlobalParameterName(string name, out ParamType paramType, out Types dataType)
         {
-            foreach(KeyValuePair<string, Parameter> item in Parameter.SystemParameters)
+            bool envFound = false;
+            Types envType = Types.String;
+            foreach (KeyValuePair<string, Parameter> item in Parameter.SystemParameters)
             {
                 if (item.Key == name && item.Value.Flag != ParamType.USER && item.Value.Flag != ParamType.ENV) 
                 {
@@ -744,9 +749,25 @@ namespace TaskRunner
                     dataType = item.Value.ParameterType;
                     return false; 
                 }
+                else if (item.Key == name && item.Value.Flag == ParamType.ENV)
+                {
+                    envFound = true;
+                    envType = item.Value.ParameterType;
+                    break;
+                }
             }
-            paramType = ParamType.NONE;
-            dataType = Types.String;
+
+            if (envFound == false)
+            {
+                paramType = ParamType.NONE; // Default (can be USER)
+                dataType = Types.String;
+            }
+            else
+            {
+                paramType = ParamType.ENV;
+                dataType = envType;
+            }
+
             return true;
         }
 
@@ -829,13 +850,15 @@ namespace TaskRunner
             {
                 System.Globalization.NumberStyles style = NumberStyles.Any;
                 CultureInfo ci = CultureInfo.InvariantCulture;
+                p.Value = p.Value.ToLower().Replace(" ", ""); // Remove all white spaces within the number
+    
                 double dv;
-                if (p.Value.ToLower() == "min")
+                if (p.Value == "min")
                 {
                     dv = Double.MinValue;
                     p.NumericValue = dv;
                 }
-                else if (p.Value.ToLower() == "max")
+                else if (p.Value == "max")
                 {
                     dv = Double.MaxValue;
                     p.NumericValue = dv;

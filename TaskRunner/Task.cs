@@ -209,7 +209,7 @@ namespace TaskRunner
         public string LogfilePath { get; set; }
 
         /// <summary>
-        /// Internal ID of the task. The ID is calculated by the file name
+        /// Internal ID of the task. The ID is calculated by the file name or randomly generated if not file based (e.g. ad-hoc task)
         /// </summary>
         [XmlIgnore]
         public string TaskID { get; set; }
@@ -223,6 +223,7 @@ namespace TaskRunner
             this.LogEntries = new List<LogEntry>();
             this.TaskMode = 0x0;
             this.Enabled = true;
+            this.TaskID = Utils.GetRandomString(16); // Default until defined by deserialization
         }
 
         private bool CheckCondition(Condition condition, ref SubTask subtask, out  Condition.ConditionAction action, out Condition.ConditionAction defaultAction)
@@ -486,7 +487,7 @@ namespace TaskRunner
             date = DateTime.Now.ToString(DATEFORMAT);
 
             Parameter.RegisterTaskIterations(this);                                                 // Registers the task (if not done before) to avoid infinite loops. If already registered, it will be incremented by 1
-            Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_TOTAL);        // Add 1 to the total number of executed tasks
+            Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_TOTAL);        // Add 1 to the total number of executed tasks
             Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_TIME_START, DateTime.Now); // Set start time of the last (this) executed task
             if (Parameter.CheckTaskIteration(this.TaskID, displayOutput) == false)                  // Check termination condition (max. iterations of task reached)
             {
@@ -530,7 +531,7 @@ namespace TaskRunner
 
                 currentTask.MainValue = currentTask.GetMainValue(displayOutput); // Resolves the main value by the config file or param name
                 Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_TIME_START, DateTime.Now);
-                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_TOTAL);
+                Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_TOTAL);
                 status = currentTask.Run();     // --> RUN
                 Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_TIME_END, DateTime.Now);
                 entry = SetLogEntry(currentTask);
@@ -539,21 +540,21 @@ namespace TaskRunner
                 if (status == Status.failed)
                 {
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, false);
-                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_FAIL);
+                    Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_FAIL);
                     this.OccurredErrors++;
                     Verbose("==> TASK FINISHED WITH ERRORS!");
                     if (stopOnError == true) { return Status.terminate; }
                 }
                 else if (status == Status.success)
                 {
-                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
+                    Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
                 }
                 else // Skipped
                 {
-                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
+                    Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
@@ -582,7 +583,7 @@ namespace TaskRunner
 
             if (this.OccurredErrors == 0)
             {
-                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_SUCCESS);
+                Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_SUCCESS);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS, true);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS_PARTIAL, true);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS, true);
@@ -590,7 +591,7 @@ namespace TaskRunner
             }
             else
             {
-                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_FAIL);
+                Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_FAIL);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_ALL_SUCCESS, false);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS, false);
                 status = Status.failed;
@@ -602,7 +603,8 @@ namespace TaskRunner
                     this.Log(this.LogfilePath, status);
                 }
             }
-            Parameter.ResetTaskParameters();
+            Parameter.ResetTaskParameters(); // TODO: The necessity / purpose of this call must be evaluated
+            Parameter.ResetSubTaskParameters(); // TODO: The necessity / purpose of this call must be evaluated (redundant operations inside)
             Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_TIME_END, DateTime.Now);
             return status; 
         }
@@ -619,7 +621,7 @@ namespace TaskRunner
         public Status Run(bool stopOnError, bool displayOutput, bool log, string logFilePath)
         {
             Parameter.RegisterTaskIterations(this);
-            Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_TOTAL);
+            Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_TOTAL);
             Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_TIME_START, DateTime.Now);
             if (Parameter.CheckTaskIteration(this.TaskID, displayOutput) == false)
             {
@@ -679,7 +681,7 @@ namespace TaskRunner
                 }
                 subTask.MainValue = subTask.GetMainValue(displayOutput); // Resolves the main value by the config file or param name
                 Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_TIME_START, DateTime.Now);
-                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_TOTAL);
+                Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_TOTAL);
                 if (subTask.SubTaskCondition != null)
                 {
                     bool stat = subTask.SubTaskCondition.Evaluate(this.DisplayOutput);
@@ -726,7 +728,7 @@ namespace TaskRunner
                 if (status == Status.failed)
                 {
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, false);
-                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_FAIL);
+                    Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_FAIL);
                     //Parameter.UpdateSystemParameter(Parameter.SysParam., DateTime.Now);
                     this.OccurredErrors++;
                     if (displayOutput == true)
@@ -737,14 +739,14 @@ namespace TaskRunner
                 }
                 else if (status == Status.success)
                 {
-                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
+                    Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
                 }
                 else // Skipped
                 {
-                    Parameter.UpdateSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
+                    Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_SUCCESS);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
@@ -797,7 +799,7 @@ namespace TaskRunner
             }
             if (this.OccurredErrors == 0)
             {
-                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_SUCCESS);
+                Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_SUCCESS);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS, true);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS_PARTIAL, true);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS, true);
@@ -805,7 +807,7 @@ namespace TaskRunner
             }
             else
             {
-                Parameter.UpdateSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_FAIL);
+                Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_FAIL);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_ALL_SUCCESS, false);
                 Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_SUCCESS, false);
                 status = Status.failed;

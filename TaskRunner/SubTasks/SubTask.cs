@@ -145,6 +145,7 @@ namespace TaskRunner.SubTasks
             this.StatusCode = 0x0;
             this.Enabled = true;
             this.UseParameter = false;
+            this.SubTaskID = Utils.GetRandomString(8); // Default
         }
         /// <summary>
         /// Abstract method to run the Sub-Task

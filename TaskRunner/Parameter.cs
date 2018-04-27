@@ -35,7 +35,7 @@ namespace TaskRunner
                 }
                 return Parameter.userParameters; 
             }
-            set { Parameter.userParameters = value; }
+            //set { Parameter.userParameters = value; }
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace TaskRunner
                 }
                 return Parameter.systemParameters;
             }
-            set { Parameter.systemParameters = value; }
+            //set { Parameter.systemParameters = value; }
         }
 
         /// <summary>
@@ -228,6 +228,10 @@ namespace TaskRunner
             /// </summary>
             SYSTEM_TIME_END,
             /// <summary>
+            /// DateTime parameter with the current time, evaluated when used (e.g. when evaluating an expression) 
+            /// </summary>
+            SYSTEM_TIME_NOW,
+            /// <summary>
             /// String parameter regarding the result of the last condition evaluation (true branch)
             /// </summary>
             SYSTEM_CONDITION_TRUE,
@@ -243,6 +247,10 @@ namespace TaskRunner
             /// Overridable maximum number of iterations of sub-tasks to avoid infinite loops
             /// </summary>
             ENV_MAX_SUBTASK_ITERATIONS,
+            /// <summary>
+            /// Arbitrary string value in the scope of the environment (debug purpose). The default value is 'null'
+            /// </summary>
+            ENV_FLAG,
         }
 
         /// <summary>
@@ -323,14 +331,13 @@ namespace TaskRunner
         }
 
         /// <summary>
-        /// Method to register or increment a task in the list to check iterations. If the task does not exist, it will be added with the counter 0. In it exists, the counter will be increased by 1.
+        /// Method to register a task in the list to check iterations. If the task does not exist, it will be added with the counter 0
         /// </summary>
         /// <param name="task">Task to register</param>
         public static void RegisterTaskIterations(Task task)
         {
             if (Parameter.TaskIterations.ContainsKey(task.TaskID))
             {
-                Parameter.TaskIterations[task.TaskID]++;
                 return;
             }
             else
@@ -401,11 +408,11 @@ namespace TaskRunner
         /// <returns>Parameter of the name</returns>
         public static Parameter GetParameter(string name, bool displayOutput)
         {
-            Parameter p = Parameter.GetParameter(name, false, true);
+            Parameter p = Parameter.GetParameter(name, false, true); // Check user parameter
             if (p.Valid == true) { return p; }
             else
             {
-                return Parameter.GetParameter(name, displayOutput, false);
+                return Parameter.GetParameter(name, displayOutput, false); // Check System-Parameter
             }
         }
 
@@ -446,7 +453,7 @@ namespace TaskRunner
         /// <param name="name">Parameter to check</param>
         /// <param name="displayOutput">If true, information about errors is passed to the command shell</param>
         /// <param name="userParameter">If true, a user parameter will be retrieved, otherwise a system parameter</param>
-        /// <returns>Parameter of the name</returns>
+        /// <returns>Parameter of the defined name. An empty object (valid == false) will be returned if not found</returns>
         private static Parameter GetParameter(string name, bool displayOutput, bool userParameter)
         {
             Parameter p = null;
@@ -458,7 +465,7 @@ namespace TaskRunner
                 }
                 else
                 {
-                    if (displayOutput == true && userParameter == true)
+                    if (displayOutput == true)
                     {
                         Console.WriteLine("the parameter '" + name + "' was not found");
                     }
@@ -471,6 +478,11 @@ namespace TaskRunner
                 if (Parameter.SystemParameters.ContainsKey(name))
                 {
                     p = Parameter.SystemParameters[name];
+                    if (name == SysParam.SYSTEM_TIME_NOW.ToString()) // Special handling
+                    {
+                        p.DateTimeValue = DateTime.Now;
+                        p.Value = p.DateTimeValue.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                    }
                 }
                 else
                 {
@@ -609,10 +621,10 @@ namespace TaskRunner
         /// Method to add 1 to a numeric system parameter
         /// </summary>
         /// <param name="key">Parameter enumeration</param>
-        public static void UpdateSystemParameterNumber(SysParam key)
+        public static void IncreaseSystemParameterNumber(SysParam key)
         {
             Parameter p = Parameter.GetSystemParameter(key);
-            Parameter.UpdateSystemParameterInternal(key, p.NumericValue + 1);
+            Parameter.UpdateSystemParameterInternal(key, Types.Number, p.NumericValue + 1);
         }
 
         /// <summary>
@@ -622,7 +634,7 @@ namespace TaskRunner
         /// <param name="number">Value to update</param>
         public static void UpdateSystemParameter(SysParam key, double number)
         {
-            Parameter.UpdateSystemParameterInternal(key, number);
+            Parameter.UpdateSystemParameterInternal(key, Types.Number, number);
         }
 
         /// <summary>
@@ -632,7 +644,7 @@ namespace TaskRunner
         /// <param name="date">Value to update</param>
         public static void UpdateSystemParameter(SysParam key, DateTime date)
         {
-            Parameter.UpdateSystemParameterInternal(key, date);
+            Parameter.UpdateSystemParameterInternal(key, Types.DateTime, date);
         }
 
         /// <summary>
@@ -642,7 +654,7 @@ namespace TaskRunner
         /// <param name="boolvalue">Value to update</param>
         public static void UpdateSystemParameter(SysParam key, bool boolvalue)
         {
-            Parameter.UpdateSystemParameterInternal(key, boolvalue);
+            Parameter.UpdateSystemParameterInternal(key, Types.Boolean, boolvalue);
         }
 
         /// <summary>
@@ -652,15 +664,16 @@ namespace TaskRunner
         /// <param name="value">Value to update</param>
         public static void UpdateSystemParameter(SysParam key, string value)
         {
-            Parameter.UpdateSystemParameterInternal(key, value);
+            Parameter.UpdateSystemParameterInternal(key, Types.String, value);
         }
 
         /// <summary>
         /// Internal method to update a system parameter
         /// </summary>
         /// <param name="parameter">Parameter number</param>
+        /// <param name="type">Expected data type of the parameter</param>
         /// <param name="o">Value to update</param>
-        private static void UpdateSystemParameterInternal(SysParam parameter, object o)
+        private static void UpdateSystemParameterInternal(SysParam parameter, Types type, object o)
         {
             string key = parameter.ToString(); 
             if (Parameter.SystemParameters.ContainsKey(key) == false)
@@ -669,6 +682,11 @@ namespace TaskRunner
                 return;
             }
             Parameter p = GetSystemParameter(parameter);
+            if (p.ParameterType != type)
+            {
+                Console.WriteLine("Error while updating system parameter '" + key + "' (parameter is not of type " + type.ToString() + ")");
+                return;
+            }
             if (o.GetType() == typeof(DateTime)) { p.DateTimeValue = (DateTime)o; p.Value = p.DateTimeValue.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture); }
             else if (o.GetType() == typeof(double)) { p.NumericValue = (Double)o; p.Value = p.NumericValue.ToString(); }
             else if (o.GetType() == typeof(bool)) { p.BooleanValue = (bool)o; p.Value = p.BooleanValue.ToString(); }
@@ -704,10 +722,12 @@ namespace TaskRunner
             Parameter.AddSystemParameter(new Parameter("-p:n:" + SysParam.SUBTASK_ALL_NUMBER_FAIL.ToString() + ":0"), ParamType.SUBTASK);
             Parameter.AddSystemParameter(new Parameter("-p:d:" + SysParam.SYSTEM_TIME_START.ToString() + ":" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)), ParamType.SYSTEM);
             Parameter.AddSystemParameter(new Parameter("-p:d:" + SysParam.SYSTEM_TIME_END.ToString() + ":" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)), ParamType.SYSTEM);
+            Parameter.AddSystemParameter(new Parameter("-p:d:" + SysParam.SYSTEM_TIME_NOW.ToString() + ":" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)), ParamType.SYSTEM);
             Parameter.AddSystemParameter(new Parameter("-p:s:" + SysParam.SYSTEM_CONDITION_TRUE.ToString() + ":none"), ParamType.SYSTEM);
             Parameter.AddSystemParameter(new Parameter("-p:s:" + SysParam.SYSTEM_CONDITION_FALSE.ToString() + ":none"), ParamType.SYSTEM);
             Parameter.AddSystemParameter(new Parameter("-p:n:" + SysParam.ENV_MAX_TASK_ITERATIONS.ToString() + ":10"), ParamType.ENV); // Environment
             Parameter.AddSystemParameter(new Parameter("-p:n:" + SysParam.ENV_MAX_SUBTASK_ITERATIONS.ToString() + ":10"), ParamType.ENV); // Environment
+            Parameter.AddSystemParameter(new Parameter("-p:s:" + SysParam.ENV_FLAG.ToString() + ":null"), ParamType.ENV); // Environment
         }
 
         /// <summary>
@@ -780,9 +800,11 @@ namespace TaskRunner
         {
             Parameter p = new Parameter();
             if (string.IsNullOrEmpty(rawValue) == true) { p.Valid = false; return p; }
-            if (rawValue.StartsWith("-p:") == false && rawValue.StartsWith("--param:") == false) { p.Valid = false; return p; }
+
+            string temp = rawValue.ToLower();
+            if (temp.StartsWith("-p:") == false && temp.StartsWith("--param:") == false) { p.Valid = false; return p; }
             string param;
-            if (rawValue.StartsWith("-p:"))
+            if (temp.StartsWith("-p:"))
             {
                 param = rawValue.Substring(3);
             }

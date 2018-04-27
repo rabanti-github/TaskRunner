@@ -116,6 +116,18 @@ namespace TaskRunnerTesting
             sr.Close();
         }
 
+        [TestMethod]
+        [Description("Test of GetRandomString()")]
+        public void GetRandomStringTest()
+        {
+            string rnd = Utils.GetRandomString(7);
+            string rnd2 = Utils.GetRandomString(7);
+            string rnd3 = Utils.GetRandomString(0); // Should not throw an exception
+            Assert.IsTrue(rnd.Length == 7);
+            Assert.IsTrue(rnd.Equals(rnd2) == false);
+            Assert.IsTrue(rnd3.Length == 0);
+        }
+
 
     }
 }

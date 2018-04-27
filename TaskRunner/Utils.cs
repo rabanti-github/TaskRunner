@@ -12,6 +12,9 @@ namespace TaskRunner
     /// </summary>
     public static class Utils
     {
+        private const string rndCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        private static Random rnd = new Random((int)DateTime.Now.Ticks);
+
         /// <summary>
         /// Writes a logfile entry
         /// </summary>
@@ -64,6 +67,21 @@ namespace TaskRunner
         {
             byte[] b = new byte[] { input };
             return ConvertBytesToString(b);
+        }
+
+        /// <summary>
+        /// Gets a random alphanumeric string of the defined length
+        /// </summary>
+        /// <param name="length">Length of the string in characters</param>
+        /// <returns>Random String</returns>
+        public static string GetRandomString(int length)
+        {
+            char[] chars = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                chars[i] = rndCharacters[rnd.Next(rndCharacters.Length)];
+            }
+            return new string(chars);
         }
 
     }

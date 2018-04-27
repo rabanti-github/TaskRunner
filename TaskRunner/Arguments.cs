@@ -5,7 +5,7 @@ using System.Text;
 namespace TaskRunner
 {
     /// <summary>
-    /// Task Runner - (c) 2017 - Raphael Stoeckli
+    /// Task Runner - (c) 2018 - Raphael Stoeckli
     /// This program and its code is released under the MIT license
     /// -----------------------------------------------------------
     /// Class represents a tuple to execute the program. It contains all possible flags and values
@@ -113,7 +113,10 @@ namespace TaskRunner
         {
             int iterations;
             bool valid = SetValue(input, out iterations);
-            NumberOfIterations = iterations;
+            if (valid == true)
+            {
+                NumberOfIterations = iterations;
+            }
             return valid;
         }
 
@@ -121,7 +124,11 @@ namespace TaskRunner
         {
             int delay;
             bool valid = SetValue(input, out delay);
-            DelayAmount = delay;
+            if (valid == true)
+            {
+                DelayAmount = delay;
+            }
+
             return valid;
         }
 
@@ -157,7 +164,7 @@ namespace TaskRunner
             this.NoInitialDelay = false;
             this.LogFilePath = String.Empty;
             this.ConfigFilePath = String.Empty;
-            this.NumberOfIterations = 1; // Will execute only once (fall back)
+            this.NumberOfIterations = 1; // Will be executed only once (fall back)
             this.DelayAmount = 0;
         }
 
@@ -166,13 +173,13 @@ namespace TaskRunner
         /// </summary>
         /// <param name="tuple">Argument tuple as reference</param>
         /// <param name="argValue">Passed argument value</param>
-        /// <param name="argType">The expected type of the argument</param>
+        /// <param name="expectedArgType">The expected type of the argument</param>
         /// <returns>The expected type of the next argument. In case of -r|--run and -l|--log, this is configFile or logFile</returns>
-        public static Arguments.ArgType CheckArgs(ref Arguments tuple, string argValue, Arguments.ArgType argType)
+        public static Arguments.ArgType CheckArgs(ref Arguments tuple, string argValue, Arguments.ArgType expectedArgType)
         {
             string arg = argValue;
             Arguments.ArgType nextArgIs = Arguments.ArgType.flag;
-            if (argType == Arguments.ArgType.flag)
+            if (expectedArgType == Arguments.ArgType.flag)
             {
                 arg = arg.ToLower();
                 if (arg == "--run" || arg == "-r")
@@ -237,11 +244,18 @@ namespace TaskRunner
                 }
                 else
                 {
-                    if (arg.StartsWith("--param") || arg.StartsWith("-p"))
+                    if (arg.StartsWith("--param:") || arg.StartsWith("-p:"))
                     {
                         Parameter p = Parameter.Parse(argValue);
-                        Parameter.AddUserParameter(p, true);
-                        nextArgIs = Arguments.ArgType.flag;
+                        if (p.Valid == true)
+                        {
+                            Parameter.AddUserParameter(p, true);
+                            nextArgIs = Arguments.ArgType.flag;
+                        }
+                        else
+                        {
+                            nextArgIs = Arguments.ArgType.undefined;
+                        }
                     }
                     else
                     {
@@ -249,17 +263,31 @@ namespace TaskRunner
                     }  
                 }
             }
-            else if (argType == Arguments.ArgType.configFile)
+            else if (expectedArgType == Arguments.ArgType.configFile)
             {
-                tuple.ConfigFilePath = arg;
-                nextArgIs = Arguments.ArgType.flag;
+                if (string.IsNullOrEmpty(arg))
+                {
+                    nextArgIs = ArgType.undefined;
+                }
+                else
+                {
+                    tuple.ConfigFilePath = arg;
+                    nextArgIs = Arguments.ArgType.flag;
+                }
             }
-            else if (argType == Arguments.ArgType.logFile)
+            else if (expectedArgType == Arguments.ArgType.logFile)
             {
-                tuple.LogFilePath = arg;
-                nextArgIs = Arguments.ArgType.flag;
+                if (string.IsNullOrEmpty(arg))
+                {
+                    nextArgIs = ArgType.undefined;
+                }
+                else
+                {
+                    tuple.LogFilePath = arg;
+                    nextArgIs = Arguments.ArgType.flag;
+                }
             }
-            else if (argType == Arguments.ArgType.iterations)
+            else if (expectedArgType == Arguments.ArgType.iterations)
             {
                 if (tuple.SetIterations(arg) == false)
                 {
@@ -270,7 +298,7 @@ namespace TaskRunner
                     nextArgIs = Arguments.ArgType.flag;
                 }
             }
-            else if (argType == Arguments.ArgType.delay)
+            else if (expectedArgType == Arguments.ArgType.delay)
             {
                 if (tuple.SetDelay(arg) == false)
                 {

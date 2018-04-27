@@ -52,6 +52,9 @@
     <Compile Include="ParameterTest.cs" />
     <Compile Include="StatusCodeEntryTest.cs" />
     <Compile Include="SysUtilsTest.cs" />
+    <Compile Include="ArgumentsTest.cs" />
+    <Compile Include="EvaluationTest.cs" />
+    <Compile Include="ConditionTest.cs" />
     <Compile Include="UtilsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

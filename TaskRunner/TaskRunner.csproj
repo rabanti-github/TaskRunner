@@ -64,6 +64,7 @@
     <Compile Include="SubTasks\WriteLogTask.cs" />
     <Compile Include="SysUtils.cs" />
     <Compile Include="Task.cs" />
+    <Compile Include="Output.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

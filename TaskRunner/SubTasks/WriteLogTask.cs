@@ -174,9 +174,9 @@ namespace TaskRunner.SubTasks
             }
             else
             {
-                t.Arguments.Add("Text token to write 1");
-                t.Arguments.Add("Text token to write 2");
-                t.Arguments.Add("Text token to write 3");
+                t.Arguments.Add("Description token to write 1");
+                t.Arguments.Add("Description token to write 2");
+                t.Arguments.Add("Description token to write 3");
             }
             return t;
         }

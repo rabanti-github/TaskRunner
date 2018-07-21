@@ -127,10 +127,11 @@ namespace TaskRunner
             /// <summary>
             /// Checks the action and default
             /// </summary>
-            /// <param name="checkAction">If true the action will be checked otherwise the default action</param>
+            /// <param name="checkAction">If true the action will be checked otherwise the default action will be returned</param>
             /// <returns>Returns the appropriate value</returns>
             public ConditionAction CheckOperation(bool checkAction)
             {
+                if (string.IsNullOrEmpty(this.Action)) { return ConditionAction.none; }
                 string test;
                 if (checkAction == true) { test = this.Action.ToLower(); }
                 else { test = this.Default.ToLower(); }
@@ -148,6 +149,7 @@ namespace TaskRunner
             /// <returns>Returns the appropriate value</returns>
             public ConditionType CheckType()
             {
+                if (string.IsNullOrEmpty(this.Type)) { return ConditionType.none; }
                 string test = this.Type.ToLower();
                 if (test == "pre") { return ConditionType.pre; }
                 else if (test == "post") { return ConditionType.post; }

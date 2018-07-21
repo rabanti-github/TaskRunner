@@ -183,7 +183,7 @@ namespace TaskRunner.SubTasks
                 string part1 = prolog.GetDocumentation(maxLength, false);
                 string part2 = codes.GetDocumentation(maxLength, false);
                 string part3 = modes.GetDocumentation(maxLength, false);
-                return part1 + Documentation.NL + part2 + Documentation.NL + part3;
+                return part1 + Output.NL + part2 + Output.NL + part3;
             }
             else { return ""; }
         }
@@ -196,11 +196,11 @@ namespace TaskRunner.SubTasks
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(GetDocumentationDescription().GetDocumentation(0,false,true, true, false));
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
             sb.Append(GetTagDocumentationParameters().GetDocumentation(0, true, false, true, true));
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
             sb.Append(GetAttributesDocumentationParameters().GetDocumentation(0,false,false,true, true));
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
             Documentation codes = GetDocumentationStatusCodes();
             Documentation prolog = this.GetStatusCodeProlog(codes.Title, codes.SubTitle);
             Documentation modes = this.GetStatusModes(codes.Title, codes.SubTitle);
@@ -213,20 +213,20 @@ namespace TaskRunner.SubTasks
             string part2 = codes.GetDocumentation(0, false, true);
             string part3 = modes.GetDocumentation(0, false, true);
             sb.Append(part1);
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
             sb.Append(part2);
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
             sb.Append(part3);
-            sb.Append(Documentation.NL);
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
+            sb.Append(Output.NL);
             sb.Append("## Example configuration");
-            sb.Append(Documentation.NL);
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
+            sb.Append(Output.NL);
             sb.Append("```xml");
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
             string demo = Task.CreateDemoFile(this.Type);
             sb.Append(demo);
-            sb.Append(Documentation.NL);
+            sb.Append(Output.NL);
             sb.Append("```");
             try
             {
@@ -346,7 +346,7 @@ namespace TaskRunner.SubTasks
         public void AppendCommonStatusCodes(ref Documentation documentation)
         {
             this.statusCodes.Clear();
-            documentation.Tuples.Clear();
+            documentation.ClearTuples();
             this.RegisterStatusCode("N/A", Task.Status.skipped, "Not applicable (task skipped)", ref documentation);
             this.RegisterStatusCode("ERROR", Task.Status.failed, "The task could not be executed due to an unknown reason", ref documentation);
             this.RegisterStatusCode("CONDITION_INVALID_ARGS", Task.Status.failed, "The condition has invalid arguments", ref documentation);

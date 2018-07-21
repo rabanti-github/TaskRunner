@@ -6,7 +6,7 @@
     <members>
         <member name="T:TaskRunner.Arguments">
             <summary>
-            Task Runner - (c) 2017 - Raphael Stoeckli
+            Task Runner - (c) 2018 - Raphael Stoeckli
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Class represents a tuple to execute the program. It contains all possible flags and values
@@ -138,7 +138,7 @@
             </summary>
             <param name="tuple">Argument tuple as reference</param>
             <param name="argValue">Passed argument value</param>
-            <param name="argType">The expected type of the argument</param>
+            <param name="expectedArgType">The expected type of the argument</param>
             <returns>The expected type of the next argument. In case of -r|--run and -l|--log, this is configFile or logFile</returns>
         </member>
         <member name="T:TaskRunner.Condition">
@@ -246,7 +246,7 @@
             <summary>
             Checks the action and default
             </summary>
-            <param name="checkAction">If true the action will be checked otherwise the default action</param>
+            <param name="checkAction">If true the action will be checked otherwise the default action will be returned</param>
             <returns>Returns the appropriate value</returns>
         </member>
         <member name="M:TaskRunner.Condition.CheckType">
@@ -270,6 +270,7 @@
             <param name="expression">Raw expression to parse</param>
             <param name="displayOutput">If true, information about the executed Sub-Tasks is passed to the command shell</param>
             <returns>True, if the expression was evaluates successfully, otherwise false</returns>
+            <remarks>Dates stored in parameters will be interpreted as ticks (long: 100 nanoseconds per tick). If strings are to compare, the terms must be enclosed by single quotes (')</remarks>
         </member>
         <member name="M:TaskRunner.Evaluation.ParseParameters(System.String)">
             <summary>
@@ -284,16 +285,6 @@
             This program and its code is released under the MIT license
             -----------------------------------------------------------
             Class for handling of the console documentation
-            </summary>
-        </member>
-        <member name="F:TaskRunner.Documentation.NL">
-            <summary>
-            Globally used new line sequence
-            </summary>
-        </member>
-        <member name="P:TaskRunner.Documentation.Tuples">
-            <summary>
-            Tuples of the documentation object
             </summary>
         </member>
         <member name="P:TaskRunner.Documentation.Title">
@@ -349,20 +340,20 @@
             </summary>
             <param name="value">Value of the tuple</param>
             <param name="description">Description of the tuple</param>
-            <param name="overrodeTagFormatting">If true, the tuple will be displayed with its raw value and not as XML tag</param>
+            <param name="overrideTagFormatting">If true, the tuple will be displayed with its raw value and not as XML tag</param>
         </member>
         <member name="M:TaskRunner.Documentation.GetDocumentation(System.Int32)">
             <summary>
-            Returns the documentation object as string
+            Returns the documentation object as string. Only titles, sub-titles and description texts will be processes (tuples are skipped)
             </summary>
-            <param name="maxLength">>Length in numbers of characters (console width)</param>
+            <param name="maxLength">Length in numbers of characters (console width)</param>
             <returns></returns>
         </member>
         <member name="M:TaskRunner.Documentation.GetDocumentation(System.Int32,System.Boolean)">
             <summary>
-            Returns the documentation object as string
+            Returns the documentation object as string. The output of tuples (as tags) can be controlled by the parameter asTagDoc
             </summary>
-            <param name="maxLength">>Length in numbers of characters (console width)</param>
+            <param name="maxLength">Length in numbers of characters (console width)</param>
             <param name="asTagDoc">If true, the documentation will be rendered as documentation for tags</param>
             <returns></returns>
         </member>
@@ -372,94 +363,10 @@
             </summary>
             <param name="maxLength">Length in numbers of characters (console width)</param>
             <param name="asTagDoc">If true, the documentation will be rendered as documentation for tags</param>
-            <param name="asMarkdown">If true, the documentation will be rendered as markdown, The lengthparameter will be skipped</param>
-            <returns></returns>
-        </member>
-        <member name="M:TaskRunner.Documentation.GetDocumentation(System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
-            <summary>
-            Returns the documentation object as string
-            </summary>
-            <param name="maxLength">Length in numbers of characters (console width)</param>
-            <param name="asTagDoc">If true, the documentation will be rendered as documentation for tags</param>
-            <param name="asHeader">If true, the header will be rendered</param>
             <param name="asMarkdown">If true, the documentation will be rendered as markdown, The length parameter will be skipped</param>
-            <param name="skipTitle">If true, no Title will be rendered</param>
             <returns></returns>
         </member>
-        <member name="M:TaskRunner.Documentation.GetMarkdownTable(System.Boolean,System.String,System.String)">
-            <summary>
-            Returns the tuples as markdown table
-            </summary>
-            <param name="asTag">If true, the line will be rendered as documentation for tags</param>
-            <param name="leftHeader">Left header text</param>
-            <param name="rightHeader">Right header text</param>
-            <returns>Formatted markdown table</returns>
-        </member>
-        <member name="M:TaskRunner.Documentation.FormatLines(System.Int32,System.Boolean)">
-            <summary>
-            Returns the a formatted string with line breaks
-            </summary>
-            <param name="maxlength">Length in numbers of characters (console width)</param>
-            <param name="asTag">If true, the line will be rendered as documentation for tags</param>
-            <returns>Formatted string</returns>
-        </member>
-        <member name="M:TaskRunner.Documentation.GetSplitPosition">
-            <summary>
-            Returns the number of characters where the text splits between value and description (over all tuples)
-            </summary>
-            <returns>Number of characters</returns>
-        </member>
-        <member name="M:TaskRunner.Documentation.ConcatLine(System.Text.StringBuilder@,System.String,System.String,System.Int32,System.Int32,System.Boolean)">
-            <summary>
-            Concatenates lines according to windows widths an split values
-            </summary>
-            <param name="sb">StringBuilder as reference</param>
-            <param name="item">Input value</param>
-            <param name="description">Description text</param>
-            <param name="split">Number of characters to splits</param>
-            <param name="lenght">Window width in number of characters</param>
-            <param name="noDelimitation">If true, no delimitation will be applied</param>
-        </member>
-        <member name="T:TaskRunner.Documentation.T">
-            <summary>
-            Subclass representing a general purpose tuple for the documentation
-            </summary>
-        </member>
-        <member name="P:TaskRunner.Documentation.T.Value">
-            <summary>
-            Value of the tuple
-            </summary>
-        </member>
-        <member name="P:TaskRunner.Documentation.T.Description">
-            <summary>
-            Description of the tuple
-            </summary>
-        </member>
-        <member name="P:TaskRunner.Documentation.T.OverrideTagFormatting">
-            <summary>
-            If true, the tuple will be displayed with its raw value and not as XML tag
-            </summary>
-        </member>
-        <member name="M:TaskRunner.Documentation.T.#ctor">
-            <summary>
-            Default constructor
-            </summary>
-        </member>
-        <member name="M:TaskRunner.Documentation.T.#ctor(System.String,System.String)">
-            <summary>
-            Constructor with parameters
-            </summary>
-            <param name="value">Value of the tuple</param>
-            <param name="description">Description of the tuple</param>
-        </member>
-        <member name="M:TaskRunner.Documentation.T.#ctor(System.String,System.String,System.Boolean)">
-            <summary>
-            Constructor with all parameters
-            </summary>
-            <param name="value">Value of the tuple</param>
-            <param name="description">Description of the tuple</param>
-            <param name="overrideTagFormatting">If true, the tuple will be displayed with its raw value and not as XML tag</param>
-        </member>
+        <!-- Badly formed XML comment ignored for member "M:TaskRunner.Documentation.GetDocumentation(System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean)" -->
         <member name="T:TaskRunner.LogEntry">
             <summary>
             Task Runner - (c) 2018 - Raphael Stoeckli
@@ -711,6 +618,11 @@
             DateTime parameter of end time of the program
             </summary>
         </member>
+        <member name="F:TaskRunner.Parameter.SysParam.SYSTEM_TIME_NOW">
+            <summary>
+            DateTime parameter with the current time, evaluated when used (e.g. when evaluating an expression) 
+            </summary>
+        </member>
         <member name="F:TaskRunner.Parameter.SysParam.SYSTEM_CONDITION_TRUE">
             <summary>
             String parameter regarding the result of the last condition evaluation (true branch)
@@ -729,6 +641,11 @@
         <member name="F:TaskRunner.Parameter.SysParam.ENV_MAX_SUBTASK_ITERATIONS">
             <summary>
             Overridable maximum number of iterations of sub-tasks to avoid infinite loops
+            </summary>
+        </member>
+        <member name="F:TaskRunner.Parameter.SysParam.ENV_FLAG">
+            <summary>
+            Arbitrary string value in the scope of the environment (debug purpose). The default value is 'null'
             </summary>
         </member>
         <member name="P:TaskRunner.Parameter.Name">
@@ -791,7 +708,7 @@
         </member>
         <member name="M:TaskRunner.Parameter.RegisterTaskIterations(TaskRunner.Task)">
             <summary>
-            Method to register a task in the list to check iterations
+            Method to register a task in the list to check iterations. If the task does not exist, it will be added with the counter 0
             </summary>
             <param name="task">Task to register</param>
         </member>
@@ -848,7 +765,7 @@
             <param name="name">Parameter to check</param>
             <param name="displayOutput">If true, information about errors is passed to the command shell</param>
             <param name="userParameter">If true, a user parameter will be retrieved, otherwise a system parameter</param>
-            <returns>Parameter of the name</returns>
+            <returns>Parameter of the defined name. An empty object (valid == false) will be returned if not found</returns>
         </member>
         <member name="M:TaskRunner.Parameter.AddUserParameter(TaskRunner.Parameter,System.Boolean)">
             <summary>
@@ -866,13 +783,14 @@
             <param name="flag">Parameter type</param>
             <returns>In true the parameter was added successfully</returns>
         </member>
-        <member name="M:TaskRunner.Parameter.AddParameter(TaskRunner.Parameter,System.Boolean,System.Boolean)">
+        <member name="M:TaskRunner.Parameter.AddParameter(TaskRunner.Parameter,System.Boolean,System.Boolean,TaskRunner.Parameter.ParamType)">
             <summary>
             Internal method to add a parameter
             </summary>
             <param name="parameter">Parameter name</param>
             <param name="displayOutput">If true, information about errors is passed to the command shell</param>
-            <param name="userParameter">If true, the parameter is a user parameter, otherwise a system parameter</param>
+            <param name="userParameter">If true, the parameter is a user or environment parameter, otherwise a system parameter</param>
+            <param name="paramType">Optional parameter type to check whether parameter is a user, system or overridable environment parameter</param>
             <returns>In true the parameter was added successfully</returns>
         </member>
         <member name="M:TaskRunner.Parameter.ValidateParameterName(System.String)">
@@ -882,7 +800,7 @@
             <param name="name">Parameter name</param>
             <returns>If true, the parameter is valid</returns>
         </member>
-        <member name="M:TaskRunner.Parameter.UpdateSystemParameterNumber(TaskRunner.Parameter.SysParam)">
+        <member name="M:TaskRunner.Parameter.IncreaseSystemParameterNumber(TaskRunner.Parameter.SysParam)">
             <summary>
             Method to add 1 to a numeric system parameter
             </summary>
@@ -916,11 +834,12 @@
             <param name="key">Parameter number</param>
             <param name="value">Value to update</param>
         </member>
-        <member name="M:TaskRunner.Parameter.UpdateSystemParameterInternal(TaskRunner.Parameter.SysParam,System.Object)">
+        <member name="M:TaskRunner.Parameter.UpdateSystemParameterInternal(TaskRunner.Parameter.SysParam,TaskRunner.Parameter.Types,System.Object)">
             <summary>
             Internal method to update a system parameter
             </summary>
             <param name="parameter">Parameter number</param>
+            <param name="type">Expected data type of the parameter</param>
             <param name="o">Value to update</param>
         </member>
         <member name="M:TaskRunner.Parameter.RegisterSystemParameters">
@@ -1398,6 +1317,12 @@
             Implemented Run method of the SubTask class
             </summary>
             <returns>Sub-task status</returns>
+        </member>
+        <member name="M:TaskRunner.SubTasks.DummyTask.SetRunStatus(TaskRunner.Task.Status)">
+            <summary>
+            Sets the run status for testing purpose
+            </summary>
+            <param name="status">The status to return when running the dummy SubTask</param>
         </member>
         <member name="T:TaskRunner.SubTasks.KillProcessTask">
             <summary>
@@ -2091,7 +2016,7 @@
             <summary>
             List of Sub-Tasks to execute in this Task
             </summary>
-            <remarks>Each class of a Sub-Task needs a distinct XML annotation (XmlArrayItem) for proper serialization / deserialization</remarks>
+            <remarks>Each class of a Sub-Task needs a particular XML annotation (XmlArrayItem) for proper serialization / deserialization</remarks>
         </member>
         <member name="P:TaskRunner.Task.TaskName">
             <summary>
@@ -2110,7 +2035,7 @@
         </member>
         <member name="P:TaskRunner.Task.Valid">
             <summary>
-            If proper deserialized, this value is set to true. It indicates that the configuration is valid (valid XML)
+            If proper deserialized, this value is set to true. It indicates that the configuration is valid (valid XML and known elements)
             </summary>
         </member>
         <member name="P:TaskRunner.Task.ExecutedSubTasks">
@@ -2155,7 +2080,7 @@
         </member>
         <member name="P:TaskRunner.Task.TaskID">
             <summary>
-            Internal ID of the task. The ID is calculated by the file name
+            Internal ID of the task. The ID is calculated by the file name or randomly generated if not file based (e.g. ad-hoc task)
             </summary>
         </member>
         <member name="M:TaskRunner.Task.#ctor">
@@ -2246,6 +2171,102 @@
             <param name="logEntry">Log entry to print the code from</param>
             <returns>Execution code as string</returns>
         </member>
+        <member name="F:TaskRunner.Output.NL">
+            <summary>
+            Globally used new line sequence
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Output.#ctor(TaskRunner.Output)">
+            <summary>
+            Internal copy constructor
+            </summary>
+            <param name="copyFrom">The object to copy</param>
+        </member>
+        <member name="M:TaskRunner.Output.GetOutput(System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.String,System.String,System.String,System.String,System.Collections.Generic.List{TaskRunner.Output.T})">
+            <summary>
+            Returns the documentation object as string
+            </summary>
+            <param name="maxLength">Length in numbers of characters (console width)</param>
+            <param name="isTagDocSection">If true, the documentation will be rendered as documentation for tags</param>
+            <param name="isHeaderSection">If true, the header will be rendered</param>
+            <param name="formatAsMarkdown">If true, the documentation will be rendered as markdown, The length parameter will be skipped</param>
+            <param name="skipTitle">If true, no Title will be rendered</param>
+            <returns></returns>
+        </member>
+        <member name="M:TaskRunner.Output.FormatLines(System.Int32,System.Boolean,System.Collections.Generic.List{TaskRunner.Output.T})">
+            <summary>
+            Returns the a formatted string with line breaks
+            </summary>
+            <param name="maxlength">Length in numbers of characters (console width)</param>
+            <param name="asTag">If true, the line will be rendered as documentation for tags</param>
+            <returns>Formatted string</returns>
+        </member>
+        <member name="M:TaskRunner.Output.GetSplitPosition(System.Collections.Generic.List{TaskRunner.Output.T},System.Boolean)">
+            <summary>
+            Returns the number of characters where the text splits between value and description (over all tuples)
+            </summary>
+            <returns>Number of characters</returns>
+        </member>
+        <member name="M:TaskRunner.Output.ConcatLine(System.Text.StringBuilder@,System.String,System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Concatenates lines according to window widths and split values
+            </summary>
+            <param name="sb">StringBuilder as reference</param>
+            <param name="item">Input value</param>
+            <param name="description">Description text</param>
+            <param name="split">Number of characters to splits</param>
+            <param name="lenght">Window width in number of characters</param>
+            <param name="noDelimitation">If true, no delimitation will be applied</param>
+        </member>
+        <member name="M:TaskRunner.Output.GetMarkdownTable(System.Boolean,System.String,System.String,System.Collections.Generic.List{TaskRunner.Output.T})">
+            <summary>
+            Returns the tuples as markdown table
+            </summary>
+            <param name="asTag">If true, the line will be rendered as documentation for tags</param>
+            <param name="leftHeader">Left header text</param>
+            <param name="rightHeader">Right header text</param>
+            <returns>Formatted markdown table</returns>
+        </member>
+        <member name="T:TaskRunner.Output.T">
+            <summary>
+            Subclass representing a general purpose tuple for the output
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Output.T.Value">
+            <summary>
+            Value of the tuple
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Output.T.Description">
+            <summary>
+            Description of the tuple
+            </summary>
+        </member>
+        <member name="P:TaskRunner.Output.T.OverrideTagFormatting">
+            <summary>
+            If true, the tuple will be displayed with its raw value and not as XML tag
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Output.T.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:TaskRunner.Output.T.#ctor(System.String,System.String)">
+            <summary>
+            Constructor with parameters
+            </summary>
+            <param name="value">Value of the tuple</param>
+            <param name="description">Description of the tuple</param>
+        </member>
+        <member name="M:TaskRunner.Output.T.#ctor(System.String,System.String,System.Boolean)">
+            <summary>
+            Constructor with all parameters
+            </summary>
+            <param name="value">Value of the tuple</param>
+            <param name="description">Description of the tuple</param>
+            <param name="overrideTagFormatting">If true, the tuple will be displayed with its raw value and not as XML tag</param>
+        </member>
         <member name="T:TaskRunner.Utils">
             <summary>
             Task Runner - (c) 2018 - Raphael Stoeckli
@@ -2276,6 +2297,13 @@
             </summary>
             <param name="input">Byte to convert</param>
             <returns>Hex string (e.g. '00', '51' or 'BC')</returns>
+        </member>
+        <member name="M:TaskRunner.Utils.GetRandomString(System.Int32)">
+            <summary>
+            Gets a random alphanumeric string of the defined length
+            </summary>
+            <param name="length">Length of the string in characters</param>
+            <returns>Random String</returns>
         </member>
     </members>
 </doc>

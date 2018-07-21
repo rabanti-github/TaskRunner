@@ -131,8 +131,9 @@ namespace TaskRunner
         /// <summary>
         /// List of Sub-Tasks to execute in this Task
         /// </summary>
-        /// <remarks>Each class of a Sub-Task needs a distinct XML annotation (XmlArrayItem) for proper serialization / deserialization</remarks>
+        /// <remarks>Each class of a Sub-Task needs a particular XML annotation (XmlArrayItem) for proper serialization / deserialization</remarks>
         [XmlArray("items")]
+        [XmlArrayItem(Type = typeof(DummyTask), ElementName = "dummyItem")] // For testing
         [XmlArrayItem(Type = typeof(DeleteFileTask), ElementName = "deleteFileItem")]
         [XmlArrayItem(Type = typeof(DeleteRegKeyTask), ElementName = "deleteRegKeyItem")]
         [XmlArrayItem(Type = typeof(WriteLogTask), ElementName = "writeLogItem")]
@@ -158,7 +159,7 @@ namespace TaskRunner
         [XmlElement("condition")]
         public Condition TaskCondition { get; set; }
         /// <summary>
-        /// If proper deserialized, this value is set to true. It indicates that the configuration is valid (valid XML)
+        /// If proper deserialized, this value is set to true. It indicates that the configuration is valid (valid XML and known elements)
         /// </summary>
         [XmlIgnore]
         public bool Valid { get; set; }
@@ -299,12 +300,7 @@ namespace TaskRunner
             }
         }
 
-        private void Verbose(string text)
-        {
-            Verbose(text, false);
-        }
-
-        private void Verbose(string text, bool skipNewline)
+        private void Verbose(string text, bool skipNewline = false)
         {
             if (this.DisplayOutput == true)
             {
@@ -362,28 +358,28 @@ namespace TaskRunner
                 {
                     if (action == Condition.ConditionAction.exit)
                     {
-                        Verbose("==> THE PROGRAM WILL BE TREMINATED DUE TO A" + type + condition.Type.ToUpper() + "-CONDITION");
+                        Verbose("▬▬► THE PROGRAM WILL BE TREMINATED DUE TO A" + type + condition.Type.ToUpper() + "-CONDITION");
                         currentTask.SetStatus("N/A", "The program will be terminated");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.exit;
                     }
                     else if (action == Condition.ConditionAction.skip)
                     {
-                        Verbose("==> THE" + type + "WILL BE SKIPPED DUE TO A" + type + condition.Type.ToUpper() + "-CONDITION");
+                        Verbose("▬▬► THE" + type + "WILL BE SKIPPED DUE TO A" + type + condition.Type.ToUpper() + "-CONDITION");
                         currentTask.SetStatus("N/A", "The" + type.ToLower() + "will be skipped");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.skip;
                     }
                     else if (action == Condition.ConditionAction.restart_task && (condition.Type.ToLower() == "post" || task == false)) // In task only allowed as post-condition, in sub-task always
                     {
-                        Verbose("==> THE TASK WILL BE RESTARTED DUE TO " + type + condition.Type.ToUpper() + "-CONDITION");
+                        Verbose("▬▬► THE TASK WILL BE RESTARTED DUE TO " + type + condition.Type.ToUpper() + "-CONDITION");
                         currentTask.SetStatus("N/A", "The task will be restarted");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.restart_task;
                     }
                     else if (action == Condition.ConditionAction.restart_last_subtask && task == false) // TO CHECK: Sub-task can always be restarted (also the first occurrence in a task?)
                     {
-                        Verbose("==> THE SUB-TASK WILL BE RESTARTED DUE TO " + type + condition.Type.ToUpper() + "-CONDITION");
+                        Verbose("▬▬► THE SUB-TASK WILL BE RESTARTED DUE TO " + type + condition.Type.ToUpper() + "-CONDITION");
                         currentTask.SetStatus("N/A", "The task will be restarted");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.restart_last_subtask;
@@ -391,7 +387,7 @@ namespace TaskRunner
                     else if (action == Condition.ConditionAction.run) { } // Default
                     else
                     {
-                        Verbose("==> THE CONDITIONAL ACTION '" + action.ToString() + "' IS NOT ALLOWED AS " + condition.Type.ToUpper() + "-CONDITION OF A" + type.TrimEnd(' ') + ". THE PROGRAM WILL BE TERMINATED");
+                        Verbose("▬▬► THE CONDITIONAL ACTION '" + action.ToString() + "' IS NOT ALLOWED AS " + condition.Type.ToUpper() + "-CONDITION OF A" + type.TrimEnd(' ') + ". THE PROGRAM WILL BE TERMINATED");
                         currentTask.SetStatus("ERROR", "Condition action not allowed");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.exit;
@@ -402,28 +398,28 @@ namespace TaskRunner
                 {
                     if (action == Condition.ConditionAction.exit)
                     {
-                        Verbose("==> THE PROGRAM WILL BE TREMINATED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
+                        Verbose("▬▬► THE PROGRAM WILL BE TREMINATED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
                         currentTask.SetStatus("N/A", "The program will be terminated");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.exit;
                     }
                     else if (action == Condition.ConditionAction.skip)
                     {
-                        Verbose("==> THE TASK WILL BE SKIPPED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
+                        Verbose("▬▬► THE TASK WILL BE SKIPPED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
                         currentTask.SetStatus("N/A", "The task will be skipped");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.skip;
                     }
                     else if (action == Condition.ConditionAction.restart_task && (condition.Type.ToLower() == "post" || task == false)) // In task only allowed as post-condition, in sub-task always
                     {
-                        Verbose("==> THE TASK WILL BE RESTARTED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
+                        Verbose("▬▬► THE TASK WILL BE RESTARTED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
                         currentTask.SetStatus("N/A", "The task will be restarted");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.restart_task;
                     }
                     else if (action == Condition.ConditionAction.restart_last_subtask && task == false) // TO CHECK: Sub-task can always be restarted (also the first occurrence in a task?)
                     {
-                        Verbose("==> THE SUB-TASK WILL BE RESTARTED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
+                        Verbose("▬▬► THE SUB-TASK WILL BE RESTARTED BECAUSE A" + type + condition.Type.ToUpper() + "-CONDITION WAS NOT MET");
                         currentTask.SetStatus("N/A", "The sub-task will be restarted");
                         SetLogEntry(currentTask);
                         return Condition.ConditionAction.restart_last_subtask;
@@ -431,7 +427,7 @@ namespace TaskRunner
                     else if (action == Condition.ConditionAction.run) { } // Default
                     else
                     {
-                        Verbose("==> THE CONDITIONAL ACTION '" + action.ToString() + "' IS NOT ALLOWED AS " + condition.Type.ToUpper() + "-CONDITION OF A" + type.TrimEnd(' ') + ". THE PROGRAM WILL BE TERMINATED");
+                        Verbose("▬▬► THE CONDITIONAL ACTION '" + action.ToString() + "' IS NOT ALLOWED AS " + condition.Type.ToUpper() + "-CONDITION OF A" + type.TrimEnd(' ') + ". THE PROGRAM WILL BE TERMINATED");
                         currentTask.SetStatus("ERROR", "Condition action not allowed");
                         SetLogEntry(currentTask);                        
                         return Condition.ConditionAction.exit;
@@ -487,17 +483,23 @@ namespace TaskRunner
             date = DateTime.Now.ToString(DATEFORMAT);
 
             Parameter.RegisterTaskIterations(this);                                                 // Registers the task (if not done before) to avoid infinite loops. If already registered, it will be incremented by 1
+            Parameter.ResetTaskParameters(); // Reset all previously written task parameters
+            Parameter.ResetSubTaskParameters(); // Reset all previously written sub-task parameters
             Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.TASK_ALL_NUMBER_TOTAL);        // Add 1 to the total number of executed tasks
             Parameter.UpdateSystemParameter(Parameter.SysParam.TASK_LAST_TIME_START, DateTime.Now); // Set start time of the last (this) executed task
             if (Parameter.CheckTaskIteration(this.TaskID, displayOutput) == false)                  // Check termination condition (max. iterations of task reached)
             {
-                Verbose("==> THE PROGRAM WILL BE TERMINATED DUET TO THE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_TASK_ITERATIONS).NumericValue + ") WAS REACHED");
+                Verbose("▬▬► THE PROGRAM WILL BE TERMINATED DUE TO THE ITERATION LIMIT OF (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_TASK_ITERATIONS).NumericValue + ") WAS REACHED");
                 return Status.terminate;
             }
             action = HandleCondition(ref currentTask, true, true);                                  // Pre-Check
             if (action == Condition.ConditionAction.exit) { return Status.terminate; }
             else if (action == Condition.ConditionAction.skip) { return Status.skipped; }
-
+            if (this.Enabled == false)
+            {
+                Verbose("▬▬► TASK '" + this.TaskName + "' SKIPPED (DISABLED)");
+                return Status.skipped;
+            }
             Verbose("Task: " + this.TaskName + " (ID: " + this.TaskID + ")\nSTARTING SUB-TASKS AT\t" + date);
             for (int i = 0; i < this.Items.Count; i++) // Loop of sub-tasks
             {
@@ -506,12 +508,12 @@ namespace TaskRunner
                 currentTask.GetDocumentationStatusCodes(); // Necessary to load the status codes
                 if (Parameter.CheckSubTaskIteration(currentTask.SubTaskID, displayOutput) == false) // Check termination condition (max. iterations of task reached)
                 {
-                    Verbose("==> THE TASK WILL BE TERMINATED DUE TO THE ITERATION LIMIT (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_SUBTASK_ITERATIONS).NumericValue + ") WAS REACHED");
+                    Verbose("▬▬► THE TASK WILL BE TERMINATED DUE TO THE ITERATION LIMIT OF (" + Parameter.GetSystemParameter(Parameter.SysParam.ENV_MAX_SUBTASK_ITERATIONS).NumericValue + ") WAS REACHED");
                     return Status.skipped;
                 }
                 if (currentTask.Enabled == false)
                 {
-                    Verbose("==> SUB-TASK '" + currentTask.Name + "' SKIPPED (DISABLED)");
+                    Verbose("▬▬► SUB-TASK '" + currentTask.Name + "' SKIPPED (DISABLED)");
                     continue;
                 }
                 date = DateTime.Now.ToString(DATEFORMAT);
@@ -542,7 +544,7 @@ namespace TaskRunner
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, false);
                     Parameter.IncreaseSystemParameterNumber(Parameter.SysParam.SUBTASK_ALL_NUMBER_FAIL);
                     this.OccurredErrors++;
-                    Verbose("==> TASK FINISHED WITH ERRORS!");
+                    Verbose("▬▬► TASK FINISHED WITH ERRORS!");
                     if (stopOnError == true) { return Status.terminate; }
                 }
                 else if (status == Status.success)
@@ -558,7 +560,7 @@ namespace TaskRunner
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS, true);
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_LAST_SUCCESS_PARTIAL, true); // Reset
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
-                    Verbose("==> TASK SKIPPED");
+                    Verbose("▬▬► TASK SKIPPED");
                 }
 
                 action = HandleCondition(ref currentTask, false, false);                            // Sub-Task post-check
@@ -603,8 +605,6 @@ namespace TaskRunner
                     this.Log(this.LogfilePath, status);
                 }
             }
-            Parameter.ResetTaskParameters(); // TODO: The necessity / purpose of this call must be evaluated
-            Parameter.ResetSubTaskParameters(); // TODO: The necessity / purpose of this call must be evaluated (redundant operations inside)
             Parameter.UpdateSystemParameter(Parameter.SysParam.SYSTEM_TIME_END, DateTime.Now);
             return status; 
         }
@@ -657,7 +657,7 @@ namespace TaskRunner
                 {
                     if (displayOutput == true)
                     {
-                        System.Console.WriteLine("==> SUB-TASK '" + subTask.Name + "' SKIPPED\n");
+                        System.Console.WriteLine("▬▬► SUB-TASK '" + subTask.Name + "' SKIPPED\n");
                     }
                     continue;
                 }
@@ -733,7 +733,7 @@ namespace TaskRunner
                     this.OccurredErrors++;
                     if (displayOutput == true)
                     {
-                        System.Console.WriteLine("==> TASK FINISHED WITH ERRORS!\n");
+                        System.Console.WriteLine("▬▬► TASK FINISHED WITH ERRORS!\n");
                     }
                     if (stopOnError == true) { break; }
                 }
@@ -752,7 +752,7 @@ namespace TaskRunner
                     Parameter.UpdateSystemParameter(Parameter.SysParam.SUBTASK_ALL_SUCCESS_PARTIAL, true); // No reset
                     if (displayOutput == true)
                     {
-                        System.Console.WriteLine("==> TASK SKIPPED\n");
+                        System.Console.WriteLine("▬▬► TASK SKIPPED\n");
                     }
                 }
                 this.LogEntries.Add(entry);
@@ -760,7 +760,7 @@ namespace TaskRunner
                 {
                     if (displayOutput == true)
                     {
-                        System.Console.WriteLine("==> PROGRAM WILL BE TERMINATED\n");
+                        System.Console.WriteLine("▬▬► PROGRAM WILL BE TERMINATED\n");
                     }
                     return Status.terminate;
                 }
@@ -768,14 +768,14 @@ namespace TaskRunner
                 if (status == Status.skipped && Parameter.GetSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE).Value == "restart_last_subtask")
                 {
                     if (displayOutput == true)
-                    { System.Console.WriteLine("==> SUB-TASK WILL BE RESTARTED\n"); }
+                    { System.Console.WriteLine("▬▬► SUB-TASK WILL BE RESTARTED\n"); }
                     i--;
                     continue;
                 }
                 if (status == Status.skipped && Parameter.GetSystemParameter(Parameter.SysParam.SYSTEM_CONDITION_TRUE).Value == "restart_task")
                 {
                     if (displayOutput == true)
-                    { System.Console.WriteLine("==> TASK WILL BE RESTARTED\n"); }
+                    { System.Console.WriteLine("▬▬► TASK WILL BE RESTARTED\n"); }
                     i = -1;
                     continue;
                 }
@@ -856,27 +856,29 @@ namespace TaskRunner
         {
             try
             {
-                FileStream fs = new FileStream(filename, FileMode.Open);
-                MD5 md5 = MD5.Create();
-                byte[] bytes = md5.ComputeHash(fs);
-                fs.Seek(0, SeekOrigin.Begin);
-                StreamReader sr = new StreamReader(fs);
-                XmlSerializer ser = new XmlSerializer(typeof(Task));
-                object o = ser.Deserialize(sr);
-                Task t = (Task)o;
-                t.AssignTaskToSubtask();
-                t.Valid = true;
-                t.TaskID = Utils.ConvertBytesToString(bytes);
-                for (int i = 0; i < t.Items.Count; i++)
+                using (FileStream fs = new FileStream(filename, FileMode.Open))
                 {
-                    t.Items[i].SubTaskID = t.TaskID + "-" + (i + 1).ToString();
+                    MD5 md5 = MD5.Create();
+                    byte[] bytes = md5.ComputeHash(fs);
+                    fs.Seek(0, SeekOrigin.Begin);
+                    StreamReader sr = new StreamReader(fs);
+                    XmlSerializer ser = new XmlSerializer(typeof(Task));
+                    object o = ser.Deserialize(sr);
+                    Task t = (Task) o;
+                    t.AssignTaskToSubtask();
+                    t.Valid = true;
+                    t.TaskID = Utils.ConvertBytesToString(bytes);
+                    for (int i = 0; i < t.Items.Count; i++)
+                    {
+                        t.Items[i].SubTaskID = t.TaskID + "-" + (i + 1).ToString();
+                    }
+                    return t;
                 }
-                return t;
             }
             catch(Exception e)
             {
                 System.Console.WriteLine("Error while deserializing file: " + filename + "\n" + e.Message);
-                return new Task();
+                return null;
             }
         }
 
@@ -903,10 +905,12 @@ namespace TaskRunner
             RemoveUnusedValues();
             try
             {
-                FileStream fs = new FileStream(filename, FileMode.Create);
-                StreamWriter sw = new StreamWriter(fs);
-                XmlSerializer ser = new XmlSerializer(typeof(Task));
-                ser.Serialize(sw, this);
+                using (FileStream fs = new FileStream(filename, FileMode.Create))
+                {
+                    StreamWriter sw = new StreamWriter(fs);
+                    XmlSerializer ser = new XmlSerializer(typeof(Task));
+                    ser.Serialize(sw, this);
+                }
             }
             catch (Exception e)
             {
@@ -973,37 +977,39 @@ namespace TaskRunner
             t.Type = type;
             SubTask tb = null;
             SubTask t1, t2, t3, t4;
-            if (type == TaskType.DeleteFile)
+            switch (type)
             {
-                tb = new DeleteFileTask();
-            }
-            else if (type == TaskType.DeleteRegKey)
-            {
-                tb = new DeleteRegKeyTask();
-            }
-            else if (type == TaskType.StartProgram)
-            {
-                tb = new StartProgramTask();
-            }
-            else if (type == TaskType.WriteLog)
-            {
-                tb = new WriteLogTask();
-            }
-            else if (type == TaskType.ControlService)
-            {
-                tb = new ControlServiceTask();
-            }
-            else if (type == TaskType.KillProcess)
-            {
-                tb = new KillProcessTask();
-            }
-            else if (type == TaskType.MetaTask)
-            {
-                tb = new MetaTask();
-            }
-            else if (type == TaskType.DelayTask)
-            {
-                tb = new DelayTask();
+                case TaskType.MixedTask: // Go to  dummy task
+                case TaskType.DummyTask:
+                    tb = new DummyTask();
+                    break;
+                case TaskType.DeleteFile:
+                    tb = new DeleteFileTask();
+                    break;
+                case TaskType.DeleteRegKey:
+                    tb = new DeleteRegKeyTask();
+                    break;
+                case TaskType.StartProgram:
+                    tb = new StartProgramTask();
+                    break;
+                case TaskType.WriteLog:
+                    tb = new WriteLogTask();
+                    break;
+                case TaskType.ControlService:
+                    tb = new ControlServiceTask();
+                    break;
+                case TaskType.KillProcess:
+                    tb = new KillProcessTask();
+                    break;
+                case TaskType.MetaTask:
+                    tb = new MetaTask();
+                    break;
+                case TaskType.DelayTask:
+                    tb = new DelayTask();
+                    break;
+                default:
+                    System.Console.WriteLine("Unknown / unregistered task type: The demo file could not be created\n");
+                    return "";
             }
             t1 = tb.GetDemoFile(1);
             t2 = tb.GetDemoFile(2);
@@ -1027,12 +1033,14 @@ namespace TaskRunner
             {
                 try
                 {
-                    MemoryStream ms = t.SerializeAsStream();
-                    StreamReader sr = new StreamReader(ms);
-                    string output = sr.ReadToEnd();
-                    ms.Close();
-                    ms.Dispose();
-                    return output;
+                    using (MemoryStream ms = t.SerializeAsStream())
+                    {
+                        StreamReader sr = new StreamReader(ms);
+                        string output = sr.ReadToEnd();
+                        ms.Close();
+                       // ms.Dispose();
+                        return output;
+                    }
                 }
                 catch (Exception e)
                 {

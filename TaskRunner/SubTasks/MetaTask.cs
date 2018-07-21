@@ -74,6 +74,10 @@ namespace TaskRunner.SubTasks
                 }
 
                 Task t = Task.Deserialize(this.MainValue);
+                if (t == null)
+                {
+                    return this.SetStatus("CORRUPT_FILE", "The config file '" + this.MainValue + "' could not be loaded");
+                }
                 Task.Status status = t.Run(this.ParentTask.StopOnError, this.ParentTask.DisplayOutput, this.ParentTask.WriteLog, this.ParentTask.LogfilePath);
                 if (status == Task.Status.terminate)
                 {
@@ -130,6 +134,7 @@ namespace TaskRunner.SubTasks
             Documentation codes = new Documentation("Meta Task", "Status Codes");
             this.AppendCommonStatusCodes(ref codes);
             this.RegisterStatusCode("NO_FILE", Task.Status.failed, "The config file was not found", ref codes);
+            this.RegisterStatusCode("CORRUPT_FILE", Task.Status.failed, "The config file could not be loaded or is corrupt", ref codes);
             this.RegisterStatusCode("SUCCESS", Task.Status.success, "The loaded config file was executed successfully", ref codes);
             this.RegisterStatusCode("SUCCESS_TERMINATION", Task.Status.success, "The loaded config file was executed but caused a program termination", ref codes);
             return codes;

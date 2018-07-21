@@ -102,6 +102,7 @@ namespace TaskRunner
                     Console.WriteLine(Usage(true));
                 }
                 t = Task.Deserialize(a.ConfigFilePath);
+                if (t == null) { return; }
                 if (t.Valid == false) { return; }
 
                 int iteration = 0;
@@ -145,91 +146,71 @@ namespace TaskRunner
         /// <returns>Header and/or usage of the program as text</returns>
         private static string Usage(bool headerOnly)
         {
-            string header = @"
-Task Runner - Run tasks controlled by config files
-(c) 2018 - Raphael Stoeckli
-https://github.com/rabanti-github/TaskRunner
---------------------------------------------------
-DISCLAIMER: USE THIS SOFTWARE AT YOUR OWN RISK.
-THE AUTHOR(S) OF THIS SOFTWARE IS/ARE NOT LIABLE FOR
-ANY DAMAGE OR OTHER NEGATIVE EFFECTS ARISING FROM
-THE USAGE OF TASKRUNNER. --> License: MIT 
---------------------------------------------------
-";
-            string usage =
-            @"Normal Usage:
-TaskRunner.exe -r [path to configuration] <options>
-Generation of example files of the configuration:
-TaskRunner.exe -d
-Generation of markdown files of the documentation:
-TaskRunner.exe -m
-Iteration example (10 times, delay of 10 seconds):
-Taskrunner.exe -r iterativeTask.xml -w 10000 -i 10 -n
+            string title = Output.GetSectionTitle("Task Runner - Run tasks, controlled by config files\n(c) 2018 - Raphael Stoeckli\nhttps://github.com/rabanti-github/TaskRunner");
+            string disclaimer = Output.GetSectionTitle("DISCLAIMER: USE THIS SOFTWARE AT YOUR OWN RISK.\nTHE AUTHOR(S) OF THIS SOFTWARE IS/ARE NOT LIABLE FOR\nANY DAMAGE OR OTHER NEGATIVE EFFECTS ARISING FROM\nTHE USAGE OF TASKRUNNER. --> License: MIT", true);
+            string header = title + "\n"+ disclaimer;
 
-Path to the configuration: A relative or absolute path to the
-configuration as XML file
+            Output o = new Output(Console.WindowWidth - 1, "Usage");
+            o.AddLine("Task execution:");
+            o.AddLine("TaskRunner.exe -r [path to configuration] <options>");
+            o.AddLine("Task execution with log entry:");
+            o.AddLine("TaskRunner.exe -r [path to configuration] -l [path to log file] <options>");
+            o.AddLine("Generation of example files of the configuration:");
+            o.AddLine("TaskRunner.exe -d");
+            o.AddLine("Generation of markdown files of the documentation:");
+            o.AddLine("TaskRunner.exe -m");
+            o.AddLine("Iteration example (10 times, delay of 10 seconds):");
+            o.AddLine("Taskrunner.exe -r iterativeTask.xml -w 10000 -i 10 -n <options>");
+            o.AddLine("Wizard to start common Windows system utilities:");
+            o.AddLine("Taskrunner.exe -u");
+            o.AddLine("\nPath to configuration: A relative or absolute path to the configuration as XML file");
+            o.AddLine("Path to log file: A relative or absolute path to the log as text file");
+            o.Flush("\n\n");
 
-Flags / Options
----------------
--r | --run:      Runs a task defined in the subsequent config file (path)
--i | --iterate:  Iterates a task the number of times defined by the
-                 following number. If 0 (zero), the number is infinite
--w | --wait:     Waits with the execution of a task for the following
-                 number of millisecond. Useful in combination with -i
--n | --nodelay:  Executes the first task after the start of TaskRunner
-                 without a defined delay (-w | --wait)
--e | --example:  Runs the demo command and generates example
-                 configurations in the current selected folder
--o | --output:   Enables the output mode. The results of the task
-                 will be displayed in the command shell
--s | --stop:     The task runner stops after an error, otherwise all
-                 sub-tasks are executed until the end of the configuration
--l | --log:      Enables logging. After the flag a valid path
-                 (absolute or relative) to a logfile must be defined
--h | --help:     Shows the program help (this text) 
--d | --docs:     Shows the menu with the task documentation
--u | --utils:    Shows the menu with several Windows utility programs
--m | --markdown: Saves the documentation of all task types to markdown
-                 files in the current folder
--p | --param     Stores a temporary variable while runtime. The variable
-                 Can be used by the Tasks
+            o.Title = "Flags / Options";
+            o.AddTuple("-r | --run", "Runs a task defined in the subsequent config file (path)");
+            o.AddTuple("-i | --iterate", "Iterates a task the number of times defined by the following number. If 0 (zero), the number is infinite");
+            o.AddTuple("-w | --wait", "Waits with the execution of a task for the following number of millisecond. Useful in combination with -i");
+            o.AddTuple("-n | --nodelay", "Executes the first task after the start of TaskRunner without a defined delay(-w | --wait)");
+            o.AddTuple("-e | --example", "Runs the demo command and generates example configurations in the current selected folder");
+            o.AddTuple("-o | --output", "Enables the output mode. The results of the task will be displayed in the command shell");
+            o.AddTuple("-s | --stop", "The task runner stops after an error, otherwise all sub-tasks are executed until the end of the configuration");
+            o.AddTuple("-l | --log", "Enables logging. After the flag a valid path (absolute or relative) to a logfile must be defined");
+            o.AddTuple("-h | --help", "Shows the general program help (this text)");
+            o.AddTuple("-d | --docs", "Shows the menu to get the task documentation");
+            o.AddTuple("-m | --markdown", "Saves the documentation of all task types to markdown files in the current folder");
+            o.AddTuple("-u | --utils", "Shows the menu with several Windows utility programs (can be started there)");
+            o.AddTuple("-p | --param", "Stores a temporary variable while runtime. The variable Can be used by the Tasks");
+            o.Flush("\n\n");
 
-Parameter Handling
-------------------
-Syntax: -p|--param:<data type>:<param name>:<param value>
-The flag -p or --param delivers a temporary parameter to the TaskRunner.
-The parameter is only valid during the execution of the loaded task. The
-parameter flag contains 3 or 4 parts, delimited by colons:
-- 1: Flag Identifier (-p or --param)
-- 2: (Optional) Data Type. Valid values are 's' for string, 'b' for boolean
-     and 'n' for number (double). If this part is omitted, the value will
-     be handled as string
-- 3: Parameter Name (unique string, without spaces or colons)
-- 4: Parameter Value (The value will be parsed to boolean or double in case
-     of the data types 'b' or 'n'). Note: Very small or big numbers can cause
-     arithmetic errors. Use MIN or MAX to define the minimum or maximum
-     value of a double number (+/- 1.797~e+308)
+            o.Title = "Parameter Handling";
+            o.Description = "Syntax: -p|--param:<data type>:<param name>:<param value>\nThe parameter is only valid during the execution of the loaded task. The parameter flag contains 3 or 4 parts, delimited by colons: ";          
+            o.AddTuple("- 1", "Flag Identifier (-p or --param)");
+            o.AddTuple("- 2", "(Optional) Data Type. Valid values are 's' for string, 'b' for boolean and 'n' for number(double). If this part is omitted, the value will be handled as string");
+            o.AddTuple("- 3", "Parameter Name (unique string [a-Z, 0-9, underscore] without spaces or colons)");
+            o.AddTuple("- 4", "Parameter Value (The value will be parsed to boolean or double in case of the data types 'b' or 'n'). Note: Very small or big numbers can cause arithmetic errors. Use MIN or MAX to define the minimum or maximum value of a double number (+/-1.797~e+308)");
+            o.Flush("\n\n");
 
-Examples:
--p:n:NUMBER_OF_FILES:8
--p:n:MAX_VALUE:MAX
---param:b:MATCH:true
---param:NAME:machine1
--p:s:NAME:""Name with spaces""
---param:COMMENT:'Other quotes are also OK'
+            //o = new Output(Console.WindowWidth - 1);
+            o.Description = "Some parameter names, starting with 'SYSTEM_', 'TASK_' and 'SUBTASK_' are read-only variables, provided by task runner. Variable names, starting with 'ENV_' are environment variables of task runner an can be overwritten. See documentation.\nExamples:";
+            o.AddLine("-p:n:NUMBER_OF_FILES:8");
+            o.AddLine("-p:n:LIMIT_NUMBER:MAX <- represents the highest possible number of a double value");
+            o.AddLine("--param:b:MATCH:true");
+            o.AddLine("--param:NAME:machine1");
+            o.AddLine("-p:s:NAME:\"Name with spaces\"");
+            o.AddLine("--param:COMMENT:'Other quotes are also OK'");
+            o.AddLine("-p:n:ENV_MAX_TASK_ITERATIONS:5  <- overrides environment variable");
+            o.Flush("\n\n");
 
-Task Documentation
-------------------
-Please look at the demo files for a practical implementation of parameters.
-Use the flag -e / --example to generate the demo files.
-Use the flag -d / --docs for the documentation.
-Use the flag -m / --markdown to save the documentation as markdown files
-Available documentation:
-- Description
-- Documentation of Tags
-- Documentation of Tag-Attributes
-- Status codes
-            ";
+            o.Title = "Task Documentation";
+            o.Description = "Use the flag -d / --docs for the documentation.\nUse the flag -m / --markdown to save the documentation as markdown files\nPlease have also a look at the demo files for a practical implementation of parameters, using the the flag -e / --example (to generate the files).\nAvailable documentation:";
+            o.AddLine("- Description");
+            o.AddLine("- Tag documentation (of xml configuration)");
+            o.AddLine("- Documentation of Tag-Attributes (of xml configuration)");
+            o.AddLine("- Status codes");
+
+            string usage = o.PrintAll();
+
             if (headerOnly == true)
             {
                 return header;
@@ -250,18 +231,24 @@ Available documentation:
             string input, text;
             int number, number2;
             bool exit;
+            Console.Clear();
+            string title = Output.GetSectionTitle("Task Runner - Run tasks, controlled by config files\n(c) 2018 - Raphael Stoeckli\nhttps://github.com/rabanti-github/TaskRunner");
+            Console.WriteLine(title);
+            bool firstTurn = true;
             while (true)
             {
+                if (firstTurn == false) {Console.Clear();}
+                else { firstTurn = false; }
                 exit = false;
-                Console.WriteLine("\n #############");
-                Console.WriteLine(" # T A S K S #");
-                Console.WriteLine(" #############");
+                Console.WriteLine(Output.GetSectionTitle("D O C U M E N T A T I O N"));
+                Output oTop = new Output(Console.WindowWidth - 1, "Task Selection", null, "Please insert a number between 1 and " + len.ToString() + " or X to exit...");
                 for (int i = 0; i < len; i++)
                 {
-                    Console.WriteLine("[" + (i + 1).ToString() + "] " + types[i].GetDocumentationDescription().Title);
+                    oTop.AddTuple("[" + (i + 1).ToString() + "]", types[i].GetDocumentationDescription().Title);
+                    //Console.WriteLine("[" + (i + 1).ToString() + "] " + types[i].GetDocumentationDescription().Title);
                 }
-                Console.WriteLine("[x] Exit");
-                Console.WriteLine("\nPlease select a number between 1 and " + len.ToString() + " or X to exit...");
+                oTop.AddTuple("[x]", "Exit");
+                Console.WriteLine(oTop.Print());
                 input = Console.ReadLine();
                 if (input.ToLower() == "x") { break; }
                 if (int.TryParse(input, out number) == false)
@@ -276,7 +263,16 @@ Available documentation:
                 }
                 while (true)
                 {
-                    Console.WriteLine("\nDocumentation Menu:\n-------------------\n[1] All documentation\n[2] Description\n[3] Tag documentation\n[4] Tag-Attribute documentation\n[5] Status codes\n[m] Main menu\n[x] Exit\n\nPlease select a number between 1 and 5, M for main menu or X to exit...");
+                    Console.Clear();
+                    Output o = new Output(Console.WindowWidth -1, "Documentation Menu", types[number].GetDocumentationDescription().Title, "Please insert a number between 1 and 5, M for main menu or X to exit...");
+                    o.AddTuple("[1]", "All documentation");
+                    o.AddTuple("[2]", "Description");
+                    o.AddTuple("[3]", "Tag documentation");
+                    o.AddTuple("[4]", "Tag-Attribute documentation");
+                    o.AddTuple("[5]", "Status codes");
+                    o.AddTuple("[m]", "Main menu");
+                    o.AddTuple("[x]", "Exit");
+                    Console.WriteLine(o.Print());
                     input = Console.ReadLine();
                     if (input.ToLower() == "x") { exit = true;  break; }
                     if (input.ToLower() == "m") { exit = false; break; }
@@ -290,6 +286,7 @@ Available documentation:
                         Console.WriteLine("Invalid input. Please retry...");
                         continue;
                     }
+                    Console.Clear();
                     if (number2 == 2 || number2 == 1)
                     {
                         text = types[number - 1].GetDocumentation(SubTask.DocumentationType.Description, Console.WindowWidth -1);
@@ -321,22 +318,29 @@ Available documentation:
         private static void Utilities()
         {
             bool exit;
+            Console.Clear();
+            string title = Output.GetSectionTitle("Task Runner - Run tasks, controlled by config files\n(c) 2018 - Raphael Stoeckli\nhttps://github.com/rabanti-github/TaskRunner");
+            Console.WriteLine(title);
+            bool firstTurn = true;
             while (true)
             {
+                if (firstTurn == false) { Console.Clear(); }
+                else { firstTurn = false; }
                 string input;
                 int number;
                 SysUtils s = new SysUtils();
                 int len = s.Utilities.Count;
                 exit = false;
-                Console.WriteLine("\n #####################");
-                Console.WriteLine(" # U T I L I T I E S #");
-                Console.WriteLine(" #####################");
+                Console.WriteLine(Output.GetSectionTitle("U T I L I T I E S"));
+                Output o = new Output(Console.WindowWidth -1, "Menu");
+                o.Description = "Administrative privileges may be necessary to start these utilities. The UAC or a password prompt may pop up.\nPlease insert a number between 1 and " + len.ToString() + " or X to exit...";
                 for (int i = 0; i < len; i++)
                 {
-                    Console.WriteLine("[" + (i + 1).ToString() + "] " + s.Utilities[i].Name);
+                    o.AddTuple("[" + (i + 1).ToString() + "]", s.Utilities[i].Name);
                 }
-                Console.WriteLine("[x] Exit");
-                Console.WriteLine("\nPlease select a number between 1 and " + len.ToString() + " or X to exit...");
+                o.AddTuple("[x]", "Exit");
+                Console.WriteLine(o.Print());
+
                 input = Console.ReadLine();
                 if (input.ToLower() == "x") { break; }
                 if (int.TryParse(input, out number) == false)
@@ -350,12 +354,22 @@ Available documentation:
                     continue;
                 }
                 number--;
-                Console.WriteLine("Starting utility: " + s.Utilities[number].Name + "...");
-                Console.WriteLine("-----------------");
-                Console.WriteLine(s.Utilities[number].Description);
+                o.ClearAll();
+                o.Title = "Starting utility: " + s.Utilities[number].Name;
+                o.Description = s.Utilities[number].Description;
+                o.AddLine("The application will be started now...");
+                o.AddLine("System call: " + s.Utilities[number].Command);
+                if (string.IsNullOrEmpty(s.Utilities[number].Arguments) == false)
+                {
+                    o.AddLine("Arguments: " + s.Utilities[number].Arguments);
+                }
+                Console.WriteLine(o.Print());
                 s.Utilities[number].Run();
-
-                Console.WriteLine("\nPress any key to continue...");
+                o.ClearAll();
+                o.AddLine(s.Utilities[number].Name + " should now be running");
+                o.AddLine("Please check your privileges or the availability of the application if " + s.Utilities[number].Name + " was not started.");
+                o.AddLine("Press any key to continue...");
+                Console.WriteLine(o.Print());
                 input = Console.ReadLine();
             }
         }

@@ -28,16 +28,23 @@ namespace TaskRunner
             {
                 bool exists = false;
                 if (File.Exists(logFile) == true) { exists = true; }
-                FileStream fs = new FileStream(logFile, FileMode.Append);
-                StreamWriter sw = new StreamWriter(fs);
-                if (exists == false)
+
+                using (FileStream fs = new FileStream(logFile, FileMode.Append))
                 {
-                    sw.WriteLine(headerValue);
+                    using (StreamWriter sw = new StreamWriter(fs))
+                    {
+                        if (exists == false)
+                        {
+                            sw.WriteLine(headerValue);
+                        }
+                        if (string.IsNullOrEmpty(value) == false)
+                        {
+                            sw.WriteLine(value);
+                        }
+                    sw.Flush();
+                    }
                 }
-                sw.WriteLine(value);
-                sw.Flush();
-                fs.Flush();
-                fs.Close();
+
                 return true;
             }
             catch (Exception e)

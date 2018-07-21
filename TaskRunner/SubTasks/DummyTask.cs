@@ -12,6 +12,8 @@ namespace TaskRunner.SubTasks
     /// </summary>
     public class DummyTask : SubTask
     {
+        private Task.Status dummyStatus = Task.Status.none;
+
         /// <summary>
         /// Implemented code of the task type (00 = Pre-Sub-Task condition)
         /// </summary>
@@ -115,7 +117,17 @@ namespace TaskRunner.SubTasks
         /// <returns>Sub-task status</returns>
         public override Task.Status Run()
         {
-            return Task.Status.none; // No action
+            return this.dummyStatus; // default: none
         }
+
+        /// <summary>
+        /// Sets the run status for testing purpose
+        /// </summary>
+        /// <param name="status">The status to return when running the dummy SubTask</param>
+        public void SetRunStatus(Task.Status status)
+        {
+            this.dummyStatus = status;
+        }
+
     }
 }

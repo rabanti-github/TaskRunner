@@ -82,8 +82,8 @@ namespace TaskRunner.SubTasks
         {
             if (string.IsNullOrEmpty(this.MainValue))
             {
-                return this.SetStatus("NO_PROCESS", "No process to terminate was defined");
-               // this.Message = "No process to terminate was defined";
+                return this.SetStatus("NO_PROCESS", "No process to terminated was defined");
+               // this.Message = "No process to terminated was defined";
                // this.StatusCode = 0x02;
                // return Task.Status.failed;
             }
@@ -221,7 +221,7 @@ namespace TaskRunner.SubTasks
             Documentation codes = new Documentation("Kill Process Task", "Status Codes");
             this.AppendCommonStatusCodes(ref codes);
 
-            this.RegisterStatusCode("NO_PROCESS", Task.Status.failed, "No process to terminate was defined", ref codes);
+            this.RegisterStatusCode("NO_PROCESS", Task.Status.failed, "No process to terminated was defined", ref codes);
             this.RegisterStatusCode("INVALID_PID", Task.Status.failed, "The process ID is invalid", ref codes);
             this.RegisterStatusCode("INVALID_METHOD", Task.Status.failed, "The method is invalid", ref codes);
             this.RegisterStatusCode("NO_PARAMETER", Task.Status.failed, "The parameter is not defined", ref codes);

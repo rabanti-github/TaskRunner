@@ -55,6 +55,10 @@
     <Compile Include="ArgumentsTest.cs" />
     <Compile Include="EvaluationTest.cs" />
     <Compile Include="ConditionTest.cs" />
+    <Compile Include="Output.T_Test.cs" />
+    <Compile Include="OutputTest.cs" />
+    <Compile Include="DocumentationTest.cs" />
+    <Compile Include="TaskTest.cs" />
     <Compile Include="UtilsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
